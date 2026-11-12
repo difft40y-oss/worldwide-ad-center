@@ -59,9 +59,9 @@ def send_telegram_alert(message: str) -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: DBWrapper = Depends(get_db)):
-    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone() or 0
+    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone()[0] or 0
     row = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
-    clk, earn = row, round(float(row), 2)
+    clk, earn = row[0], round(float(row[1]), 2)
     ctr = round((clk / imp * 100), 2) if imp > 0 else 0.0
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else "Local SQLite (Temporary)"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,7 +96,7 @@ async def sim_click(db: DBWrapper = Depends(get_db)):
 
 @app.get("/payout-hub", response_class=HTMLResponse)
 async def payout_hub(db: DBWrapper = Depends(get_db)):
-    bal = round(float(db.execute("SELECT COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()), 2)
+    bal = round(float(db.execute("SELECT COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()[0]), 2)
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#22c55e;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
     <body><div class="box"><h2>eSewa Withdrawal Portal</h2><p>Available Balance: <b style="color:#22c55e">{bal} NPR</b></p>
     <input id="ph" value="9703544008" placeholder="eSewa Phone"><input id="am" type="number" step="0.01" value="{bal}" placeholder="Amount NPR">
@@ -105,7 +105,7 @@ async def payout_hub(db: DBWrapper = Depends(get_db)):
 
 @app.post("/payout/esewa")
 async def process_esewa(req: PayoutReq, db: DBWrapper = Depends(get_db)):
-    bal = round(float(db.execute("SELECT COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()), 2)
+    bal = round(float(db.execute("SELECT COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()[0]), 2)
     if req.amount_npr <= 0 or req.amount_npr > bal:
         raise HTTPException(status_code=400, detail=f"Invalid amount. Available: {bal} NPR")
     db.execute("UPDATE clicks SET escrow_status='processed_success' WHERE escrow_status='locked'")
@@ -129,8 +129,8 @@ async def tag_preview():
 
 @app.get("/api/v1/health/telegram-report")
 async def health_report(db: DBWrapper = Depends(get_db)):
-    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone() or 0
+    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone()[0] or 0
     row = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
-    report = f"📊 AD CENTER REPORT\n• Impressions: {imp}\n• Locked Clicks: {row}\n• Available Escrow: {round(float(row), 2)} NPR"
+    report = f"📊 AD CENTER REPORT\n• Impressions: {imp}\n• Locked Clicks: {row[0]}\n• Available Escrow: {round(float(row[1]), 2)} NPR"
     st = send_telegram_alert(report)
     return {"status": st, "summary": report}
