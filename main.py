@@ -118,13 +118,13 @@ async def ad_tag_js(db: DBWrapper = Depends(get_db)):
     imp_id = f"IMP-WEB-{int(time.time()*1000)}"
     db.execute("INSERT INTO impressions (impression_id, publisher_id, timestamp) VALUES (?, 'pub_dev_773x92', 'now')", (imp_id,))
     db.commit()
-    js = f"""(function(){{var d=document.createElement('div');d.style='background:#1e293b;color:#fff;padding:15px;border-radius:8px;text-align:center;font-family:sans-serif;border:1px solid #38bdf8;margin:10px 0;';d.innerHTML='<small style="color:#38bdf8">WORLDWIDE AD CENTER</small><h4 style="margin:5px 0">Premium Q4 APAC Push</h4><button onclick="fetch(\\'https://onrender.com\\',{{method:\\'POST\\'}});alert(\\'Ad Click Recorded!\\')" style="background:#22c55e;border:none;padding:8px 14px;border-radius:4px;font-weight:bold;cursor:pointer">Learn More</button>';document.currentScript.parentNode.insertBefore(d,document.currentScript);}})();"""
+    js = f"""(function(){{var d=document.createElement('div');d.style='background:#1e293b;color:#fff;padding:15px;border-radius:8px;text-align:center;font-family:sans-serif;border:1px solid #38bdf8;margin:10px 0;';d.innerHTML='<small style="color:#38bdf8">WORLDWIDE AD CENTER</small><h4 style="margin:5px 0">Premium Q4 APAC Push</h4><button onclick="fetch(\\'https://worldwide-ad-center-1.onrender.com/api/v1/simulate-click\\',{{method:\\'POST\\'}});alert(\\'Ad Click Recorded!\\')" style="background:#22c55e;border:none;padding:8px 14px;border-radius:4px;font-weight:bold;cursor:pointer">Learn More</button>';document.currentScript.parentNode.insertBefore(d,document.currentScript);}})();"""
     return Response(content=js, media_type="application/javascript")
 
 @app.get("/tag-preview", response_class=HTMLResponse)
 async def tag_preview():
     return """<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}code{display:block;background:#1e293b;padding:12px;border-radius:8px;color:#38bdf8;word-break:break-all;margin:15px 0}</style></head>
-    <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="https://onrender.com"&gt;&lt;/script&gt;</code>
+    <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="https://worldwide-ad-center-1.onrender.com/api/v1/simulate-click"&gt;&lt;/script&gt;</code>
     <h3>Live Ad Preview:</h3><script src="/api/v1/tag.js"></script><br><a href="/" style="color:#94a3b8">Back to Hub</a></body></html>"""
 
 @app.get("/api/v1/health/telegram-report")
