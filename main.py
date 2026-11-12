@@ -50,15 +50,15 @@ init_db()
 
 def send_telegram_alert(message: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        return False
+        return str(e)
     url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": message}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=data)
         urllib.request.urlopen(req, timeout=5)
-        return True
+        return "OK"
     except Exception:
-        return False
+        return str(e)
 
 @app.middleware("http")
 async def anti_fraud_click_gate(request: Request, call_next):
@@ -192,4 +192,4 @@ async def trigger_telegram_health_report(db: sqlite3.Connection = Depends(get_db
         f"• Anti-Fraud Gate: ACTIVE"
     )
     sent = send_telegram_alert(report)
-    return {"status": "report_dispatched" if sent else "telegram_offline", "summary": report}
+    return {"status": sent, "summary": report}
