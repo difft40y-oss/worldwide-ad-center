@@ -1,27 +1,17 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.responses import HTMLResponse
 import sqlite3
 import os
 import time
 import urllib.request
 import urllib.parse
-import json
+import urllib.error
 
 app = FastAPI()
-HOME_DIR = os.path.expanduser("~")
-DB_PATH = os.path.join(HOME_DIR, "adcenter.db")
+DB_PATH = os.path.join(os.path.expanduser("~"), "adcenter.db")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "9215398870:AAHp1CoVp1YZn_-5scR-B1zb-afy-lIFuDU")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "9058235041")
-
-CLICK_COOLDOWN_SECONDS = 60
-ip_click_tracker = {}
-
-class PayoutRequest(BaseModel):
-    publisher_id: str = Field(..., example="pub_dev_773x92")
-    wallet_phone: str = Field(..., pattern=r"^9\d{9}$", example="9703544008")
-    amount_npr: float = Field(..., gt=0, example=5.00)
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -33,44 +23,25 @@ def get_db():
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
-    conn.execute("CREATE TABLE IF NOT EXISTS publishers (publisher_id TEXT PRIMARY KEY, publisher_name TEXT, esewa_phone TEXT, account_status TEXT);")
-    conn.execute("CREATE TABLE IF NOT EXISTS campaigns (campaign_id INTEGER PRIMARY KEY AUTOINCREMENT, advertiser_id TEXT, campaign_name TEXT, max_cpm_bid REAL, target_geos TEXT);")
     conn.execute("CREATE TABLE IF NOT EXISTS impressions (impression_id TEXT PRIMARY KEY, campaign_id INTEGER, publisher_id TEXT, cost_usd REAL, timestamp TEXT);")
     conn.execute("CREATE TABLE IF NOT EXISTS clicks (click_id TEXT PRIMARY KEY, publisher_id TEXT, payout_credited_npr REAL, escrow_status TEXT);")
-    
-    # Seed initial campaign if empty so Render cloud boots with live data
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM campaigns")
-    if cur.fetchone()[0] == 0:
-        conn.execute("INSERT INTO campaigns (advertiser_id, campaign_name, max_cpm_bid, target_geos) VALUES ('adv_nepal_01', 'Premium Q4 APAC Push', 5.25, 'NP,US');")
     conn.commit()
     conn.close()
 
 init_db()
 
-def send_telegram_alert(message: str):
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        return str(e)
+def send_telegram_alert(message: str) -> str:
     url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": message}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=data)
-        urllib.request.urlopen(req, timeout=5)
-        return "OK"
-    except Exception:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            return "OK"
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="ignore")
+        return f"HTTP {e.code}: {err_body}"
+    except Exception as e:
         return str(e)
-
-@app.middleware("http")
-async def anti_fraud_click_gate(request: Request, call_next):
-    if request.method == "POST" and request.url.path == "/payout/esewa":
-        client_ip = request.client.host if request.client else "127.0.0.1"
-        current_time = time.time()
-        if client_ip in ip_click_tracker:
-            elapsed = current_time - ip_click_tracker[client_ip]
-            if elapsed < CLICK_COOLDOWN_SECONDS:
-                raise HTTPException(status_code=429, detail=f"Anti-Fraud Triggered! Wait {int(CLICK_COOLDOWN_SECONDS - elapsed)}s.")
-        ip_click_tracker[client_ip] = current_time
-    return await call_next(request)
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: sqlite3.Connection = Depends(get_db)):
@@ -116,9 +87,6 @@ async def root_hub(db: sqlite3.Connection = Depends(get_db)):
     </html>
     """
 
-# ==========================================
-# OPTION 2: LIVE MOBILE APP AD SIMULATION
-# ==========================================
 @app.get("/simulate-app", response_class=HTMLResponse)
 async def simulate_mobile_app(db: sqlite3.Connection = Depends(get_db)):
     imp_id = f"IMP-SIM-{int(time.time() * 1000)}"
@@ -167,12 +135,9 @@ async def record_simulated_click(db: sqlite3.Connection = Depends(get_db)):
     clk_id = f"CLK-SIM-{int(time.time() * 1000)}"
     db.execute("INSERT INTO clicks (click_id, publisher_id, payout_credited_npr, escrow_status) VALUES (?, 'pub_dev_773x92', 2.50, 'locked')", (clk_id,))
     db.commit()
-    send_telegram_alert(f"💰 New Ad Click Logged! ID: {clk_id} | +2.50 NPR credited to pub_dev_773x92.")
-    return {"status": "success", "message": f"Click {clk_id} logged! +2.50 NPR added."}
+    alert_res = send_telegram_alert(f"💰 New Ad Click Logged! ID: {clk_id} | +2.50 NPR credited to pub_dev_773x92.")
+    return {"status": alert_res, "message": f"Click {clk_id} logged! Telegram: {alert_res}"}
 
-# ==========================================
-# OPTION 3: AUTOMATED TELEGRAM HEALTH CHECK
-# ==========================================
 @app.get("/api/v1/health/telegram-report")
 async def trigger_telegram_health_report(db: sqlite3.Connection = Depends(get_db)):
     cur = db.cursor()
@@ -191,5 +156,5 @@ async def trigger_telegram_health_report(db: sqlite3.Connection = Depends(get_db
         f"• Available Escrow: {locked_npr} NPR\n"
         f"• Anti-Fraud Gate: ACTIVE"
     )
-    sent = send_telegram_alert(report)
-    return {"status": sent, "summary": report}
+    status_msg = send_telegram_alert(report)
+    return {"status": status_msg, "summary": report}
