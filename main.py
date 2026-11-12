@@ -31,7 +31,7 @@ def init_db():
 init_db()
 
 def send_telegram_alert(message: str) -> str:
-    url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = "https://" + "api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage"
     data = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": message}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=data)
