@@ -124,7 +124,7 @@ async def ad_tag_js(db: DBWrapper = Depends(get_db)):
 @app.get("/tag-preview", response_class=HTMLResponse)
 async def tag_preview():
     return """<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}code{display:block;background:#1e293b;padding:12px;border-radius:8px;color:#38bdf8;word-break:break-all;margin:15px 0}</style></head>
-    <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="https://worldwide-ad-center-1.onrender.com/api/v1/simulate-click"&gt;&lt;/script&gt;</code>
+    <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="https://worldwide-ad-center-1.onrender.com/api/v1/tag.js"&gt;&lt;/script&gt;</code>
     <h3>Live Ad Preview:</h3><script src="/api/v1/tag.js"></script><br><a href="/" style="color:#94a3b8">Back to Hub</a></body></html>"""
 
 @app.get("/api/v1/health/telegram-report")
