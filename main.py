@@ -14,13 +14,17 @@ if DATABASE_URL.startswith("postgres://"):
 
 class DBWrapper:
     def __init__(self):
+        self.err = ''
         if DATABASE_URL:
-            import psycopg2
-            self.conn = psycopg2.connect(DATABASE_URL)
-            self.is_pg = True
-        else:
-            self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-            self.is_pg = False
+            try:
+                import psycopg2
+                self.conn = psycopg2.connect(DATABASE_URL)
+                self.is_pg = True
+                return
+            except Exception as e:
+                self.err = str(e)
+        self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self.is_pg = False
     def execute(self, q, params=()):
         if self.is_pg:
             q = q.replace("?", "%s")
@@ -63,7 +67,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     row = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
     clk, earn = row[0], round(float(row[1]), 2)
     ctr = round((clk / imp * 100), 2) if imp > 0 else 0.0
-    db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else "Local SQLite (Temporary)"
+    db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL found'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
     <body><div class="card"><h2 style="margin:0 0 5px 0;">Worldwide Ad Center Hub</h2><p style="color:#94a3b8;font-size:12px;margin:0;">Storage: <b>{db_mode}</b></p></div>
