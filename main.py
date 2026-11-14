@@ -47,6 +47,9 @@ def init_db():
     db = DBWrapper()
     db.execute("CREATE TABLE IF NOT EXISTS impressions (impression_id TEXT PRIMARY KEY, publisher_id TEXT, timestamp TEXT);")
     db.execute("CREATE TABLE IF NOT EXISTS clicks (click_id TEXT PRIMARY KEY, publisher_id TEXT, payout_credited_npr REAL, escrow_status TEXT);")
+    db.execute("CREATE TABLE IF NOT EXISTS ad_config (id INTEGER PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT);")
+    if not db.execute("SELECT id FROM ad_config WHERE id=1").fetchone():
+        db.execute("INSERT INTO ad_config (id, headline, subtext, btn_text, target_url) VALUES (1, 'Worldwide Ad Center Network', 'Monetize your website traffic with instant eSewa payouts.', 'Join Now', 'https://worldwide-ad-center-1.onrender.com');")
     db.commit()
     db.close()
 
@@ -75,7 +78,8 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <a href="/simulate-app" class="btn">1. OPEN MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. OPEN ESEWA WITHDRAWAL PORTAL</a>
     <a href="/tag-preview" class="btn" style="background:#a855f7;color:#fff;">3. GET WEBSITE AD TAG (&lt;script&gt;)</a>
-    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">4. SEND TELEGRAM HEALTH REPORT</a></div></body></html>"""
+    <a href="/customize-ad" class="btn" style="background:#ec4899;color:#fff;">4. CUSTOMIZE AD BANNER & LINK</a>
+    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">5. SEND TELEGRAM HEALTH REPORT</a></div></body></html>"""
 
 class PayoutReq(BaseModel):
     wallet_phone: str
