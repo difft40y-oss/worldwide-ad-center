@@ -87,6 +87,40 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <a href="/campaigns" class="btn" style="background:#ec4899;color:#fff;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISER SUBMISSION PORTAL</a>
     <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">6. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}</body></html>"""
+
+@app.get("/campaigns", response_class=HTMLResponse)
+async def campaigns_page(db: DBWrapper = Depends(get_db)):
+    rows = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns ORDER BY id DESC").fetchall()
+    items = "".join([f"<div style='background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border:1px solid #334155;'><b>#{r}: {r}</b><br><span style='font-size:12px;color:#cbd5e1'>{r}</span><br><small style='color:#38bdf8'>{r}</small></div>" for r in rows])
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#ec4899;color:#fff;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
+    <body><div class="box"><h2>Add New Rotating Ad Campaign</h2>
+    <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
+    <button class="btn" onclick="addC()">ADD TO ROTATION</button><p id="res" style="color:#22c55e"></p></div>
+    <div class="box"><h3>Active Rotating Ads ({len(rows)})</h3>{items}</div>{FOOTER}
+    <script>async function addC(){{const r=await fetch('/api/v1/add-campaign',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
+
+@app.post("/api/v1/add-campaign")
+async def add_campaign(req: CampaignReq, db: DBWrapper = Depends(get_db)):
+    if req.pin != ADMIN_PIN:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN.")
+    nid = int(time.time()) % 1000000
+    db.execute("INSERT INTO ad_campaigns (id, headline, subtext, btn_text, target_url, active) VALUES (?, ?, ?, ?, ?, 1)", (nid, req.headline, req.subtext, req.btn_text, req.target_url))
+    db.commit()
+    return {"message": "Campaign added to live rotation! Refresh page to see list."}
+
+@app.get("/advertise", response_class=HTMLResponse)
+async def advertise_portal():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
+    <body><div class="box"><h2>Advertiser Campaign Submission</h2><p style="color:#cbd5e1;font-size:13px;">Launch your sponsored banner across our publisher network.</p>
+    <input id="hl" placeholder="Brand / Ad Headline"><input id="sub" placeholder="Offer Description"><input id="btn" placeholder="Call-to-Action Button"><input id="url" placeholder="Target Website URL (https://...)">
+    <button class="btn" onclick="subAd()">SUBMIT CAMPAIGN FOR REVIEW</button><p id="res" style="color:#22c55e"></p></div>{FOOTER}
+    <script>async function subAd(){{const r=await fetch('/api/v1/submit-advertiser',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message;}}</script></body></html>"""
+
+@app.post("/api/v1/submit-advertiser")
+async def submit_advertiser(req: CampaignReq):
+    send_telegram_alert(f"📢 New Advertiser Request!\n• Headline: {req.headline}\n• URL: {req.target_url}")
+    return {"message": "Campaign submitted! Network admin notified via Telegram for approval."}
+
 @app.get("/api/v1/tag.js")
 async def ad_tag_js(db: DBWrapper = Depends(get_db)):
     imp_id = f"IMP-WEB-{int(time.time()*1000)}"
