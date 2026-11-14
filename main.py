@@ -6,8 +6,8 @@ import sqlite3, os, time, urllib.request, urllib.parse
 app = FastAPI()
 DB_PATH = os.path.join(os.path.expanduser("~"), "adcenter.db")
 DATABASE_URL = os.getenv("DATABASE_URL", "")
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "9215398870:AAHp1CoVp1YZn_-5scR-B1zb-afy-lIFuDU")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "9058235041")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
