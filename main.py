@@ -110,10 +110,21 @@ async def add_campaign(req: CampaignReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/advertise", response_class=HTMLResponse)
 async def advertise_portal():
-    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
-    <body><div class="box"><h2>Advertiser Campaign Submission</h2><p style="color:#cbd5e1;font-size:13px;">Launch your sponsored banner across our publisher network.</p>
-    <input id="hl" placeholder="Brand / Ad Headline"><input id="sub" placeholder="Offer Description"><input id="btn" placeholder="Call-to-Action Button"><input id="url" placeholder="Target Website URL (https://...)">
-    <button class="btn" onclick="subAd()">SUBMIT CAMPAIGN FOR REVIEW</button><p id="res" style="color:#22c55e"></p></div>{FOOTER}
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px;line-height:1.5}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}.step{{background:#0f172a;padding:10px 12px;border-radius:8px;margin-bottom:8px;border-left:3px solid #14b8a6;font-size:13px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:10px;cursor:pointer}}</style></head>
+    <body>
+    <div class="box"><h2 style="margin-top:0;">How to Advertise With Us</h2><p style="color:#94a3b8;font-size:13px;">Launch your sponsored banner across our publisher network in 3 simple steps:</p>
+    <div class="step"><b>Step 1 — Write Your Ad Copy:</b> Enter a catchy headline (max 40 chars), a short offer description, button text (e.g., <i>Visit Site</i>), and your full destination URL starting with <code>https://</code>.</div>
+    <div class="step"><b>Step 2 — Instant Admin Review:</b> Submit the form below. Our network admin receives an instant Telegram notification to verify your link for safety and quality.</div>
+    <div class="step"><b>Step 3 — Go Live in Rotation:</b> Once approved, your ad rotates automatically across all partner blogs and websites at our transparent rate of <b>2.50 NPR per verified click</b>.</div>
+    <div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px dashed #38bdf8;margin-top:12px;">
+        <small style="color:#38bdf8;letter-spacing:1px;">EXAMPLE AD PREVIEW</small>
+        <h4 style="margin:6px 0;font-size:16px;">Your Brand Headline Here</h4>
+        <p style="margin:0 0 10px 0;font-size:12px;color:#cbd5e1;">Your short promotional offer appears right here.</p>
+        <span style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:bold;">Learn More</span>
+    </div></div>
+    <div class="box"><h3 style="margin-top:0;">Submit Your Campaign</h3>
+    <input id="hl" placeholder="Brand / Ad Headline (e.g. Best Deals in Nepal)"><input id="sub" placeholder="Offer Description (e.g. Free delivery on all orders today)"><input id="btn" placeholder="Call-to-Action Button (e.g. Shop Now)"><input id="url" placeholder="Target Website URL (https://...)">
+    <button class="btn" onclick="subAd()">SUBMIT CAMPAIGN FOR REVIEW</button><p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
     <script>async function subAd(){{const r=await fetch('/api/v1/submit-advertiser',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message;}}</script></body></html>"""
 
 @app.post("/api/v1/submit-advertiser")
