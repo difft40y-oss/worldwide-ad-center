@@ -79,13 +79,13 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
-    <body><div class="card"><h2 style="margin:0 0 5px 0;">Worldwide Ad Center Hub</h2><p style="color:#94a3b8;font-size:12px;margin:0;">Storage: <b>{db_mode}</b></p></div>
+    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:9px 12px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;white-space:nowrap;">Advertise With Us</a></div>
     <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div class="val">{earn} NPR</div></div></div>
     <a href="/simulate-app" class="btn">1. MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. ESEWA WITHDRAWAL &amp; HISTORY</a>
     <a href="/tag-preview" class="btn" style="background:#a855f7;color:#fff;">3. GET WEBSITE AD TAG (&lt;script&gt;)</a>
     <a href="/campaigns" class="btn" style="background:#ec4899;color:#fff;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
-    <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISER SUBMISSION PORTAL</a>
+    <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISE WITH US (SUBMIT AD)</a>
     <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">6. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}</body></html>"""
 
 @app.get("/campaigns", response_class=HTMLResponse)
