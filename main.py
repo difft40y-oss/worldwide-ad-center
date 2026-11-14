@@ -68,7 +68,7 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
-FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
+FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: DBWrapper = Depends(get_db)):
@@ -150,6 +150,25 @@ async def tag_preview():
     <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="{base}/api/v1/tag.js"&gt;&lt;/script&gt;</code>
     <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}</body></html>"""
 
+
+
+@app.get("/about", response_class=HTMLResponse)
+async def about_page():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #334155;font-size:13px}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:12px}}</style></head>
+    <body>
+    <div class="box"><h2>About Worldwide Ad Center</h2>
+    <p><b>Worldwide Ad Center</b> is an independent, performance-driven digital advertising network built to connect businesses directly with quality blogs, news portals, and mobile apps—without middleman fees or invasive tracking cookies.</p>
+    <p>Our lightweight <code>&lt;script&gt;</code> tag empowers publishers in Nepal and worldwide to monetize their traffic transparently at <b>2.50 NPR per verified human click</b> with fast mobile wallet settlements.</p></div>
+
+    <div class="box"><h3>Contact &amp; Advertiser Support</h3>
+    <p style="font-size:13px;">Have questions about launching an ad campaign, publisher integration, or eSewa payouts? Reach our network team directly:</p>
+    <div class="row"><b>Official Telegram Bot:</b> <a href="https://t.me" target="_blank" style="color:#38bdf8;text-decoration:none;">@WorldwideAdCenterNotificationBot</a></div>
+    <div class="row"><b>Support Desk / Inquiries:</b> support@worldwideadcenter.com</div>
+    <div class="row"><b>Payout Settlement Gateway:</b> eSewa Verified Merchant Support (Nepal)</div>
+    <div class="row"><b>Operating Region:</b> Gandaki Province, Nepal &bull; Serving Global Web Traffic</div>
+    <a href="https://t.me" target="_blank" class="btn">MESSAGE US ON TELEGRAM</a>
+    <a href="/advertise" class="btn" style="background:#14b8a6;">SUBMIT AN AD CAMPAIGN</a></div>
+    {FOOTER}</body></html>"""
 
 @app.get("/faq", response_class=HTMLResponse)
 async def faq_page():
