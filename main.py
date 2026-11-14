@@ -68,7 +68,7 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
-FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
+FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: DBWrapper = Depends(get_db)):
@@ -149,6 +149,29 @@ async def tag_preview():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}code{{display:block;background:#1e293b;padding:12px;border-radius:8px;color:#38bdf8;word-break:break-all;margin:15px 0}}</style></head>
     <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="{base}/api/v1/tag.js"&gt;&lt;/script&gt;</code>
     <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}</body></html>"""
+
+
+@app.get("/faq", response_class=HTMLResponse)
+async def faq_page():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.q{{color:#38bdf8;font-weight:bold;margin-top:14px}}.tag{{display:inline-block;background:#0f172a;border:1px solid #14b8a6;color:#14b8a6;padding:4px 10px;border-radius:20px;font-size:12px;margin:4px 4px 0 0}}.ban{{border-color:#ef4444;color:#ef4444}}</style></head>
+    <body>
+    <div class="box"><h2>Help Center &amp; Frequently Asked Questions</h2>
+    <div class="q">1. How much does advertising cost?</div>
+    <p>Advertisers pay a flat, transparent rate of <b>2.50 NPR per verified human click</b>. Impressions are served free across our partner publisher network.</p>
+    <div class="q">2. How fast is my ad campaign approved?</div>
+    <p>As soon as you submit your campaign on the <a href="/advertise" style="color:#14b8a6;">Advertise With Us</a> page, our admin team receives an instant Telegram alert and reviews your link within a few hours.</p>
+    <div class="q">3. How do website owners earn money?</div>
+    <p>Bloggers and website owners simply copy our single <code>&lt;script&gt;</code> tag from the hub and paste it into their HTML, Blogger, or WordPress site. Every verified click credits <b>+2.50 NPR</b> to escrow, payable directly to your <b>eSewa mobile wallet</b>.</p>
+    <div class="q">4. How does your anti-fraud protection work?</div>
+    <p>Our network filters duplicate refreshes and automated bot clicks so advertisers only pay for genuine human interest.</p></div>
+
+    <div class="box"><h3>Supported &amp; Prohibited Ad Topics</h3>
+    <p style="font-size:13px;">To keep our publisher websites family-friendly and brand-safe, all ads must follow our content guidelines:</p>
+    <p style="margin-bottom:6px;color:#fff;font-size:13px;"><b>Allowed Topics:</b></p>
+    <span class="tag">E-Commerce &amp; Retail</span><span class="tag">Tech &amp; Mobile Apps</span><span class="tag">Education &amp; Courses</span><span class="tag">Local Nepal Businesses</span><span class="tag">Finance &amp; SaaS</span><span class="tag">Blogs &amp; Media</span>
+    <p style="margin:14px 0 6px 0;color:#fff;font-size:13px;"><b>Strictly Prohibited Topics:</b></p>
+    <span class="tag ban">Adult / Explicit Content</span><span class="tag ban">Gambling &amp; Betting</span><span class="tag ban">Malware / Fake Downloads</span><span class="tag ban">Illegal Products</span><span class="tag ban">Click-Fraud Schemes</span></div>
+    {FOOTER}</body></html>"""
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
