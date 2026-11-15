@@ -51,6 +51,7 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS ad_campaigns (id INTEGER PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, active INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS payouts (payout_id TEXT PRIMARY KEY, wallet_phone TEXT, amount_npr REAL, status TEXT, created_at TEXT);")
     db.execute("CREATE TABLE IF NOT EXISTS saved_banners (draft_id TEXT PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, img_data TEXT, expires_at INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     if not db.execute("SELECT id FROM ad_campaigns WHERE id=1").fetchone():
         db.execute("INSERT INTO ad_campaigns (id, headline, subtext, btn_text, target_url, active) VALUES (1, 'Worldwide Ad Center Network', 'Monetize your website traffic with instant eSewa payouts.', 'Join Now', 'https://worldwide-ad-center-1.onrender.com', 1);")
     db.commit()
@@ -69,7 +70,7 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
-FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
+FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: DBWrapper = Depends(get_db)):
@@ -80,14 +81,15 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
-    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">For Agencies</a><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Advertise</a></div></div>
+    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Tenders &amp; Bids</a><a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">For Agencies</a><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Advertise</a></div></div>
     <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div class="val">{earn} NPR</div></div></div>
     <a href="/simulate-app" class="btn">1. MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. ESEWA WITHDRAWAL &amp; HISTORY</a>
     <a href="/tag-preview" class="btn" style="background:#a855f7;color:#fff;">3. GET WEBSITE AD TAG (&lt;script&gt;)</a>
     <a href="/campaigns" class="btn" style="background:#ec4899;color:#fff;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISE WITH US (SUBMIT AD)</a>
-    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">6. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}</body></html>"""
+    <a href="/tenders" class="btn" style="background:#0ea5e9;color:#0f172a;">6. CONSTRUCTION &amp; BIDDER NOTICES</a>
+    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}</body></html>"""
 
 @app.get("/campaigns", response_class=HTMLResponse)
 async def campaigns_page(db: DBWrapper = Depends(get_db)):
@@ -186,6 +188,64 @@ class AgencyReq(BaseModel):
     contact_info: str
     monthly_budget: str
     client_count: str
+
+
+class TenderReq(BaseModel):
+    title: str
+    issuer: str
+    category: str
+    deadline: str
+    contact_url: str
+    pin: str = ""
+
+@app.get("/tenders", response_class=HTMLResponse)
+async def tenders_portal(db: DBWrapper = Depends(get_db)):
+    rows = db.execute("SELECT tender_id, title, issuer, category, deadline, contact_url FROM tenders WHERE approved=1 ORDER BY tender_id DESC LIMIT 20").fetchall()
+    cards = ""
+    for r in rows:
+        tid, ttl, iss, cat, ddl, curl = r
+        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
+    if not cards:
+        cards = '<p style="color:#94a3b8;font-size:12px;">No active construction notices yet. Publish the first Invitation for Bid (IFB) or Contractor Notice below!</p>'
+
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input,select{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#38bdf8;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
+    <body>
+    <div class="box"><span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFRASTRUCTURE &amp; PROCUREMENT</span>
+    <h2 style="margin:8px 0 6px 0;">Construction &amp; Bidder Notices</h2>
+    <p style="font-size:13px;margin:0;">Active Invitation for Bids (IFB), Sealed Quotations, Subcontractor Calls &amp; Material Supply Tenders:</p>
+    {cards}</div>
+
+    <div class="box"><h3>Publish Construction / Bidder Notice</h3>
+    <p style="font-size:12px;margin-top:0;">Submit a notice for admin review, or enter your <b>Admin PIN</b> to publish immediately:</p>
+    <input id="ttl" placeholder="Project / Notice Title (e.g. Road Blacktopping &amp; Drainage IFB)">
+    <input id="iss" placeholder="Issuing Office / Contractor Name">
+    <select id="cat"><option>Civil &amp; Road Construction</option><option>Building &amp; Structural Works</option><option>Sealed Quotation / Supply</option><option>Subcontractor &amp; Heavy Equipment</option><option>Consultancy &amp; Engineering</option></select>
+    <input id="ddl" placeholder="Bid Deadline (e.g. 2026-12-05, 12:00 PM)">
+    <input id="url" placeholder="Notice Link, Phone, or Email (https://... or tel:...)">
+    <input id="pin" type="password" placeholder="Admin PIN (Optional - leave blank for review)">
+    <button class="btn" onclick="postTender()">SUBMIT / PUBLISH BIDDER NOTICE</button>
+    <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+
+    <script>
+    async function postTender(){{
+        const r = await fetch('/api/v1/submit-tender',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{title:document.getElementById('ttl').value,issuer:document.getElementById('iss').value,category:document.getElementById('cat').value,deadline:document.getElementById('ddl').value,contact_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});
+        const d = await r.json(); document.getElementById('res').innerText = d.message || d.detail;
+        if(d.published) setTimeout(()=>location.reload(), 1000);
+    }}
+    </script></body></html>"""
+
+@app.post("/api/v1/submit-tender")
+async def submit_tender(req: TenderReq, db: DBWrapper = Depends(get_db)):
+    tid = f"BID-{int(time.time()) % 1000000}"
+    is_admin = (req.pin == ADMIN_PIN and req.pin != "")
+    approved = 1 if is_admin else 0
+    db.execute("INSERT INTO tenders (tender_id, title, issuer, category, deadline, contact_url, approved) VALUES (?, ?, ?, ?, ?, ?, ?)", (tid, req.title, req.issuer, req.category, req.deadline, req.contact_url, approved))
+    db.commit()
+    st_txt = "PUBLISHED LIVE" if is_admin else "PENDING REVIEW"
+    send_telegram_alert(f"🏗️ CONSTRUCTION / BIDDER NOTICE ({st_txt})!\n• ID: {tid}\n• Title: {req.title}\n• Issuer: {req.issuer}\n• Category: {req.category}\n• Deadline: {req.deadline}\n• Contact: {req.contact_url}")
+    if is_admin:
+        return {"message": f"Notice {tid} published live on the Bidder Board!", "published": True}
+    return {"message": f"Notice {tid} submitted! Admin notified via Telegram for approval.", "published": False}
 
 @app.get("/agencies", response_class=HTMLResponse)
 async def agencies_portal():
