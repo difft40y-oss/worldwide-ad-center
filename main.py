@@ -69,7 +69,7 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
-FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
+FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
 
 @app.get("/", response_class=HTMLResponse)
 async def root_hub(db: DBWrapper = Depends(get_db)):
@@ -80,7 +80,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
-    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:9px 12px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;white-space:nowrap;">Advertise With Us</a></div>
+    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">For Agencies</a><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Advertise</a></div></div>
     <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div class="val">{earn} NPR</div></div></div>
     <a href="/simulate-app" class="btn">1. MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. ESEWA WITHDRAWAL &amp; HISTORY</a>
@@ -179,6 +179,61 @@ async def tag_preview():
     <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}</body></html>"""
 
 
+
+
+class AgencyReq(BaseModel):
+    agency_name: str
+    contact_info: str
+    monthly_budget: str
+    client_count: str
+
+@app.get("/agencies", response_class=HTMLResponse)
+async def agencies_portal():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.tier{{background:#0f172a;padding:11px;border-radius:8px;margin-top:8px;border-left:3px solid #f59e0b;font-size:13px}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#f59e0b;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}.stat{{background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #38bdf8;margin-top:10px}}</style></head>
+    <body>
+    <div class="box"><span style="background:#f59e0b;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">AGENCY PARTNER PROGRAM</span>
+    <h2 style="margin:8px 0 6px 0;">Agency Media Kit &amp; Rate Card</h2>
+    <p style="font-size:13px;margin:0 0 10px 0;">Scale your clients across Nepal &amp; global web publishers with transparent CPC pricing, zero cookie friction, and priority Telegram campaign support.</p>
+    <div class="tier"><b>Standard Agency Rate:</b> 2.50 NPR / Verified Click (Free Unlimited Impressions)</div>
+    <div class="tier"><b>Growth Tier (25,000+ NPR/mo):</b> 10% Bonus Click Credits + Priority Ad Rotation</div>
+    <div class="tier"><b>Enterprise Tier (100,000+ NPR/mo):</b> 20% Bonus Credits + Dedicated Multi-Brand Account</div>
+    <div class="tier"><b>Ad Specs &amp; Formats:</b> Responsive Native Card, 300x250 / 728x90 Banner + Optional Creative Attachment (JPG/PNG/WEBP)</div></div>
+
+    <div class="box"><h3>Live Budget &amp; ROI Estimator</h3>
+    <p style="font-size:12px;margin-top:0;">Enter your client campaign budget in NPR to calculate guaranteed clicks &amp; estimated reach:</p>
+    <input id="bud" type="number" value="10000" oninput="calc()" placeholder="Campaign Budget (NPR)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="stat"><small style="color:#94a3b8;">VERIFIED CLICKS</small><div id="clk" style="font-size:20px;font-weight:bold;color:#22c55e;">4,000</div></div>
+        <div class="stat"><small style="color:#94a3b8;">EST. IMPRESSIONS</small><div id="imp" style="font-size:20px;font-weight:bold;color:#38bdf8;">80,000+</div></div>
+    </div></div>
+
+    <div class="box"><h3>Agency Partner Fast-Track Request</h3>
+    <p style="font-size:12px;margin-top:0;">Apply for priority multi-client onboarding. Our network desk responds directly via Telegram/WhatsApp:</p>
+    <input id="ag" placeholder="Agency / Company Name">
+    <input id="ct" placeholder="WhatsApp, Telegram, or Email Contact">
+    <input id="mb" placeholder="Estimated Monthly Client Spend (e.g. 50,000 NPR)">
+    <input id="cc" placeholder="Number of Active Client Brands (e.g. 5 Brands)">
+    <button class="btn" onclick="sendAg()">REQUEST AGENCY PARTNER ACCESS</button>
+    <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+
+    <script>
+    function calc(){{
+        const b = parseFloat(document.getElementById('bud').value) || 0;
+        let bonus = b >= 100000 ? 1.20 : (b >= 25000 ? 1.10 : 1.0);
+        const clicks = Math.floor((b / 2.50) * bonus);
+        document.getElementById('clk').innerText = clicks.toLocaleString();
+        document.getElementById('imp').innerText = (clicks * 20).toLocaleString() + "+";
+    }}
+    async function sendAg(){{
+        const r = await fetch('/api/v1/agency-fast-track',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{agency_name:document.getElementById('ag').value,contact_info:document.getElementById('ct').value,monthly_budget:document.getElementById('mb').value,client_count:document.getElementById('cc').value}})}});
+        const d = await r.json(); document.getElementById('res').innerText = d.message;
+    }}
+    </script></body></html>"""
+
+@app.post("/api/v1/agency-fast-track")
+async def agency_fast_track(req: AgencyReq):
+    send_telegram_alert(f"🏢 PRIORITY AGENCY INQUIRY!\n• Agency: {req.agency_name}\n• Contact: {req.contact_info}\n• Monthly Budget: {req.monthly_budget}\n• Client Brands: {req.client_count}")
+    return {"message": "Fast-track request received! Our Agency Desk has been alerted via Telegram."}
 
 @app.get("/about", response_class=HTMLResponse)
 async def about_page():
