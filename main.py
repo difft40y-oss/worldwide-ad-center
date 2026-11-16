@@ -71,6 +71,37 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
+def render_nav(title: str, subpath: str) -> str:
+    return f"""<div style="background:#1e293b;padding:12px 14px;border-radius:12px;border:1px solid #334155;margin-bottom:14px;position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff;">
+            <span style="background:linear-gradient(135deg,#38bdf8,#14b8a6);color:#0f172a;font-weight:900;font-size:14px;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">WA</span>
+            <div><div style="font-weight:bold;font-size:15px;line-height:1.1;">Worldwide Ad Center</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath}</div></div>
+        </a>
+        <div style="position:relative;">
+            <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
+            <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
+                <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a>
+                <a href="/simulate-app" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128241; Mobile App Simulator</a>
+                <a href="/payout-hub" style="display:block;padding:10px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128184; eSewa Payouts &amp; History</a>
+                <a href="/tag-preview" style="display:block;padding:10px 14px;color:#a855f7;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128187; Website Ad Tag (&lt;script&gt;)</a>
+                <a href="/campaigns" style="display:block;padding:10px 14px;color:#ec4899;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128260; Rotating Ad Campaigns</a>
+                <a href="/faq" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
+                <a href="/about" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
+                <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
+                <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;">&#128220; Terms of Service</a>
+            </div>
+        </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid #334155;">
+        <a href="/" style="background:#0f172a;color:#e2e8f0;border:1px solid #475569;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Home</a>
+        <a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Tenders &amp; Bids</a>
+        <a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">For Agencies</a>
+        <a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Advertise</a>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Section: <b style="color:#fff;">{title}</b></div>
+</div>"""
+
 FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center &bull; Admin PIN Protected</span></div>'
 
 @app.get("/", response_class=HTMLResponse)
@@ -82,7 +113,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
-    <body><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><h2 style="margin:0 0 5px 0;font-size:18px;">Worldwide Ad Center</h2><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Tenders &amp; Bids</a><a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">For Agencies</a><a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:8px 10px;border-radius:8px;font-weight:bold;font-size:11px;text-decoration:none;white-space:nowrap;">Advertise</a></div></div>
+    <body>{render_nav("Main Control Hub", "Home / Dashboard")}<div class="card" style="padding:10px 14px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div>
     <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div class="val">{earn} NPR</div></div></div>
     <a href="/simulate-app" class="btn">1. MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. ESEWA WITHDRAWAL &amp; HISTORY</a>
@@ -97,7 +128,7 @@ async def campaigns_page(db: DBWrapper = Depends(get_db)):
     rows = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns ORDER BY id DESC").fetchall()
     items = "".join([f"<div style='background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border:1px solid #334155;'><b>#{r}: {r}</b><br><span style='font-size:12px;color:#cbd5e1'>{r}</span><br><small style='color:#38bdf8'>{r}</small></div>" for r in rows])
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#ec4899;color:#fff;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
-    <body><div class="box"><h2>Add New Rotating Ad Campaign</h2>
+    <body>{render_nav("Manage & Rotate Campaigns", "Home / Campaigns")}<div class="box"><h2>Add New Rotating Ad Campaign</h2>
     <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
     <button class="btn" onclick="addC()">ADD TO ROTATION</button><p id="res" style="color:#22c55e"></p></div>
     <div class="box"><h3>Active Rotating Ads ({len(rows)})</h3>{items}</div>{FOOTER}
@@ -127,7 +158,7 @@ async def advertise_portal(db: DBWrapper = Depends(get_db)):
     if not lib:
         lib = '<p style="color:#94a3b8;font-size:12px;">No saved drafts yet.</p>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:18px}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}.tpl{{background:#0f172a;border:1px solid #14b8a6;color:#14b8a6;padding:6px 9px;border-radius:6px;font-size:11px;margin:3px}}input{{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:11px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:7px}}</style></head>
-    <body><div class="box"><h3 style="margin-top:0">Templates &amp; Live Preview</h3>
+    <body>{render_nav("Advertiser Studio & 7-Day Library", "Home / Advertise With Us")}<div class="box"><h3 style="margin-top:0">Templates &amp; Live Preview</h3>
     <button class="tpl" onclick="tp('Flash Sale: 50% Off!','Limited-time deals across Nepal.','Shop Now')">E-Commerce</button>
     <button class="tpl" onclick="tp('Smart App Launch','Try free for 14 days today.','Download')">App Launch</button>
     <button class="tpl" onclick="tp('Local Service Offer','Trusted quality &amp; fast booking.','Book Now')">Local Offer</button>
@@ -178,7 +209,7 @@ async def ad_tag_js(db: DBWrapper = Depends(get_db)):
 async def tag_preview():
     base = "https://" + "worldwide-ad-center-1" + ".onrender.com"
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}code{{display:block;background:#1e293b;padding:12px;border-radius:8px;color:#38bdf8;word-break:break-all;margin:15px 0}}</style></head>
-    <body><h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="{base}/api/v1/tag.js"&gt;&lt;/script&gt;</code>
+    <body>{render_nav("Website Ad Tag (<script>)", "Home / Website Ad Tag")}<h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="{base}/api/v1/tag.js"&gt;&lt;/script&gt;</code>
     <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}</body></html>"""
 
 
@@ -251,7 +282,7 @@ async def submit_tender(req: TenderReq, db: DBWrapper = Depends(get_db)):
 @app.get("/agencies", response_class=HTMLResponse)
 async def agencies_portal():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.tier{{background:#0f172a;padding:11px;border-radius:8px;margin-top:8px;border-left:3px solid #f59e0b;font-size:13px}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#f59e0b;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}.stat{{background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #38bdf8;margin-top:10px}}</style></head>
-    <body>
+    <body>{render_nav("Agency Partner Program", "Home / For Agencies")}
     <div class="box"><span style="background:#f59e0b;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">AGENCY PARTNER PROGRAM</span>
     <h2 style="margin:8px 0 6px 0;">Agency Media Kit &amp; Rate Card</h2>
     <p style="font-size:13px;margin:0 0 10px 0;">Scale your clients across Nepal &amp; global web publishers with transparent CPC pricing, zero cookie friction, and priority Telegram campaign support.</p>
@@ -299,7 +330,7 @@ async def agency_fast_track(req: AgencyReq):
 @app.get("/about", response_class=HTMLResponse)
 async def about_page():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #334155;font-size:13px}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:12px}}</style></head>
-    <body>
+    <body>{render_nav("About & Contact Support", "Home / About Us")}
     <div class="box"><h2>About Worldwide Ad Center</h2>
     <p><b>Worldwide Ad Center</b> is an independent, performance-driven digital advertising network built to connect businesses directly with quality blogs, news portals, and mobile apps—without middleman fees or invasive tracking cookies.</p>
     <p>Our lightweight <code>&lt;script&gt;</code> tag empowers publishers in Nepal and worldwide to monetize their traffic transparently at <b>2.50 NPR per verified human click</b> with fast mobile wallet settlements.</p></div>
@@ -317,7 +348,7 @@ async def about_page():
 @app.get("/faq", response_class=HTMLResponse)
 async def faq_page():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.q{{color:#38bdf8;font-weight:bold;margin-top:14px}}.tag{{display:inline-block;background:#0f172a;border:1px solid #14b8a6;color:#14b8a6;padding:4px 10px;border-radius:20px;font-size:12px;margin:4px 4px 0 0}}.ban{{border-color:#ef4444;color:#ef4444}}</style></head>
-    <body>
+    <body>{render_nav("Help Center & Ad Topics", "Home / FAQ & Guidelines")}
     <div class="box"><h2>Help Center &amp; Frequently Asked Questions</h2>
     <div class="q">1. How much does advertising cost?</div>
     <p>Advertisers pay a flat, transparent rate of <b>2.50 NPR per verified human click</b>. Impressions are served free across our partner publisher network.</p>
@@ -339,12 +370,12 @@ async def faq_page():
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px}}h2,h3{{color:#fff}}</style></head>
-    <body><div class="box"><h2>Privacy Policy</h2><p><b>Effective Date:</b> November 2026</p><h3>1. Cookie-Free Ad Delivery</h3><p>Worldwide Ad Center delivers contextual advertisements without storing third-party tracking cookies on visitor browsers.</p><h3>2. Impression &amp; Click Logging</h3><p>We log anonymized impression counts, verified click events, and basic anti-fraud rate limits solely to calculate publisher earnings and prevent automated bot traffic.</p><h3>3. Publisher Payout Data</h3><p>Registered mobile wallet numbers (such as eSewa IDs) are used strictly for processing requested publisher settlements.</p></div>{FOOTER}</body></html>"""
+    <body>{render_nav("Privacy Policy", "Home / Legal / Privacy Policy")}<div class="box"><h2>Privacy Policy</h2><p><b>Effective Date:</b> November 2026</p><h3>1. Cookie-Free Ad Delivery</h3><p>Worldwide Ad Center delivers contextual advertisements without storing third-party tracking cookies on visitor browsers.</p><h3>2. Impression &amp; Click Logging</h3><p>We log anonymized impression counts, verified click events, and basic anti-fraud rate limits solely to calculate publisher earnings and prevent automated bot traffic.</p><h3>3. Publisher Payout Data</h3><p>Registered mobile wallet numbers (such as eSewa IDs) are used strictly for processing requested publisher settlements.</p></div>{FOOTER}</body></html>"""
 
 @app.get("/terms", response_class=HTMLResponse)
 async def terms_of_service():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px}}h2,h3{{color:#fff}}</style></head>
-    <body><div class="box"><h2>Terms of Service</h2><h3>1. Publisher Guidelines</h3><p>Publishers embedding the Worldwide Ad Center script tag must not generate artificial clicks, automated refreshes, or incentivized click fraud.</p><h3>2. Escrow &amp; Settlements</h3><p>Verified clicks accrue in locked escrow and become eligible for settlement via supported mobile wallets upon admin verification.</p></div>{FOOTER}</body></html>"""
+    <body>{render_nav("Terms of Service", "Home / Legal / Terms of Service")}<div class="box"><h2>Terms of Service</h2><h3>1. Publisher Guidelines</h3><p>Publishers embedding the Worldwide Ad Center script tag must not generate artificial clicks, automated refreshes, or incentivized click fraud.</p><h3>2. Escrow &amp; Settlements</h3><p>Verified clicks accrue in locked escrow and become eligible for settlement via supported mobile wallets upon admin verification.</p></div>{FOOTER}</body></html>"""
 
 @app.get("/api/v1/health/telegram-report")
 async def health_report(db: DBWrapper = Depends(get_db)):
