@@ -78,14 +78,14 @@ def render_nav(title: str, subpath: str) -> str:
     return f"""<div style="background:#1e293b;padding:12px 14px;border-radius:12px;border:1px solid #334155;margin-bottom:14px;position:relative;">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
         <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff;">
-            <span style="background:#0f172a;border:1px solid #38bdf8;padding:4px 7px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;">
-                <svg width="46" height="28" viewBox="0 0 120 72" xmlns="http://w3.org">
-                    <polygon points="3,8 14,6 22,13 33,15 44,23 56,26 68,34 84,37 98,42 114,41 116,52 111,64 96,63 82,58 67,56 54,48 42,45 31,37 19,32 10,23 5,15" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round"/>
-                    <polygon points="52,14 74,28 57,28 76,43 52,43" fill="#dc143c" stroke="#003893" stroke-width="2.2" stroke-linejoin="round"/>
-                    <circle cx="58.5" cy="24.5" r="2" fill="#ffffff"/>
-                    <circle cx="59.5" cy="36.5" r="2.6" fill="#ffffff"/>
+            <span style="background:#0f172a;border:1px solid #38bdf8;padding:4px 8px;border-radius:9px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;">
+                <svg width="64" height="32" viewBox="0 0 160 80" xmlns="http://w3.org">
+                    <polygon points="4,10 16,6 24,14 38,16 52,24 68,26 84,33 104,35 124,38 148,36 154,48 150,64 134,66 116,62 96,60 76,54 58,50 40,42 22,35 10,24" fill="#1e293b" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round"/>
+                    <polygon points="72,10 98,26 78,26 102,43 72,43" fill="#dc143c" stroke="#003893" stroke-width="2.5" stroke-linejoin="round"/>
+                    <circle cx="80" cy="22" r="2.3" fill="#ffffff"/>
+                    <circle cx="81" cy="36" r="3" fill="#ffffff"/>
                 </svg>
-                <span style="font-weight:800;font-size:9px;color:#cbd5e1;letter-spacing:0.6px;">WAC</span>
+                <span style="font-weight:800;font-size:9px;color:#cbd5e1;letter-spacing:1.2px;margin-top:1px;line-height:1;">WAC</span>
             </span>
             <div><div style="font-weight:bold;font-size:14px;line-height:1.1;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath}</div></div>
         </a>
