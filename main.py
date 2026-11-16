@@ -52,6 +52,9 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS payouts (payout_id TEXT PRIMARY KEY, wallet_phone TEXT, amount_npr REAL, status TEXT, created_at TEXT);")
     db.execute("CREATE TABLE IF NOT EXISTS saved_banners (draft_id TEXT PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, img_data TEXT, expires_at INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, province TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL);")
+    if not db.execute("SELECT id FROM settings WHERE id=1").fetchone():
+        db.execute("INSERT INTO settings (id, default_wallet, cpc_rate) VALUES (1, '9703544008', 2.50);")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     if not db.execute("SELECT id FROM ad_campaigns WHERE id=1").fetchone():
         db.execute("INSERT INTO ad_campaigns (id, headline, subtext, btn_text, target_url, active) VALUES (1, 'Worldwide Ad Center Network', 'Monetize your website traffic with instant eSewa payouts.', 'Join Now', 'https://worldwide-ad-center-1.onrender.com', 1);")
@@ -78,7 +81,7 @@ def render_nav(title: str, subpath: str) -> str:
             <span style="background:linear-gradient(135deg,#38bdf8,#14b8a6);color:#0f172a;font-weight:900;font-size:14px;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">WA</span>
             <div><div style="font-weight:bold;font-size:15px;line-height:1.1;">Worldwide Ad Center</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath}</div></div>
         </a>
-        <div style="position:relative;">
+        <div style="display:flex;align-items:center;gap:6px;"><button onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:bold;cursor:pointer;">&larr; Exit</button><div style="position:relative;">
             <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
             <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
                 <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a>
@@ -89,15 +92,19 @@ def render_nav(title: str, subpath: str) -> str:
                 <a href="/faq" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
                 <a href="/about" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
                 <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
+                <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
+                <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Network Settings</a>
                 <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;">&#128220; Terms of Service</a>
             </div>
-        </div>
+        </div></div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid #334155;">
         <a href="/" style="background:#0f172a;color:#e2e8f0;border:1px solid #475569;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Home</a>
         <a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Tenders &amp; Bids</a>
         <a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">For Agencies</a>
         <a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Advertise</a>
+        <a href="/gallery" style="background:#a855f7;color:#fff;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Gallery</a>
+        <a href="/settings" style="background:#475569;color:#fff;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Settings</a>
     </div>
     <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Section: <b style="color:#fff;">{title}</b></div>
 </div>"""
@@ -229,6 +236,56 @@ class TenderReq(BaseModel):
     deadline: str
     contact_url: str
     pin: str = ""
+
+
+class SettingsReq(BaseModel):
+    default_wallet: str
+    cpc_rate: float
+    pin: str
+
+@app.get("/gallery", response_class=HTMLResponse)
+async def gallery_page(db: DBWrapper = Depends(get_db)):
+    camps = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1 ORDER BY id DESC").fetchall()
+    drafts = db.execute("SELECT headline, subtext, btn_text, img_data FROM saved_banners WHERE img_data != '' ORDER BY expires_at DESC LIMIT 8").fetchall()
+    cards = ""
+    for c in camps:
+        cid, hl, sub, btn, url = c
+        cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px solid #38bdf8;margin-top:10px;"><small style="color:#38bdf8;">LIVE CAMPAIGN #{cid}</small><h4 style="margin:6px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 10px 0;">{sub}</p><a href="{url}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
+    for d in drafts:
+        hl, sub, btn, img = d
+        cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px dashed #a855f7;margin-top:10px;"><img src="{img}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;"><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0;">{sub}</p></div>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}</style></head>
+    <body>{render_nav("Ad Creative Gallery", "Home / Gallery")}
+    <div class="box"><h2>Ad Creative &amp; Visual Gallery</h2><p style="font-size:13px;margin-top:0;">Showcase of active sponsored banners and attached visual creatives across our network:</p>{cards}</div>{FOOTER}</body></html>"""
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT default_wallet, cpc_rate FROM settings WHERE id=1").fetchone()
+    wal, rate = row if row else ("9703544008", 2.50)
+    db_st = "Connected (Cloud PostgreSQL)" if db.is_pg else "Local SQLite"
+    tg_st = "Active (@WorldwideAdCenterNotificationBot)" if TELEGRAM_BOT_TOKEN else "Not Configured"
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid #334155;font-size:12px}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#22c55e;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
+    <body>{render_nav("Network Settings", "Home / Settings")}
+    <div class="box"><h2>System Status &amp; Diagnostics</h2>
+    <div class="row"><b>Database Storage:</b> <span style="color:#22c55e;">{db_st}</span></div>
+    <div class="row"><b>Telegram Alert Bot:</b> <span style="color:#38bdf8;">{tg_st}</span></div>
+    <div class="row"><b>Admin Security:</b> PIN Protected (Manage via Render <code>ADMIN_PIN</code>)</div></div>
+
+    <div class="box"><h3>Payout &amp; Rate Configuration</h3>
+    <label style="font-size:12px;">Default eSewa Wallet Number:</label><input id="wal" value="{wal}">
+    <label style="font-size:12px;">Standard CPC Rate (NPR per Click):</label><input id="rt" type="number" step="0.1" value="{rate}">
+    <input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
+    <button class="btn" onclick="saveSet()">SAVE NETWORK SETTINGS</button>
+    <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+    <script>async function saveSet(){{const r=await fetch('/api/v1/save-settings',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{default_wallet:document.getElementById('wal').value,cpc_rate:parseFloat(document.getElementById('rt').value),pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
+
+@app.post("/api/v1/save-settings")
+async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
+    if req.pin != ADMIN_PIN:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN.")
+    db.execute("UPDATE settings SET default_wallet=?, cpc_rate=? WHERE id=1", (req.default_wallet, req.cpc_rate))
+    db.commit()
+    return {"message": "Network settings saved to Cloud PostgreSQL!"}
 
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_portal(db: DBWrapper = Depends(get_db)):
