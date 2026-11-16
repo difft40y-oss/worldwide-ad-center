@@ -92,8 +92,8 @@ def render_nav(title: str, subpath: str) -> str:
                 <a href="/faq" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
                 <a href="/about" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
                 <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
-                <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
                 <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
+                <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
                 <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
                 <a href="javascript:void(0)" onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="display:block;padding:11px 14px;background:#ffffff;color:#000000;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Exit</a>
             </div>
@@ -104,8 +104,6 @@ def render_nav(title: str, subpath: str) -> str:
         <a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Tenders &amp; Bids</a>
         <a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">For Agencies</a>
         <a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Advertise</a>
-        <a href="/gallery" style="background:#a855f7;color:#fff;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Gallery</a>
-        <a href="/settings" style="background:#475569;color:#fff;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Settings</a>
     </div>
     <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Section: <b style="color:#fff;">{title}</b></div>
 </div>"""
