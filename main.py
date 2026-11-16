@@ -86,7 +86,7 @@ def render_nav(title: str, subpath: str) -> str:
                 </svg>
                 <span style="font-weight:900;font-size:16px;color:#ffffff;letter-spacing:1.2px;">WAC</span>
             </span>
-            <div><div style="font-weight:bold;font-size:14px;line-height:1.1;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath} <span id="urlParam" style="color:#94a3b8;font-family:monospace;"></span></div><script>document.getElementById("urlParam").innerText="("+window.location.pathname+window.location.search+")";</script></div>
+            <div><div style="font-weight:bold;font-size:14px;line-height:1.1;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath} <span id="urlParam" style="color:#94a3b8;font-family:monospace;word-break:break-all;font-size:10px;"></span></div><script>document.getElementById("urlParam").innerText="("+window.location.href+")";</script></div>
         </a>
         <div style="position:relative;">
             <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
