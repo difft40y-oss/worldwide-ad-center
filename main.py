@@ -52,9 +52,13 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS payouts (payout_id TEXT PRIMARY KEY, wallet_phone TEXT, amount_npr REAL, status TEXT, created_at TEXT);")
     db.execute("CREATE TABLE IF NOT EXISTS saved_banners (draft_id TEXT PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, img_data TEXT, expires_at INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, province TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
-    db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL);")
+    db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL, qr_img TEXT);")
+    try:
+        db.execute("ALTER TABLE settings ADD COLUMN qr_img TEXT;")
+    except Exception:
+        pass
     if not db.execute("SELECT id FROM settings WHERE id=1").fetchone():
-        db.execute("INSERT INTO settings (id, default_wallet, cpc_rate) VALUES (1, '9717831225', 2.50);")
+        db.execute("INSERT INTO settings (id, default_wallet, cpc_rate, qr_img) VALUES (1, '9717831225', 2.50, '');")
     db.execute("UPDATE settings SET default_wallet='9717831225' WHERE default_wallet='9703544008';")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     if not db.execute("SELECT id FROM ad_campaigns WHERE id=1").fetchone():
@@ -143,7 +147,7 @@ async def campaigns_page(db: DBWrapper = Depends(get_db)):
     items = "".join([f"<div style='background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border:1px solid #334155;'><b>#{r}: {r}</b><br><span style='font-size:12px;color:#cbd5e1'>{r}</span><br><small style='color:#38bdf8'>{r}</small></div>" for r in rows])
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#ec4899;color:#fff;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
     <body>{render_nav("Manage & Rotate Campaigns", "Home / Campaigns")}<div class="box"><h2>Add New Rotating Ad Campaign</h2>
-    <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
+    <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><label style="font-size:12px;">Upload Official eSewa QR Screenshot (Optional, Max 500KB):</label><input type="file" accept="image/*" onchange="readQr(this)" style="font-size:12px;"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
     <button class="btn" onclick="addC()">ADD TO ROTATION</button><p id="res" style="color:#22c55e"></p></div>
     <div class="box"><h3>Active Rotating Ads ({len(rows)})</h3>{items}</div>{FOOTER}
     <script>async function addC(){{const r=await fetch('/api/v1/add-campaign',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
@@ -248,6 +252,7 @@ class TenderReq(BaseModel):
 class SettingsReq(BaseModel):
     default_wallet: str
     cpc_rate: float
+    qr_img: str = ""
     pin: str
 
 @app.get("/gallery", response_class=HTMLResponse)
@@ -281,16 +286,20 @@ async def settings_page(db: DBWrapper = Depends(get_db)):
     <div class="box"><h3>Payout &amp; Rate Configuration</h3>
     <label style="font-size:12px;">Default eSewa Wallet Number:</label><input id="wal" value="{wal}">
     <label style="font-size:12px;">Standard CPC Rate (NPR per Click):</label><input id="rt" type="number" step="0.1" value="{rate}">
-    <input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
+    <label style="font-size:12px;">Upload Official eSewa QR Screenshot (Optional, Max 500KB):</label><input type="file" accept="image/*" onchange="readQr(this)" style="font-size:12px;"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
     <button class="btn" onclick="saveSet()">SAVE NETWORK SETTINGS</button>
     <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function saveSet(){{const r=await fetch('/api/v1/save-settings',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{default_wallet:document.getElementById('wal').value,cpc_rate:parseFloat(document.getElementById('rt').value),pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
+    <script>let qrData="";function readQr(i){{const f=i.files.item(0);if(!f)return;if(f.size>520000){{alert('Max 500KB');return}}const r=new FileReader();r.onload=e=>{{qrData=e.target.result;}};r.readAsDataURL(f)}}
+    async function saveSet(){{const r=await fetch('/api/v1/save-settings',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{default_wallet:document.getElementById('wal').value,cpc_rate:parseFloat(document.getElementById('rt').value),qr_img:qrData,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
 
 @app.post("/api/v1/save-settings")
 async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
     if req.pin != ADMIN_PIN:
         raise HTTPException(status_code=403, detail="Invalid Admin PIN.")
-    db.execute("UPDATE settings SET default_wallet=?, cpc_rate=? WHERE id=1", (req.default_wallet, req.cpc_rate))
+    if req.qr_img:
+        db.execute("UPDATE settings SET default_wallet=?, cpc_rate=?, qr_img=? WHERE id=1", (req.default_wallet, req.cpc_rate, req.qr_img))
+    else:
+        db.execute("UPDATE settings SET default_wallet=?, cpc_rate=? WHERE id=1", (req.default_wallet, req.cpc_rate))
     db.commit()
     return {"message": "Network settings saved to Cloud PostgreSQL!"}
 
@@ -392,7 +401,12 @@ async def agency_fast_track(req: AgencyReq):
     return {"message": "Fast-track request received! Our Agency Desk has been alerted via Telegram."}
 
 @app.get("/about", response_class=HTMLResponse)
-async def about_page():
+async def about_page(db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
+    wal = row.__getitem__(0) if row else "9717831225"
+    qimg = row.__getitem__(1) if (row and len(row) > 1 and row.__getitem__(1)) else ""
+    qr_payload = urllib.parse.quote(f'{{"eSewa_id":"{wal}","name":"Worldwide Ad Center"}}')
+    qr_src = qimg if qimg else f"https://qrserver.com{qr_payload}"
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #334155;font-size:13px}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:12px}}</style></head>
     <body>{render_nav("About & Contact Support", "Home / About Us")}
     <div class="box"><h2>About Worldwide Ad Center</h2>
@@ -406,6 +420,15 @@ async def about_page():
     <div class="row"><b>Direct Phone / WhatsApp (eSewa):</b> +977-9717831225</div>
     <div class="row"><b>Payout Settlement Gateway:</b> eSewa Verified Merchant Support (Nepal)</div>
     <div class="row"><b>Operating Region:</b> Gandaki Province, Nepal &bull; Serving Global Web Traffic</div>
+    <div style="background:#0f172a;padding:16px;border-radius:10px;text-align:center;border:1px solid #22c55e;margin:14px 0;">
+        <span style="background:#22c55e;color:#0f172a;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:bold;">INSTANT ESEWA PAYMENT QR</span>
+        <div style="background:#ffffff;padding:10px;border-radius:10px;display:inline-block;margin:12px auto;">
+            <img src="{qr_src}" alt="eSewa QR" style="width:170px;height:170px;display:block;">
+        </div>
+        <div style="font-size:13px;color:#fff;font-weight:bold;">eSewa ID: {wal}</div>
+        <p style="font-size:11px;color:#94a3b8;margin:4px 0 10px 0;">Scan via eSewa App or copy ID to deposit campaign funds</p>
+        <button onclick="navigator.clipboard.writeText('{wal}');this.innerText='Copied: {wal}';" style="background:#22c55e;color:#0f172a;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;">Copy eSewa ID ({wal})</button>
+    </div>
     <a href="https://t.me" target="_blank" class="btn">MESSAGE US ON TELEGRAM</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;">SUBMIT AN AD CAMPAIGN</a></div>
     {FOOTER}</body></html>"""
