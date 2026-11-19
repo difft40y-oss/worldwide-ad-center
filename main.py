@@ -107,6 +107,8 @@ def render_nav(title: str, subpath: str) -> str:
                 <a href="/about" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
                 <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
                 <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
+                <a href="/directory" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127760; Universal Live Directory</a>
+                <a href="/verify-badge" style="display:block;padding:10px 14px;color:#14b8a6;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
                 <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
                 <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
                 <a href="javascript:void(0)" onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="display:block;padding:11px 14px;background:#ffffff;color:#000000;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Exit</a>
@@ -133,7 +135,25 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     db_mode = "Cloud PostgreSQL (Permanent)" if db.is_pg else f"Local SQLite ({db.err or 'No DATABASE_URL'})"
     return f"""<!DOCTYPE html><html><head><title>Worldwide Ad Center</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
-    <body>{render_nav("Main Control Hub", "Home / Dashboard")}<div class="card" style="padding:10px 14px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p></div>
+    <body>{render_nav("Main Control Hub", "Home / Dashboard")}<div class="card" style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p>
+        <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:#94a3b8;">Currency:</span>
+            <button onclick="setCur('NPR',1)" style="background:#38bdf8;color:#0f172a;border:none;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">NPR</button>
+            <button onclick="setCur('USD',0.0074)" style="background:#0f172a;color:#cbd5e1;border:1px solid #475569;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">USD</button>
+            <button onclick="setCur('INR',0.625)" style="background:#0f172a;color:#cbd5e1;border:1px solid #475569;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">INR</button>
+            <button onclick="setCur('EUR',0.0068)" style="background:#0f172a;color:#cbd5e1;border:1px solid #475569;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">EUR</button>
+        </div>
+    </div>
+    <script>
+    const baseNpr = {balance};
+    function setCur(sym, rate){{
+        const val = (baseNpr * rate).toFixed(sym==='NPR'?2:4);
+        const cpc = (2.50 * rate).toFixed(sym==='NPR'?2:4);
+        document.getElementById('balVal').innerText = val + ' ' + sym;
+        document.getElementById('cpcNote').innerText = 'Standard Rate: ' + cpc + ' ' + sym + ' / Click';
+    }}
+    </script>
     <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div class="val">{earn} NPR</div></div></div>
     <a href="/simulate-app" class="btn">1. MOBILE APP AD SIMULATOR</a>
     <a href="/payout-hub" class="btn" style="background:#f59e0b;">2. ESEWA WITHDRAWAL &amp; HISTORY</a>
@@ -267,6 +287,45 @@ class SettingsReq(BaseModel):
     cpc_rate: float
     qr_img: str = ""
     pin: str
+
+
+@app.get("/directory", response_class=HTMLResponse)
+async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
+    like_q = f"%{q}%"
+    ads = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1 AND (headline LIKE ? OR subtext LIKE ?) ORDER BY id DESC", (like_q, like_q)).fetchall()
+    tnds = db.execute("SELECT tender_id, title, issuer, province, deadline, contact_url FROM tenders WHERE approved=1 AND (title LIKE ? OR issuer LIKE ? OR province LIKE ?) ORDER BY tender_id DESC", (like_q, like_q, like_q)).fetchall()
+
+    ad_html = ""
+    for a in ads:
+        cid, hl, sub, btn, url = a
+        ad_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #14b8a6;"><span style="font-size:10px;color:#14b8a6;font-weight:bold;">SPONSORED CAMPAIGN #{cid}</span><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0;">{sub}</p><a href="{url}" target="_blank" style="background:#14b8a6;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
+
+    tn_html = ""
+    for t in tnds:
+        tid, ttl, iss, prv, ddl, curl = t
+        tn_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #38bdf8;"><span style="font-size:10px;color:#38bdf8;font-weight:bold;">TENDER &bull; {prv} &bull; {tid}</span><h4 style="margin:4px 0;color:#fff;">{ttl}</h4><p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;">{iss} &bull; Deadline: {ddl}</p><a href="{curl}" target="_blank" style="background:#38bdf8;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">Open Notice</a></div>'
+
+    combined = (ad_html + tn_html) or '<p style="color:#94a3b8;font-size:12px;">No matching ads or tenders found.</p>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}</style></head>
+    <body>{render_nav("Universal Live Directory", "Home / Universal Directory")}
+    <div class="box"><h2>Universal Global &amp; Local Directory</h2>
+    <p style="font-size:12px;margin-top:0;">Search live sponsored campaigns, brands, and Nepal construction tenders in one unified index:</p>
+    <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;">Search</button></form>
+    {combined}</div>{FOOTER}</body></html>"""
+
+@app.get("/verify-badge", response_class=HTMLResponse)
+async def verify_badge_page():
+    badge_code = '&lt;a href="https://worldwide-ad-center-1.onrender.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0f172a;color:#fff;border:1px solid #38bdf8;padding:6px 12px;border-radius:8px;font-family:sans-serif;font-size:12px;font-weight:bold;text-decoration:none;"&gt;&#9989; Verified Partner &bull; Worldwide Ad Center&lt;/a&gt;'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}textarea{{width:100%;height:95px;background:#0f172a;color:#38bdf8;border:1px solid #475569;border-radius:8px;padding:10px;font-family:monospace;font-size:11px;box-sizing:border-box}}</style></head>
+    <body>{render_nav("Partner Trust Badge", "Home / Partner Trust Badge")}
+    <div class="box"><h2>Official Partner Verification Badge</h2>
+    <p style="font-size:13px;">Publishers, agencies, and verified contractors can embed this official trust seal on their website to verify membership in the <b>Worldwide Ad Center</b> network:</p>
+    <div style="background:#0f172a;padding:16px;border-radius:10px;text-align:center;border:1px dashed #14b8a6;margin:12px 0;">
+        <a href="https://worldwide-ad-center-1.onrender.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0f172a;color:#fff;border:1px solid #38bdf8;padding:7px 14px;border-radius:8px;font-family:sans-serif;font-size:12px;font-weight:bold;text-decoration:none;">&#9989; Verified Partner &bull; Worldwide Ad Center</a>
+    </div>
+    <label style="font-size:12px;color:#94a3b8;">Copy &amp; Paste HTML Embed Code:</label>
+    <textarea id="bcode" readonly>{badge_code}</textarea>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('bcode').value);this.innerText='Badge HTML Copied!';" style="width:100%;padding:11px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer;">COPY TRUST BADGE CODE</button></div>{FOOTER}</body></html>"""
 
 @app.get("/gallery", response_class=HTMLResponse)
 async def gallery_page(db: DBWrapper = Depends(get_db)):
