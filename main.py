@@ -146,13 +146,24 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
 @app.get("/campaigns", response_class=HTMLResponse)
 async def campaigns_page(db: DBWrapper = Depends(get_db)):
     rows = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns ORDER BY id DESC").fetchall()
-    items = "".join([f"<div style='background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border:1px solid #334155;'><b>#{r}: {r}</b><br><span style='font-size:12px;color:#cbd5e1'>{r}</span><br><small style='color:#38bdf8'>{r}</small></div>" for r in rows])
+    items = ""
+    for r in rows:
+        cid, hl, sub, btn, url = r
+        items += f"<div style='background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #ec4899;'><b style='color:#fff;'>#{cid} &bull; {hl}</b><p style='margin:4px 0;font-size:12px;color:#cbd5e1;'>{sub}</p><small style='color:#38bdf8;'>Button: {btn} &rarr; {url}</small></div>"
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px}}input{{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#ec4899;color:#fff;border:none;border-radius:6px;font-weight:bold;margin-top:10px}}</style></head>
     <body>{render_nav("Manage & Rotate Campaigns", "Home / Campaigns")}<div class="box"><h2>Add New Rotating Ad Campaign</h2>
     <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
     <button class="btn" onclick="addC()">ADD TO ROTATION</button><p id="res" style="color:#22c55e"></p></div>
     <div class="box"><h3>Active Rotating Ads ({len(rows)})</h3>{items}</div>{FOOTER}
     <script>async function addC(){{const r=await fetch('/api/v1/add-campaign',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}}</script></body></html>"""
+
+class CampaignReq(BaseModel):
+    headline: str
+    subtext: str
+    btn_text: str
+    target_url: str
+    img_data: str = ""
+    pin: str = ""
 
 @app.post("/api/v1/add-campaign")
 async def add_campaign(req: CampaignReq, db: DBWrapper = Depends(get_db)):
