@@ -402,7 +402,6 @@ async def agency_fast_track(req: AgencyReq):
     send_telegram_alert(f"🏢 PRIORITY AGENCY INQUIRY!\n• Agency: {req.agency_name}\n• Contact: {req.contact_info}\n• Monthly Budget: {req.monthly_budget}\n• Client Brands: {req.client_count}")
     return {"message": "Fast-track request received! Our Agency Desk has been alerted via Telegram."}
 
-@app.get("/about", response_class=HTMLResponse)
 def make_qr_b64(data_str: str) -> str:
     qr = qrcode.QRCode(box_size=6, border=2)
     qr.add_data(data_str)
@@ -412,6 +411,7 @@ def make_qr_b64(data_str: str) -> str:
     img.save(buf, format="PNG")
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
+@app.get("/about", response_class=HTMLResponse)
 async def about_page(db: DBWrapper = Depends(get_db)):
     row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
     wal = row.__getitem__(0) if row else "9717831225"
