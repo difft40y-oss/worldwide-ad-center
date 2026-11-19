@@ -55,8 +55,9 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL, qr_img TEXT);")
     try:
         db.execute("ALTER TABLE settings ADD COLUMN qr_img TEXT;")
+        db.commit()
     except Exception:
-        pass
+        db.conn.rollback()
     if not db.execute("SELECT id FROM settings WHERE id=1").fetchone():
         db.execute("INSERT INTO settings (id, default_wallet, cpc_rate, qr_img) VALUES (1, '9717831225', 2.50, '');")
     db.execute("UPDATE settings SET default_wallet='9717831225' WHERE default_wallet='9703544008';")
