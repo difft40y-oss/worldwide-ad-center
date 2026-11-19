@@ -1,4 +1,4 @@
-import io, base64, qrcode
+import io, base64, qrcode, qrcode.image.svg
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
@@ -403,13 +403,13 @@ async def agency_fast_track(req: AgencyReq):
     return {"message": "Fast-track request received! Our Agency Desk has been alerted via Telegram."}
 
 def make_qr_b64(data_str: str) -> str:
-    qr = qrcode.QRCode(box_size=6, border=2)
-    qr.add_data(data_str)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    try:
+        img = qrcode.make(data_str, image_factory=qrcode.image.svg.SvgPathImage, box_size=8, border=2)
+        buf = io.BytesIO()
+        img.save(buf)
+        return "data:image/svg+xml;base64," + base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        return ""
 
 @app.get("/about", response_class=HTMLResponse)
 async def about_page(db: DBWrapper = Depends(get_db)):
