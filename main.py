@@ -146,7 +146,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
         </div>
     </div>
     <script>
-    const baseNpr = {balance};
+    const baseNpr = {0};
     function setCur(sym, rate){{
         const val = (baseNpr * rate).toFixed(sym==='NPR'?2:4);
         const cpc = (2.50 * rate).toFixed(sym==='NPR'?2:4);
