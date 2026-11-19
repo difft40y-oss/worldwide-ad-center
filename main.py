@@ -108,6 +108,7 @@ def render_nav(title: str, subpath: str) -> str:
                 <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
                 <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
                 <a href="/directory" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127760; Universal Live Directory</a>
+                <a href="/social-partners" style="display:block;padding:10px 14px;color:#f43f5e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128242; Social Partners (FB/TikTok/IG)</a>
                 <a href="/verify-badge" style="display:block;padding:10px 14px;color:#14b8a6;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
                 <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
                 <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
@@ -288,6 +289,60 @@ class SettingsReq(BaseModel):
     qr_img: str = ""
     pin: str
 
+
+
+@app.get("/go/social")
+async def social_redirect(platform: str = "social", partner: str = "partner", cid: int = 1, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT target_url FROM ad_campaigns WHERE id=?", (cid,)).fetchone()
+    dest = row.__getitem__(0) if row else "https://onrender.com"
+    db.execute("INSERT INTO impressions (ts, source) VALUES (?, ?)", (int(time.time()), f"{platform}:{partner}"))
+    db.execute("INSERT INTO clicks (ts, ip, source) VALUES (?, ?, ?)", (int(time.time()), f"social-{partner}", f"{platform}:{partner}"))
+    db.commit()
+    return HTMLResponse(f'<script>window.location.href="{dest}";</script>')
+
+@app.get("/social-partners", response_class=HTMLResponse)
+async def social_partners_page(db: DBWrapper = Depends(get_db)):
+    camps = db.execute("SELECT id, headline FROM ad_campaigns WHERE active=1 ORDER BY id DESC").fetchall()
+    opts = ""
+    for c in camps:
+        opts += f'<option value="{c.__getitem__(0)}">#{c.__getitem__(0)} - {c.__getitem__(1)}</option>'
+    if not opts:
+        opts = '<option value="1">#1 - Worldwide Ad Center Network</option>'
+
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input,select,textarea{{width:100%;padding:11px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#f43f5e;color:#fff;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer}}.sbtn{{display:inline-block;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:bold;text-decoration:none;margin:4px 4px 0 0}}</style></head>
+    <body>{render_nav("Social & Influencer Partners", "Home / Social Partners")}
+    <div class="box"><span style="background:#f43f5e;color:#fff;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">FACEBOOK &bull; TIKTOK &bull; INSTAGRAM &bull; YOUTUBE</span>
+    <h2 style="margin:8px 0 6px 0;">Social Media Partner Link Generator</h2>
+    <p style="font-size:13px;margin-top:0;">Create a tracked monetization link for your <b>TikTok Bio</b>, <b>Instagram Story</b>, or <b>Facebook Page</b>. Earn <b>2.50 NPR</b> per verified click:</p>
+    <label style="font-size:12px;">Select Social Platform:</label>
+    <select id="plat"><option value="facebook">Facebook Page / Reels</option><option value="tiktok">TikTok Bio / Video</option><option value="instagram">Instagram Bio / Story</option><option value="youtube">YouTube Description</option></select>
+    <label style="font-size:12px;">Your Page Name or @Handle:</label>
+    <input id="hnd" placeholder="e.g. @nepal_tech_hub">
+    <label style="font-size:12px;">Select Campaign to Promote:</label>
+    <select id="cid">{opts}</select>
+    <button class="btn" onclick="genLink()">GENERATE TRACKED SOCIAL LINK</button>
+    <div id="outBox" style="display:none;margin-top:12px;">
+        <label style="font-size:11px;color:#38bdf8;">Your Monetized Partner Link (Paste in Bio or Post):</label>
+        <textarea id="slink" readonly style="height:68px;font-family:monospace;font-size:11px;color:#22c55e;"></textarea>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('slink').value);this.innerText='Link Copied!';" style="width:100%;padding:10px;background:#22c55e;color:#0f172a;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">COPY PARTNER LINK</button>
+    </div></div>
+
+    <div class="box"><h3>Official Network Social Channels &amp; Quick Share</h3>
+    <p style="font-size:12px;margin-top:0;">Share Worldwide Ad Center across associating social platforms to invite advertisers, agencies, and bidders:</p>
+    <a href="https://facebook.com" target="_blank" class="sbtn" style="background:#1877f2;color:#fff;">Share on Facebook</a>
+    <a href="https://whatsapp.com" target="_blank" class="sbtn" style="background:#25d366;color:#0f172a;">Share on WhatsApp</a>
+    <a href="https://t.me" target="_blank" class="sbtn" style="background:#38bdf8;color:#0f172a;">Share on Telegram</a>
+    <button onclick="navigator.clipboard.writeText('https://worldwide-ad-center-1.onrender.com');this.innerText='Bio Link Copied for TikTok/IG!';" class="sbtn" style="background:#e1306c;color:#fff;border:none;cursor:pointer;">Copy Bio Link (TikTok / Instagram)</button>
+    </div>{FOOTER}
+    <script>
+    function genLink(){{
+        const p = document.getElementById('plat').value;
+        const h = encodeURIComponent(document.getElementById('hnd').value || 'partner');
+        const c = document.getElementById('cid').value;
+        document.getElementById('slink').value = window.location.origin + '/go/social?platform=' + p + '&partner=' + h + '&cid=' + c;
+        document.getElementById('outBox').style.display = 'block';
+    }}
+    </script></body></html>"""
 
 @app.get("/directory", response_class=HTMLResponse)
 async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
