@@ -54,7 +54,8 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, province TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL);")
     if not db.execute("SELECT id FROM settings WHERE id=1").fetchone():
-        db.execute("INSERT INTO settings (id, default_wallet, cpc_rate) VALUES (1, '9703544008', 2.50);")
+        db.execute("INSERT INTO settings (id, default_wallet, cpc_rate) VALUES (1, '9717831225', 2.50);")
+    db.execute("UPDATE settings SET default_wallet='9717831225' WHERE default_wallet='9703544008';")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     if not db.execute("SELECT id FROM ad_campaigns WHERE id=1").fetchone():
         db.execute("INSERT INTO ad_campaigns (id, headline, subtext, btn_text, target_url, active) VALUES (1, 'Worldwide Ad Center Network', 'Monetize your website traffic with instant eSewa payouts.', 'Join Now', 'https://worldwide-ad-center-1.onrender.com', 1);")
@@ -267,7 +268,7 @@ async def gallery_page(db: DBWrapper = Depends(get_db)):
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(db: DBWrapper = Depends(get_db)):
     row = db.execute("SELECT default_wallet, cpc_rate FROM settings WHERE id=1").fetchone()
-    wal, rate = row if row else ("9703544008", 2.50)
+    wal, rate = row if row else ("9717831225", 2.50)
     db_st = "Connected (Cloud PostgreSQL)" if db.is_pg else "Local SQLite"
     tg_st = "Active (@WorldwideAdCenterNotificationBot)" if TELEGRAM_BOT_TOKEN else "Not Configured"
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid #334155;font-size:12px}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#22c55e;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
@@ -402,6 +403,7 @@ async def about_page():
     <p style="font-size:13px;">Have questions about launching an ad campaign, publisher integration, or eSewa payouts? Reach our network team directly:</p>
     <div class="row"><b>Official Telegram Bot:</b> <a href="https://t.me" target="_blank" style="color:#38bdf8;text-decoration:none;">@WorldwideAdCenterNotificationBot</a></div>
     <div class="row"><b>Support Desk / Inquiries:</b> support@worldwideadcenter.com</div>
+    <div class="row"><b>Direct Phone / WhatsApp (eSewa):</b> +977-9717831225</div>
     <div class="row"><b>Payout Settlement Gateway:</b> eSewa Verified Merchant Support (Nepal)</div>
     <div class="row"><b>Operating Region:</b> Gandaki Province, Nepal &bull; Serving Global Web Traffic</div>
     <a href="https://t.me" target="_blank" class="btn">MESSAGE US ON TELEGRAM</a>
