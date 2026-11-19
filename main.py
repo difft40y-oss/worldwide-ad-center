@@ -416,7 +416,7 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     <div class="box"><h3>Contact &amp; Advertiser Support</h3>
     <p style="font-size:13px;">Have questions about launching an ad campaign, publisher integration, or eSewa payouts? Reach our network team directly:</p>
     <div class="row"><b>Official Telegram Bot:</b> <a href="https://t.me" target="_blank" style="color:#38bdf8;text-decoration:none;">@WorldwideAdCenterNotificationBot</a></div>
-    <div class="row"><b>Support Desk / Inquiries:</b> <a href="mailto:difft40y@gmail.com" style="color:#38bdf8;text-decoration:none;">difft40y@gmail.com</a></div>
+    <div class="row"><b>Support Desk / Inquiries:</b> <a href='mailto:difft40y@gmail.com' style='color:#38bdf8;text-decoration:none;'>difft40y@gmail.com</a></div>
     <div class="row"><b>Direct Phone / WhatsApp (eSewa):</b> +977-9717831225</div>
     <div class="row"><b>Payout Settlement Gateway:</b> eSewa Verified Merchant Support (Nepal)</div>
     <div class="row"><b>Operating Region:</b> Gandaki Province, Nepal &bull; Serving Global Web Traffic</div>
