@@ -406,8 +406,7 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
     wal = row.__getitem__(0) if row else "9717831225"
     qimg = row.__getitem__(1) if (row and len(row) > 1 and row.__getitem__(1)) else ""
-    qr_payload = urllib.parse.quote(f'{{"eSewa_id":"{wal}","name":"Worldwide Ad Center"}}')
-    qr_src = qimg if qimg else f"https://qrserver.com{qr_payload}"
+    qr_json = f'{{"eSewa_id":"{wal}","name":"Worldwide Ad Center"}}' 
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.row{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #334155;font-size:13px}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:12px}}</style></head>
     <body>{render_nav("About & Contact Support", "Home / About Us")}
     <div class="box"><h2>About Worldwide Ad Center</h2>
@@ -423,9 +422,11 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     <div class="row"><b>Operating Region:</b> Gandaki Province, Nepal &bull; Serving Global Web Traffic</div>
     <div style="background:#0f172a;padding:16px;border-radius:10px;text-align:center;border:1px solid #22c55e;margin:14px 0;">
         <span style="background:#22c55e;color:#0f172a;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:bold;">INSTANT ESEWA PAYMENT QR</span>
-        <div style="background:#ffffff;padding:10px;border-radius:10px;display:inline-block;margin:12px auto;">
-            <img src="{qr_src}" alt="eSewa QR" style="width:170px;height:170px;display:block;">
+        <div id="qrBox" style="background:#ffffff;padding:12px;border-radius:10px;display:inline-block;margin:12px auto;">
+            {f'<img src="{qimg}" alt="eSewa QR" style="width:170px;height:170px;display:block;">' if qimg else '<div id="localQr"></div>'}
         </div>
+        <script src="https://cloudflare.com"></script>
+        <script>if(document.getElementById("localQr")){{new QRCode(document.getElementById("localQr"),{{text:'{qr_json}',width:165,height:165,colorDark:"#000000",colorLight:"#ffffff"}});}}</script>
         <div style="font-size:13px;color:#fff;font-weight:bold;">eSewa ID: {wal}</div>
         <p style="font-size:11px;color:#94a3b8;margin:4px 0 10px 0;">Scan via eSewa App or copy ID to deposit campaign funds</p>
         <button onclick="navigator.clipboard.writeText('{wal}');this.innerText='Copied: {wal}';" style="background:#22c55e;color:#0f172a;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;">Copy eSewa ID ({wal})</button>
