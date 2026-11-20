@@ -1,4 +1,4 @@
-from deep_translator import GoogleTranslator
+from deep_translator import MyMemoryTranslator
 import io, base64, qrcode, qrcode.image.svg
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import HTMLResponse, Response
@@ -145,11 +145,12 @@ def render_nav(title: str, subpath: str) -> str:
         es: "← Volver / Salir (Back / Exit)"
     }};
     const fullDict = {{"zh": {{"WORLDWIDE AD CENTER": "全球广告中心", "Home": "首页", "Tenders & Bids": "招标与投标", "For Agencies": "广告代理商", "Advertise": "投放广告", "Main Control Hub": "主控制中心", "IMPRESSIONS": "展示次数", "LOCKED CLICKS": "锁定点击", "CTR %": "点击率", "AVAILABLE": "可用余额", "1. MOBILE APP AD SIMULATOR": "1. 移动应用广告模拟器", "2. ESEWA WITHDRAWAL & HISTORY": "2. eSewa 提现与记录", "3. GET WEBSITE AD TAG (<script>)": "3. 获取网站广告代码", "4. MANAGE & ROTATE AD CAMPAIGNS": "4. 管理与轮播广告", "5. ADVERTISE WITH US (SUBMIT AD)": "5. 投放广告 (提交广告)", "6. CONSTRUCTION & BIDDER NOTICES": "6. 建设与招标公告", "7. SEND TELEGRAM HEALTH REPORT": "7. 发送电报健康报告", "Main Dashboard Hub": "主控制中心", "Beginner Guide & Rules": "新手指南与规则", "Invoice, Receipt & Tax PDF": "发票、收据与税务 PDF", "Complaints & Suggestions": "投诉与建议", "Mobile App Simulator": "移动应用模拟器", "Deposit Ad Credits (eSewa)": "充值广告余额 (eSewa)", "eSewa Payouts & History": "eSewa 提现与记录", "Website Ad Tag (<script>)": "网站广告代码 (<script>)", "Rotating Ad Campaigns": "轮播广告活动", "FAQ & Ad Topics": "常见问题与广告主题", "About & Contact": "关于与联系我们", "Privacy Policy": "隐私政策", "Terms of Service": "服务条款", "Social Partners (FB/TikTok/IG)": "社交合作伙伴 (FB/TikTok/IG)", "Universal Live Directory": "全球实时目录", "Partner Trust Badge": "合作伙伴信任徽章", "Ad Creative Gallery": "广告创意画廊", "Settings": "系统设置"}}, "ja": {{"WORLDWIDE AD CENTER": "ワールドワイド広告センター", "Home": "ホーム", "Tenders & Bids": "入札・建設公告", "For Agencies": "代理店向け", "Advertise": "広告掲載", "Main Control Hub": "メイン管理ハブ", "IMPRESSIONS": "表示回数", "LOCKED CLICKS": "確定クリック", "CTR %": "クリック率", "AVAILABLE": "利用可能残高", "1. MOBILE APP AD SIMULATOR": "1. モバイル広告シミュレーター", "2. ESEWA WITHDRAWAL & HISTORY": "2. eSewa 出金と履歴", "3. GET WEBSITE AD TAG (<script>)": "3. ウェブサイト広告タグ取得", "4. MANAGE & ROTATE AD CAMPAIGNS": "4. 広告キャンペーン管理", "5. ADVERTISE WITH US (SUBMIT AD)": "5. 広告を掲載する", "6. CONSTRUCTION & BIDDER NOTICES": "6. 建設・入札公告", "7. SEND TELEGRAM HEALTH REPORT": "7. Telegram レポート送信", "Main Dashboard Hub": "メイン管理ハブ", "Beginner Guide & Rules": "初心者ガイドと規約", "Invoice, Receipt & Tax PDF": "請求書・領収書・税務 PDF", "Complaints & Suggestions": "ご意見・ご要望", "Mobile App Simulator": "モバイル広告シミュレーター", "Deposit Ad Credits (eSewa)": "広告クレジット入金 (eSewa)", "eSewa Payouts & History": "eSewa 出金と履歴", "Website Ad Tag (<script>)": "ウェブサイト広告タグ", "Rotating Ad Campaigns": "ローテーション広告管理", "FAQ & Ad Topics": "よくある質問と広告トピック", "About & Contact": "会社概要・お問い合わせ", "Privacy Policy": "プライバシーポリシー", "Terms of Service": "利用規約", "Social Partners (FB/TikTok/IG)": "SNSパートナー (FB/TikTok/IG)", "Universal Live Directory": "グローバルライブディレクトリ", "Partner Trust Badge": "パートナー信頼バッジ", "Ad Creative Gallery": "広告クリエイティブギャラリー", "Settings": "システム設定"}}, "ko": {{"WORLDWIDE AD CENTER": "월드와이드 광고 센터", "Home": "홈", "Tenders & Bids": "입찰 및 공고", "For Agencies": "에이전시", "Advertise": "광고 등록", "Main Control Hub": "메인 제어 허브", "IMPRESSIONS": "노출수", "LOCKED CLICKS": "확정 클릭", "CTR %": "클릭률", "AVAILABLE": "사용 가능 잔액", "1. MOBILE APP AD SIMULATOR": "1. 모바일 앱 광고 시뮬레이터", "2. ESEWA WITHDRAWAL & HISTORY": "2. eSewa 출금 및 내역", "3. GET WEBSITE AD TAG (<script>)": "3. 웹사이트 광고 태그 받기", "4. MANAGE & ROTATE AD CAMPAIGNS": "4. 광고 캠페인 관리", "5. ADVERTISE WITH US (SUBMIT AD)": "5. 광고 신청하기", "6. CONSTRUCTION & BIDDER NOTICES": "6. 건설 및 입찰 공고", "7. SEND TELEGRAM HEALTH REPORT": "7. 텔레그램 상태 보고", "Main Dashboard Hub": "메인 제어 허브", "Beginner Guide & Rules": "초보자 가이드 및 규칙", "Invoice, Receipt & Tax PDF": "청구서, 영수증 및 세무 PDF", "Complaints & Suggestions": "불만 및 건의사항", "Mobile App Simulator": "모바일 앱 시뮬레이터", "Deposit Ad Credits (eSewa)": "광고 크레딧 충전 (eSewa)", "eSewa Payouts & History": "eSewa 출금 및 내역", "Website Ad Tag (<script>)": "웹사이트 광고 태그", "Rotating Ad Campaigns": "순환 광고 캠페인", "FAQ & Ad Topics": "자주 묻는 질문 및 광고 주제", "About & Contact": "소개 및 문의하기", "Privacy Policy": "개인정보 처리방침", "Terms of Service": "이용약관", "Social Partners (FB/TikTok/IG)": "소셜 파트너 (FB/TikTok/IG)", "Universal Live Directory": "글로벌 실시간 디렉토리", "Partner Trust Badge": "파트너 신뢰 배지", "Ad Creative Gallery": "광고 크리에이티브 갤러리", "Settings": "시스템 설정"}}, "hi": {{"WORLDWIDE AD CENTER": "वर्ल्डवाइड एड सेंटर", "Home": "होम", "Tenders & Bids": "टेंडर और निविदा", "For Agencies": "एजेंसी पोर्टल", "Advertise": "विज्ञापन दें", "Main Control Hub": "मुख्य नियंत्रण केंद्र", "IMPRESSIONS": "इंप्रेशन", "LOCKED CLICKS": "सत्यापित क्लिक", "CTR %": "सीटीआर %", "AVAILABLE": "उपलब्ध शेष", "1. MOBILE APP AD SIMULATOR": "1. मोबाइल ऐप विज्ञापन सिम्युलेटर", "2. ESEWA WITHDRAWAL & HISTORY": "2. eSewa निकासी और इतिहास", "3. GET WEBSITE AD TAG (<script>)": "3. वेबसाइट विज्ञापन टैग प्राप्त करें", "4. MANAGE & ROTATE AD CAMPAIGNS": "4. विज्ञापन अभियान प्रबंधित करें", "5. ADVERTISE WITH US (SUBMIT AD)": "5. हमारे साथ विज्ञापन दें", "6. CONSTRUCTION & BIDDER NOTICES": "6. निर्माण और निविदा सूचनाएं", "7. SEND TELEGRAM HEALTH REPORT": "7. टेलीग्राम रिपोर्ट भेजें", "Main Dashboard Hub": "मुख्य नियंत्रण केंद्र", "Beginner Guide & Rules": "शुरुआती गाइड और नियम", "Invoice, Receipt & Tax PDF": "चालान, रसीद और कर PDF", "Complaints & Suggestions": "शिकायतें और सुझाव", "Mobile App Simulator": "मोबाइल ऐप सिम्युलेटर", "Deposit Ad Credits (eSewa)": "विज्ञापन क्रेडिट जमा करें (eSewa)", "eSewa Payouts & History": "eSewa निकासी और इतिहास", "Website Ad Tag (<script>)": "वेबसाइट विज्ञापन टैग", "Rotating Ad Campaigns": "रोटेटिंग विज्ञापन अभियान", "FAQ & Ad Topics": "सामान्य प्रश्न और विज्ञापन विषय", "About & Contact": "हमारे बारे में और संपर्क", "Privacy Policy": "गोपनीयता नीति", "Terms of Service": "सेवा की शर्तें", "Social Partners (FB/TikTok/IG)": "सोशल पार्टनर्स (FB/TikTok/IG)", "Universal Live Directory": "यूनिवर्सल लाइव डायरेक्टरी", "Partner Trust Badge": "पार्टनर ट्रस्ट बैज", "Ad Creative Gallery": "विज्ञापन क्रिएटिव गैलरी", "Settings": "सिस्टम सेटिंग्स"}}, "es": {{"WORLDWIDE AD CENTER": "CENTRO MUNDIAL DE ANUNCIOS", "Home": "Inicio", "Tenders & Bids": "Licitaciones", "For Agencies": "Agencias", "Advertise": "Anunciar", "Main Control Hub": "Panel Principal", "IMPRESSIONS": "IMPRESIONES", "LOCKED CLICKS": "CLICS VERIFICADOS", "CTR %": "CTR %", "AVAILABLE": "DISPONIBLE", "1. MOBILE APP AD SIMULATOR": "1. SIMULADOR DE ANUNCIOS MÓVILES", "2. ESEWA WITHDRAWAL & HISTORY": "2. RETIRO E HISTORIAL ESEWA", "3. GET WEBSITE AD TAG (<script>)": "3. OBTENER ETIQUETA DE ANUNCIO", "4. MANAGE & ROTATE AD CAMPAIGNS": "4. GESTIONAR CAMPAÑAS", "5. ADVERTISE WITH US (SUBMIT AD)": "5. ANÚNCIATE CON NOSOTROS", "6. CONSTRUCTION & BIDDER NOTICES": "6. AVISOS DE CONSTRUCCIÓN", "7. SEND TELEGRAM HEALTH REPORT": "7. ENVIAR INFORME TELEGRAM", "Main Dashboard Hub": "Panel Principal", "Beginner Guide & Rules": "Guía para Principiantes y Reglas", "Invoice, Receipt & Tax PDF": "Factura, Recibo e Impuestos PDF", "Complaints & Suggestions": "Quejas y Sugerencias", "Mobile App Simulator": "Simulador de App Móvil", "Deposit Ad Credits (eSewa)": "Depositar Créditos (eSewa)", "eSewa Payouts & History": "Retiros e Historial eSewa", "Website Ad Tag (<script>)": "Etiqueta de Anuncio Web", "Rotating Ad Campaigns": "Campañas Rotativas", "FAQ & Ad Topics": "Preguntas Frecuentes", "About & Contact": "Acerca de y Contacto", "Privacy Policy": "Política de Privacidad", "Terms of Service": "Términos de Servicio", "Social Partners (FB/TikTok/IG)": "Socios Sociales (FB/TikTok/IG)", "Universal Live Directory": "Directorio Global en Vivo", "Partner Trust Badge": "Insignia de Socio Verificado", "Ad Creative Gallery": "Galería Creativa de Anuncios", "Settings": "Configuración"}}}};
-    function applyLang(l){{
+    async function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
         const m = fullDict.hasOwnProperty(l)?fullDict[l]:{{}};
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        const todo = [];
         let node;
         while((node = walker.nextNode())){{
             const p = node.parentElement;
@@ -162,7 +163,25 @@ def render_nav(title: str, subpath: str) -> str:
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
             else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else{{node.nodeValue = raw;}}
+            else if(t.length > 2 && !t.startsWith('http') && !/^[0-9.,%+$\s-]+$/.test(t)){{
+                const ck = 'mm_' + l + '_' + t;
+                const c = localStorage.getItem(ck);
+                if(c){{node.nodeValue = raw.replace(t, c);}}
+                else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
+            }}
+        }}
+        for(let i=0; i<todo.length; i+=15){{
+            const chunk = todo.slice(i, i+15);
+            try{{
+                const res = await fetch('/api/v1/translate-batch', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{tl:l,texts:chunk.map(x=>x.t)}})}});
+                const data = await res.json();
+                if(data.items){{
+                    chunk.forEach((item, idx)=>{{
+                        const tr = data.items.at(idx);
+                        if(tr && tr !== item.t){{localStorage.setItem(item.ck, tr);item.node.nodeValue = item.raw.replace(item.t, tr);}}
+                    }});
+                }}
+            }}catch(e){{}}
         }}
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
@@ -407,12 +426,17 @@ async def translate_batch(payload: dict):
     texts = payload.get("texts", [])
     if tl == "en" or not texts:
         return {"items": texts}
+    lang_map = {"zh": "zh-CN", "zh-CN": "zh-CN", "ja": "ja-JP", "ko": "ko-KR", "hi": "hi-IN", "es": "es-ES"}
+    target_code = lang_map.get(tl, tl)
+    out = []
     try:
-        tr = GoogleTranslator(source="en", target=tl)
-        out = [tr.translate(t) if t.strip() else t for t in texts]
-        return {"items": out}
+        tr = MyMemoryTranslator(source="en-US", target=target_code)
+        for t in texts:
+            s = t.strip()
+            out.append(tr.translate(s) if len(s) > 1 else t)
     except Exception:
-        return {"items": texts}
+        out = texts
+    return {"items": out}
 
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
