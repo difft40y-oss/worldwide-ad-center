@@ -582,7 +582,6 @@ def make_qr_b64(data_str: str) -> str:
     except Exception:
         return ""
 
-@app.get("/about", response_class=HTMLResponse)
 def get_live_proof(db: DBWrapper) -> str:
     imp_c = db.execute("SELECT COUNT(*) FROM impressions").fetchone().__getitem__(0)
     clk_c = db.execute("SELECT COUNT(*) FROM clicks").fetchone().__getitem__(0)
@@ -590,6 +589,7 @@ def get_live_proof(db: DBWrapper) -> str:
     tnd_c = db.execute("SELECT COUNT(*) FROM tenders WHERE approved=1").fetchone().__getitem__(0)
     return f'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0;"><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #38bdf8;"><div style="font-size:18px;font-weight:bold;color:#38bdf8;">{imp_c:,}</div><small style="color:#94a3b8;font-size:10px;">VERIFIED IMPRESSIONS</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #22c55e;"><div style="font-size:18px;font-weight:bold;color:#22c55e;">{clk_c:,}</div><small style="color:#94a3b8;font-size:10px;">HUMAN CLICKS (GUARDED)</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #ec4899;"><div style="font-size:18px;font-weight:bold;color:#ec4899;">{cmp_c}</div><small style="color:#94a3b8;font-size:10px;">ACTIVE AD CAMPAIGNS</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #f59e0b;"><div style="font-size:18px;font-weight:bold;color:#f59e0b;">{tnd_c}</div><small style="color:#94a3b8;font-size:10px;">LIVE NEPAL TENDERS</small></div></div>'
 
+@app.get("/about", response_class=HTMLResponse)
 async def about_page(db: DBWrapper = Depends(get_db)):
     proof_html = get_live_proof(db)
     row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
