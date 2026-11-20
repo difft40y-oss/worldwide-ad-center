@@ -426,16 +426,18 @@ def _tr_one(target_code: str, txt: str) -> str:
     s = txt.strip()
     if len(s) < 2:
         return txt
-    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
-    try:
-        u = f"https://googleapis.com{tl}&dt=t&q={urllib.parse.quote(s[:450])}"
-        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-        raw = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-        res = json.loads(raw)
-        if isinstance(res, list) and len(res) > 0 and isinstance(res.__getitem__(0), list):
-            return "".join([seg.__getitem__(0) for seg in res.__getitem__(0) if seg and seg.__getitem__(0)]) or txt
-    except Exception:
-        pass
+    tl = "zh" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
+    q = urllib.parse.quote(s[:450], safe="")
+    for host in ("https://garudalinux.org", "https://lingva.ml", "https://lunar.icu"):
+        try:
+            u = f"{host}/api/v1/en/{tl}/{q}"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+            raw = urllib.request.urlopen(req, timeout=4).read().decode("utf-8")
+            res = json.loads(raw)
+            if isinstance(res, dict) and res.get("translation"):
+                return res.get("translation")
+        except Exception:
+            continue
     return txt
 
 @app.post("/api/v1/translate-batch")
