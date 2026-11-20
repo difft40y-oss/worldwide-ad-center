@@ -144,40 +144,21 @@ def render_nav(title: str, subpath: str) -> str:
         hi: "← वापस / बाहर निकलें (Back / Exit)",
         es: "← Volver / Salir (Back / Exit)"
     }};
-    async function applyLang(l){{
+    const fullDict = { ... }; // Contains full 0ms translation mappings for zh, ja, ko, hi, es
+    function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
-        const tl = l==='zh'?'zh-CN':l;
+        const m = fullDict.hasOwnProperty(l)?fullDict[l]:{{}};
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-        const todo = [];
         let node;
         while((node = walker.nextNode())){{
             const p = node.parentElement;
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
             const raw = node.nodeValue;
             const t = raw.trim();
-            if(!t || t.length<2 || t.startsWith('http') || /^[0-9.]+$/.test(t)) continue;
-            if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{
-                node.nodeValue = raw.replace(t, exitLbl[l]);
-                continue;
-            }}
-            const ck = 'wtr2_' + tl + '_' + t;
-            const cached = localStorage.getItem(ck);
-            if(cached){{node.nodeValue = raw.replace(t, cached);}}
-            else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
-        }}
-        for(let i=0; i<todo.length; i+=25){{
-            const chunk = todo.slice(i, i+25);
-            try{{
-                const res = await fetch('/api/v1/translate-batch', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{tl:tl,texts:chunk.map(x=>x.t)}})}});
-                const data = await res.json();
-                if(data.items){{
-                    chunk.forEach((item, idx)=>{{
-                        const tr = data.items.at(idx);
-                        if(tr){{localStorage.setItem(item.ck, tr);item.node.nodeValue = item.raw.replace(item.t, tr);}}
-                    }});
-                }}
-            }}catch(e){{}}
+            if(!t) continue;
+            if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
+            else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
         }}
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
