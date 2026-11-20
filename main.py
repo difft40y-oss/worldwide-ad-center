@@ -548,6 +548,15 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     <p><b>Worldwide Ad Center</b> is an independent, performance-driven digital advertising network built to connect businesses directly with quality blogs, news portals, and mobile apps—without middleman fees or invasive tracking cookies.</p>
     <p>Our lightweight <code>&lt;script&gt;</code> tag empowers publishers in Nepal and worldwide to monetize their traffic transparently at <b>2.50 NPR per verified human click</b> with fast mobile wallet settlements.</p></div>
 
+    <div class="box"><h3>Platform Features &amp; Capabilities</h3>
+    <div class="row"><b>&#127760; Multi-Currency &amp; Global Reach:</b> Instant rate conversion across <b>NPR, USD, INR, and EUR</b> paired with a public <b>Universal Live Directory</b> indexing all active campaigns and opportunities.</div>
+    <div class="row"><b>&#128187; Lightweight &lt;script&gt; Ad Engine:</b> Automated multi-banner rotation for websites and blogs with verified <b>2.50 NPR/click</b> tracking and embeddable <b>Partner Trust Badges</b>.</div>
+    <div class="row"><b>&#127959;&#65039; All-Nepal Construction &amp; Bidder Notices:</b> Dedicated procurement board covering <b>all 7 Nepal provinces</b> for IFBs, sealed quotations, and subcontractor calls.</div>
+    <div class="row"><b>&#127970; Agency Partner Program:</b> Volume bonus click tiers (10% Growth &amp; 20% Enterprise), live ROI budget estimator, and priority Telegram onboarding.</div>
+    <div class="row"><b>&#127912; Advertiser Studio &amp; 7-Day Vault:</b> One-tap ad templates, live banner preview, creative image attachment (up to 500 KB), 7-day draft storage, and <b>Ad Creative Gallery</b>.</div>
+    <div class="row"><b>&#128242; Social &amp; Influencer Monetization:</b> Tracked bio and story redirect links for <b>Facebook, TikTok, Instagram, and YouTube</b> creators at 2.50 NPR per verified click.</div>
+    <div class="row"><b>&#128184; Direct eSewa Settlements &amp; PIN Security:</b> Instant eSewa QR deposits, Admin PIN-protected wallet payouts, and real-time Telegram alerts.</div></div>
+
     <div class="box"><h3>Contact &amp; Advertiser Support</h3>
     <p style="font-size:13px;">Have questions about launching an ad campaign, publisher integration, or eSewa payouts? Reach our network team directly:</p>
     <div class="row"><b>Official Telegram Bot:</b> <a href="https://t.me" target="_blank" style="color:#38bdf8;text-decoration:none;">@WorldwideAdCenterNotificationBot</a></div>
