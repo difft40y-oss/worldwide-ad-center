@@ -124,7 +124,12 @@ def render_nav(title: str, subpath: str) -> str:
         <a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">For Agencies</a>
         <a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Advertise</a>
     </div>
-    <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Section: <b style="color:#fff;">{title}</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;">
+        <div style="font-size:12px;color:#94a3b8;">Section: <b style="color:#fff;">{title}</b></div>
+        <div id="google_translate_element" style="font-size:11px;"></div>
+    </div>
+    <script>function googleTranslateElementInit(){{new google.translate.TranslateElement({{pageLanguage:'en',includedLanguages:'en,zh-CN,ja,ko,hi,ne,ar,es,fr,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE}},'google_translate_element');}}</script>
+    <script src="https://google.com"></script>
 </div>"""
 
 FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center. All Rights Reserved. &bull; Gandaki Province, Nepal</span></div>'
@@ -358,12 +363,12 @@ async def submit_feedback(req: FeedbackReq):
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.step{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;font-size:13px}}.btn{{display:block;width:100%;padding:13px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
-    <body>{render_nav("Beginner Guide & Rules", "Home / Guide (नेपाली उपशीर्षक)")}
-    <div class="box"><h2>Step-by-Step Guide (सुरुवाती मार्गदर्शिका)</h2>
-    <div class="step"><b>1. Create Banner:</b> Open <b>Advertise</b>, pick a template, attach image (max 500KB), and save. <i>(विज्ञापन ब्यानर बनाउनुहोस्)</i></div>
-    <div class="step"><b>2. Deposit via eSewa QR:</b> Open <b>Deposit Ad Credits</b>, scan QR <b>9717831225</b>, and submit Txn ID. <i>(eSewa बाट रकम जम्मा गर्नुहोस्)</i></div>
-    <div class="step"><b>3. Track Clicks:</b> Embed <code>&lt;script&gt;</code> tag or Social link to earn <b>2.50 NPR/click</b> (60s anti-spam). <i>(क्लिक र आम्दानी हेर्नुहोस्)</i></div>
-    <div class="step"><b>4. Invoice &amp; Tax PDF:</b> Generate signed Invoices, Receipts &amp; Tax Clearance anytime. <i>(बिल र रसिद डाउनलोड गर्नुहोस्)</i></div></div>
+    <body>{render_nav("Beginner Guide & Rules", "Home / Beginner Guide (English Subtitles)")}
+    <div class="box"><h2>Step-by-Step Guide</h2><p style='font-size:12px;color:#38bdf8;margin-top:-6px;'>English Subtitles &amp; Clear Onboarding Instructions</p>
+    <div class="step"><b>1. Create Banner:</b> Open <b>Advertise</b>, pick a template, attach image (max 500KB), and save. <i>(Subtitle: Design &amp; preview your ad banner)</i></div>
+    <div class="step"><b>2. Deposit via eSewa QR:</b> Open <b>Deposit Ad Credits</b>, scan QR <b>9717831225</b>, and submit Txn ID. <i>(Subtitle: Fund campaign balance via eSewa or direct transfer)</i></div>
+    <div class="step"><b>3. Track Clicks:</b> Embed <code>&lt;script&gt;</code> tag or Social link to earn <b>2.50 NPR/click</b> (60s anti-spam). <i>(Subtitle: Track verified human clicks in real time)</i></div>
+    <div class="step"><b>4. Invoice &amp; Tax PDF:</b> Generate signed Invoices, Receipts &amp; Tax Clearance anytime. <i>(Subtitle: Download signed invoices &amp; tax receipts)</i></div></div>
     <div class="box"><h3>Official Moderation Standards</h3>
     <div class="step" style="border-left-color:#22c55e;"><b>&#128591; Grateful Acceptance:</b> "Thank you for partnering with Worldwide Ad Center! We are grateful for your submission—your campaign is now live."</div>
     <div class="step" style="border-left-color:#f59e0b;"><b>&#129309; Humble Apology / Rejection:</b> "We sincerely apologize, but we cannot approve this submission under our safety/clarity rules. Please edit and resubmit anytime."</div>
