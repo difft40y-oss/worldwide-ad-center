@@ -164,8 +164,8 @@ def render_nav(title: str, subpath: str) -> str:
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
             else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else if(t.length > 2 && !t.startsWith('http') && !/^[0-9.,%+$-]+$/.test(t.split(" ").join(""))){{
-                const ck = 'mm_' + l + '_' + t;
+            else if(t.length > 2 && !t.startsWith('http')){{
+                const ck = 'wac3_' + l + '_' + t;
                 const c = localStorage.getItem(ck);
                 if(c){{node.nodeValue = raw.replace(t, c);}}
                 else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
@@ -185,10 +185,11 @@ def render_nav(title: str, subpath: str) -> str:
             }}catch(e){{}}
         }}
     }}
-    window.addEventListener('DOMContentLoaded', ()=>{{
+    setTimeout(()=>{{
         const saved = localStorage.getItem('wac_lang');
-        if(saved && saved!=='en'){{document.getElementById('langSel').value=saved;applyLang(saved);}}
-    }});
+        const sel = document.getElementById('langSel');
+        if(saved && saved!=='en' && sel){{sel.value=saved;applyLang(saved);}}
+    }}, 80);
     </script>
 </div>"""
 
@@ -427,13 +428,12 @@ def _tr_one(target_code: str, txt: str) -> str:
         return txt
     tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
     try:
-        u = f"https://google.com{tl}&q={urllib.parse.quote(s[:450])}"
+        u = f"https://googleapis.com{tl}&dt=t&q={urllib.parse.quote(s[:450])}"
         req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
         raw = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
         res = json.loads(raw)
-        if isinstance(res, list) and len(res) > 0:
-            first = res.__getitem__(0)
-            return first.__getitem__(0) if isinstance(first, list) else str(first)
+        if isinstance(res, list) and len(res) > 0 and isinstance(res.__getitem__(0), list):
+            return "".join([seg.__getitem__(0) for seg in res.__getitem__(0) if seg and seg.__getitem__(0)]) or txt
     except Exception:
         pass
     return txt
