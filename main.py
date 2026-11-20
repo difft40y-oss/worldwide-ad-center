@@ -804,3 +804,7 @@ async def health_report(db: DBWrapper = Depends(get_db)):
     report = f"📊 AD CENTER REPORT\n• Impressions: {imp}\n• Locked Clicks: {row}\n• Available Escrow: {round(float(row), 2)} NPR"
     st = send_telegram_alert(report)
     return {"status": st, "summary": report}
+
+@app.exception_handler(404)
+async def not_found_redirect(request, exc):
+    return HTMLResponse("<script>window.location.href='/';</script>")
