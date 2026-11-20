@@ -1,5 +1,5 @@
+import json, urllib.request, urllib.parse
 import asyncio
-from deep_translator import MyMemoryTranslator
 import io, base64, qrcode, qrcode.image.svg
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import HTMLResponse, Response
