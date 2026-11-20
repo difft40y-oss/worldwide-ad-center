@@ -164,7 +164,7 @@ def render_nav(title: str, subpath: str) -> str:
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
             else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else if(t.length > 2 && !t.startsWith('http') && !/^[0-9.,%+$\s-]+$/.test(t)){{
+            else if(t.length > 2 && !t.startsWith('http') && !/^[0-9.,%+$-]+$/.test(t.split(" ").join(""))){{
                 const ck = 'mm_' + l + '_' + t;
                 const c = localStorage.getItem(ck);
                 if(c){{node.nodeValue = raw.replace(t, c);}}
