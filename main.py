@@ -1,3 +1,4 @@
+import asyncio
 from deep_translator import MyMemoryTranslator
 import io, base64, qrcode, qrcode.image.svg
 from fastapi import FastAPI, HTTPException, Depends
@@ -420,6 +421,15 @@ async def submit_feedback(req: FeedbackReq):
     return {"message": "Thank you! Your message has been received honestly by our support desk (difft40y@gmail.com)."}
 
 
+def _tr_one(target_code: str, txt: str) -> str:
+    s = txt.strip()
+    if len(s) < 2:
+        return txt
+    try:
+        return MyMemoryTranslator(source="en-US", target=target_code).translate(s[:450]) or txt
+    except Exception:
+        return txt
+
 @app.post("/api/v1/translate-batch")
 async def translate_batch(payload: dict):
     tl = payload.get("tl", "en")
@@ -428,15 +438,9 @@ async def translate_batch(payload: dict):
         return {"items": texts}
     lang_map = {"zh": "zh-CN", "zh-CN": "zh-CN", "ja": "ja-JP", "ko": "ko-KR", "hi": "hi-IN", "es": "es-ES"}
     target_code = lang_map.get(tl, tl)
-    out = []
-    try:
-        tr = MyMemoryTranslator(source="en-US", target=target_code)
-        for t in texts:
-            s = t.strip()
-            out.append(tr.translate(s) if len(s) > 1 else t)
-    except Exception:
-        out = texts
-    return {"items": out}
+    tasks = [asyncio.to_thread(_tr_one, target_code, t) for t in texts]
+    out = await asyncio.gather(*tasks)
+    return {"items": list(out)}
 
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
