@@ -114,7 +114,7 @@ def render_nav(title: str, subpath: str) -> str:
                 <a href="/verify-badge" style="display:block;padding:10px 14px;color:#14b8a6;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
                 <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
                 <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
-                <a href="javascript:void(0)" onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="display:block;padding:11px 14px;background:#ffffff;color:#000000;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Exit</a>
+                <a href="javascript:void(0)" onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="display:block;padding:11px 14px;background:#ffffff;color:#000000;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
             </div>
         </div>
     </div>
@@ -136,12 +136,19 @@ def render_nav(title: str, subpath: str) -> str:
         </select>
     </div>
     <script>
+    const exitLbl = {{
+        zh: "← 退出 (Back / Exit)",
+        ja: "← 戻る / 終了 (Back / Exit)",
+        ko: "← 뒤로 / 나가기 (Back / Exit)",
+        hi: "← वापस / बाहर निकलें (Back / Exit)",
+        es: "← Volver / Salir (Back / Exit)"
+    }};
     const dict = {{
-        zh: {{"Home":"首页","Tenders & Bids":"招标与投标","For Agencies":"广告代理商","Advertise":"投放广告","Main Control Hub":"主控制中心","Available Balance":"可用余额","WORLDWIDE AD CENTER":"全球广告中心"}},
-        ja: {{"Home":"ホーム","Tenders & Bids":"入札・建設公告","For Agencies":"代理店向け","Advertise":"広告掲載","Main Control Hub":"メイン管理ハブ","Available Balance":"利用可能残高","WORLDWIDE AD CENTER":"ワールドワイド広告センター"}},
-        ko: {{"Home":"홈","Tenders & Bids":"입찰 및 공고","For Agencies":"에이전시","Advertise":"광고 등록","Main Control Hub":"메인 제어 허브","Available Balance":"사용 가능 잔액","WORLDWIDE AD CENTER":"월드와이드 광고 센터"}},
-        hi: {{"Home":"होम","Tenders & Bids":"टेंडर और निविदा","For Agencies":"एजेंसी पोर्टल","Advertise":"विज्ञापन दें","Main Control Hub":"मुख्य नियंत्रण केंद्र","Available Balance":"उपलब्ध शेष","WORLDWIDE AD CENTER":"वर्ल्डवाइड एड सेंटर"}},
-        es: {{"Home":"Inicio","Tenders & Bids":"Licitaciones","For Agencies":"Agencias","Advertise":"Anunciar","Main Control Hub":"Panel Principal","Available Balance":"Saldo Disponible","WORLDWIDE AD CENTER":"CENTRO MUNDIAL DE ANUNCIOS"}}
+        zh: {{"Home":"首页","Tenders & Bids":"招标与投标","For Agencies":"广告代理商","Advertise":"投放广告","Main Control Hub":"主控制中心","WORLDWIDE AD CENTER":"全球广告中心","IMPRESSIONS":"展示次数","LOCKED CLICKS":"锁定点击","CTR %":"点击率","AVAILABLE":"可用余额","1. MOBILE APP AD SIMULATOR":"1. 移动应用广告模拟器","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa 提现与记录","3. GET WEBSITE AD TAG (<script>)":"3. 获取网站广告代码","4. MANAGE & ROTATE AD CAMPAIGNS":"4. 管理与轮播广告","5. ADVERTISE WITH US (SUBMIT AD)":"5. 投放广告 (提交广告)","6. CONSTRUCTION & BIDDER NOTICES":"6. 建设与招标公告","7. SEND TELEGRAM HEALTH REPORT":"7. 发送电报健康报告"}},
+        ja: {{"Home":"ホーム","Tenders & Bids":"入札・建設公告","For Agencies":"代理店向け","Advertise":"広告掲載","Main Control Hub":"メイン管理ハブ","WORLDWIDE AD CENTER":"ワールドワイド広告センター","IMPRESSIONS":"表示回数","LOCKED CLICKS":"確定クリック","CTR %":"クリック率","AVAILABLE":"利用可能残高","1. MOBILE APP AD SIMULATOR":"1. モバイル広告シミュレーター","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa 出金と履歴","3. GET WEBSITE AD TAG (<script>)":"3. ウェブサイト広告タグ取得","4. MANAGE & ROTATE AD CAMPAIGNS":"4. 広告キャンペーン管理","5. ADVERTISE WITH US (SUBMIT AD)":"5. 広告を掲載する","6. CONSTRUCTION & BIDDER NOTICES":"6. 建設・入札公告","7. SEND TELEGRAM HEALTH REPORT":"7. Telegram レポート送信"}},
+        ko: {{"Home":"홈","Tenders & Bids":"입찰 및 공고","For Agencies":"에이전시","Advertise":"광고 등록","Main Control Hub":"메인 제어 허브","WORLDWIDE AD CENTER":"월드와이드 광고 센터","IMPRESSIONS":"노출수","LOCKED CLICKS":"확정 클릭","CTR %":"클릭률","AVAILABLE":"사용 가능 잔액","1. MOBILE APP AD SIMULATOR":"1. 모바일 앱 광고 시뮬레이터","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa 출금 및 내역","3. GET WEBSITE AD TAG (<script>)":"3. 웹사이트 광고 태그 받기","4. MANAGE & ROTATE AD CAMPAIGNS":"4. 광고 캠페인 관리","5. ADVERTISE WITH US (SUBMIT AD)":"5. 광고 신청하기","6. CONSTRUCTION & BIDDER NOTICES":"6. 건설 및 입찰 공고","7. SEND TELEGRAM HEALTH REPORT":"7. 텔레그램 상태 보고"}},
+        hi: {{"Home":"होम","Tenders & Bids":"टेंडर और निविदा","For Agencies":"एजेंसी पोर्टल","Advertise":"विज्ञापन दें","Main Control Hub":"मुख्य नियंत्रण केंद्र","WORLDWIDE AD CENTER":"वर्ल्डवाइड एड सेंटर","IMPRESSIONS":"इंप्रेशन","LOCKED CLICKS":"सत्यापित क्लिक","CTR %":"सीटीआर %","AVAILABLE":"उपलब्ध शेष","1. MOBILE APP AD SIMULATOR":"1. मोबाइल ऐप विज्ञापन सिम्युलेटर","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa निकासी और इतिहास","3. GET WEBSITE AD TAG (<script>)":"3. वेबसाइट विज्ञापन टैग प्राप्त करें","4. MANAGE & ROTATE AD CAMPAIGNS":"4. विज्ञापन अभियान प्रबंधित करें","5. ADVERTISE WITH US (SUBMIT AD)":"5. हमारे साथ विज्ञापन दें","6. CONSTRUCTION & BIDDER NOTICES":"6. निर्माण और निविदा सूचनाएं","7. SEND TELEGRAM HEALTH REPORT":"7. टेलीग्राम रिपोर्ट भेजें"}},
+        es: {{"Home":"Inicio","Tenders & Bids":"Licitaciones","For Agencies":"Agencias","Advertise":"Anunciar","Main Control Hub":"Panel Principal","WORLDWIDE AD CENTER":"CENTRO MUNDIAL DE ANUNCIOS","IMPRESSIONS":"IMPRESIONES","LOCKED CLICKS":"CLICS VERIFICADOS","CTR %":"CTR %","AVAILABLE":"DISPONIBLE","1. MOBILE APP AD SIMULATOR":"1. SIMULADOR DE ANUNCIOS MÓVILES","2. ESEWA WITHDRAWAL & HISTORY":"2. RETIRO E HISTORIAL ESEWA","3. GET WEBSITE AD TAG (<script>)":"3. OBTENER ETIQUETA DE ANUNCIO","4. MANAGE & ROTATE AD CAMPAIGNS":"4. GESTIONAR CAMPAÑAS","5. ADVERTISE WITH US (SUBMIT AD)":"5. ANÚNCIATE CON NOSOTROS","6. CONSTRUCTION & BIDDER NOTICES":"6. AVISOS DE CONSTRUCCIÓN","7. SEND TELEGRAM HEALTH REPORT":"7. ENVIAR INFORME TELEGRAM"}}
     }};
     function applyLang(l){{
         localStorage.setItem('wac_lang', l);
@@ -149,7 +156,7 @@ def render_nav(title: str, subpath: str) -> str:
         const m = dict.hasOwnProperty(l)?dict[l]:null;
         if(!m) return;
         document.querySelectorAll('a,b,div,small,button,h2,h3').forEach(el=>{{
-            if(el.children.length===0 && m.hasOwnProperty(el.innerText.trim())){{el.innerText = m[el.innerText.trim()];}}
+            const t=el.innerText.trim();if(el.children.length===0 && t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{el.innerText=exitLbl[l];}}else if(el.children.length===0 && m.hasOwnProperty(t)){{el.innerText=m[t];}}
         }});
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
