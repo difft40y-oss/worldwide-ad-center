@@ -126,10 +126,37 @@ def render_nav(title: str, subpath: str) -> str:
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;">
         <div style="font-size:12px;color:#94a3b8;">Section: <b style="color:#fff;">{title}</b></div>
-        <div id="google_translate_element" style="font-size:11px;"></div>
+        <select id="langSel" onchange="applyLang(this.value)" style="background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;border-radius:6px;padding:3px 6px;font-size:11px;font-weight:bold;min-height:28px;width:auto;">
+            <option value="en">&#127760; English</option>
+            <option value="zh">&#127464;&#127475; 中文 (Chinese)</option>
+            <option value="ja">&#127471;&#127477; 日本語 (Japanese)</option>
+            <option value="ko">&#127472;&#127479; 한국어 (Korean)</option>
+            <option value="hi">&#127470;&#127475; हिन्दी (Hindi)</option>
+            <option value="es">&#127466;&#127480; Español</option>
+        </select>
     </div>
-    <script>function googleTranslateElementInit(){{new google.translate.TranslateElement({{pageLanguage:'en',includedLanguages:'en,zh-CN,ja,ko,hi,ne,ar,es,fr,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE}},'google_translate_element');}}</script>
-    <script src="https://google.com"></script>
+    <script>
+    const dict = {{
+        zh: {{"Home":"首页","Tenders & Bids":"招标与投标","For Agencies":"广告代理商","Advertise":"投放广告","Main Control Hub":"主控制中心","Available Balance":"可用余额","WORLDWIDE AD CENTER":"全球广告中心"}},
+        ja: {{"Home":"ホーム","Tenders & Bids":"入札・建設公告","For Agencies":"代理店向け","Advertise":"広告掲載","Main Control Hub":"メイン管理ハブ","Available Balance":"利用可能残高","WORLDWIDE AD CENTER":"ワールドワイド広告センター"}},
+        ko: {{"Home":"홈","Tenders & Bids":"입찰 및 공고","For Agencies":"에이전시","Advertise":"광고 등록","Main Control Hub":"메인 제어 허브","Available Balance":"사용 가능 잔액","WORLDWIDE AD CENTER":"월드와이드 광고 센터"}},
+        hi: {{"Home":"होम","Tenders & Bids":"टेंडर और निविदा","For Agencies":"एजेंसी पोर्टल","Advertise":"विज्ञापन दें","Main Control Hub":"मुख्य नियंत्रण केंद्र","Available Balance":"उपलब्ध शेष","WORLDWIDE AD CENTER":"वर्ल्डवाइड एड सेंटर"}},
+        es: {{"Home":"Inicio","Tenders & Bids":"Licitaciones","For Agencies":"Agencias","Advertise":"Anunciar","Main Control Hub":"Panel Principal","Available Balance":"Saldo Disponible","WORLDWIDE AD CENTER":"CENTRO MUNDIAL DE ANUNCIOS"}}
+    }};
+    function applyLang(l){{
+        localStorage.setItem('wac_lang', l);
+        if(l==='en'){{location.reload();return;}}
+        const m = dict.hasOwnProperty(l)?dict[l]:null;
+        if(!m) return;
+        document.querySelectorAll('a,b,div,small,button,h2,h3').forEach(el=>{{
+            if(el.children.length===0 && m.hasOwnProperty(el.innerText.trim())){{el.innerText = m[el.innerText.trim()];}}
+        }});
+    }}
+    window.addEventListener('DOMContentLoaded', ()=>{{
+        const saved = localStorage.getItem('wac_lang');
+        if(saved && saved!=='en'){{document.getElementById('langSel').value=saved;applyLang(saved);}}
+    }});
+    </script>
 </div>"""
 
 FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center. All Rights Reserved. &bull; Gandaki Province, Nepal</span></div>'
