@@ -150,14 +150,32 @@ def render_nav(title: str, subpath: str) -> str:
         hi: {{"Home":"होम","Tenders & Bids":"टेंडर और निविदा","For Agencies":"एजेंसी पोर्टल","Advertise":"विज्ञापन दें","Main Control Hub":"मुख्य नियंत्रण केंद्र","WORLDWIDE AD CENTER":"वर्ल्डवाइड एड सेंटर","IMPRESSIONS":"इंप्रेशन","LOCKED CLICKS":"सत्यापित क्लिक","CTR %":"सीटीआर %","AVAILABLE":"उपलब्ध शेष","1. MOBILE APP AD SIMULATOR":"1. मोबाइल ऐप विज्ञापन सिम्युलेटर","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa निकासी और इतिहास","3. GET WEBSITE AD TAG (<script>)":"3. वेबसाइट विज्ञापन टैग प्राप्त करें","4. MANAGE & ROTATE AD CAMPAIGNS":"4. विज्ञापन अभियान प्रबंधित करें","5. ADVERTISE WITH US (SUBMIT AD)":"5. हमारे साथ विज्ञापन दें","6. CONSTRUCTION & BIDDER NOTICES":"6. निर्माण और निविदा सूचनाएं","7. SEND TELEGRAM HEALTH REPORT":"7. टेलीग्राम रिपोर्ट भेजें"}},
         es: {{"Home":"Inicio","Tenders & Bids":"Licitaciones","For Agencies":"Agencias","Advertise":"Anunciar","Main Control Hub":"Panel Principal","WORLDWIDE AD CENTER":"CENTRO MUNDIAL DE ANUNCIOS","IMPRESSIONS":"IMPRESIONES","LOCKED CLICKS":"CLICS VERIFICADOS","CTR %":"CTR %","AVAILABLE":"DISPONIBLE","1. MOBILE APP AD SIMULATOR":"1. SIMULADOR DE ANUNCIOS MÓVILES","2. ESEWA WITHDRAWAL & HISTORY":"2. RETIRO E HISTORIAL ESEWA","3. GET WEBSITE AD TAG (<script>)":"3. OBTENER ETIQUETA DE ANUNCIO","4. MANAGE & ROTATE AD CAMPAIGNS":"4. GESTIONAR CAMPAÑAS","5. ADVERTISE WITH US (SUBMIT AD)":"5. ANÚNCIATE CON NOSOTROS","6. CONSTRUCTION & BIDDER NOTICES":"6. AVISOS DE CONSTRUCCIÓN","7. SEND TELEGRAM HEALTH REPORT":"7. ENVIAR INFORME TELEGRAM"}}
     }};
-    function applyLang(l){{
+    async function trText(txt, tl){{
+        const ck = 'tr_' + tl + '_' + txt;
+        const cached = localStorage.getItem(ck);
+        if(cached) return cached;
+        try{{
+            const res = await fetch('https://googleapis.com' + tl + '&dt=t&q=' + encodeURIComponent(txt));
+            const data = await res.json();
+            const out = data[0].map(x=>x[0]).join('');
+            localStorage.setItem(ck, out);
+            return out;
+        }}catch(e){{return txt;}}
+    }}
+    async function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
-        const m = dict.hasOwnProperty(l)?dict[l]:null;
-        if(!m) return;
-        document.querySelectorAll('a,b,div,small,button,h2,h3').forEach(el=>{{
-            const t=el.innerText.trim();if(el.children.length===0 && t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{el.innerText=exitLbl[l];}}else if(el.children.length===0 && m.hasOwnProperty(t)){{el.innerText=m[t];}}
-        }});
+        const m = dict.hasOwnProperty(l)?dict[l]:{{}};
+        const tl = l==='zh'?'zh-CN':l;
+        const nodes = document.querySelectorAll('a,b,div,small,button,h2,h3,h4,p,label,option');
+        for(const el of nodes){{
+            if(el.id==='langSel' || el.closest('#langSel')) continue;
+            const t = el.innerText.trim();
+            if(!t || el.children.length>0) continue;
+            if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{el.innerText=exitLbl[l];}}
+            else if(m.hasOwnProperty(t)){{el.innerText=m[t];}}
+            else if(t.length>1 && !t.startsWith('http')){{el.innerText = await trText(t, tl);}}
+        }}
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
         const saved = localStorage.getItem('wac_lang');
