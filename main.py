@@ -154,11 +154,15 @@ def render_nav(title: str, subpath: str) -> str:
         while((node = walker.nextNode())){{
             const p = node.parentElement;
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
-            const raw = node.nodeValue;
+            if(!node._origRaw) node._origRaw = node.nodeValue;
+            const raw = node._origRaw;
             const t = raw.trim();
             if(!t) continue;
+            const cleanT = t.replace(/^[^A-Za-z0-9<]+/, '').trim();
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
+            else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
+            else{{node.nodeValue = raw;}}
         }}
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
