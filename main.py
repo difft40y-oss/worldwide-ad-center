@@ -1,3 +1,4 @@
+import re, html
 import json, urllib.request, urllib.parse
 import asyncio
 import io, base64, qrcode, qrcode.image.svg
@@ -426,18 +427,16 @@ def _tr_one(target_code: str, txt: str) -> str:
     s = txt.strip()
     if len(s) < 2:
         return txt
-    tl = "zh" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
-    q = urllib.parse.quote(s[:450], safe="")
-    for host in ("https://garudalinux.org", "https://lingva.ml", "https://lunar.icu"):
-        try:
-            u = f"{host}/api/v1/en/{tl}/{q}"
-            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-            raw = urllib.request.urlopen(req, timeout=4).read().decode("utf-8")
-            res = json.loads(raw)
-            if isinstance(res, dict) and res.get("translation"):
-                return res.get("translation")
-        except Exception:
-            continue
+    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
+    try:
+        u = f"https://google.com{tl}&q={urllib.parse.quote(s[:450])}"
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Linux; Android 10)"})
+        page = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
+        m = re.search(r'<div class="result-container">(.*?)</div>', page, re.S)
+        if m:
+            return html.unescape(m.group(1)).strip() or txt
+    except Exception:
+        pass
     return txt
 
 @app.post("/api/v1/translate-batch")
