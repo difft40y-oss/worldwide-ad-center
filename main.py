@@ -425,10 +425,18 @@ def _tr_one(target_code: str, txt: str) -> str:
     s = txt.strip()
     if len(s) < 2:
         return txt
+    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
     try:
-        return MyMemoryTranslator(source="en-US", target=target_code).translate(s[:450]) or txt
+        u = f"https://google.com{tl}&q={urllib.parse.quote(s[:450])}"
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
+        res = json.loads(raw)
+        if isinstance(res, list) and len(res) > 0:
+            first = res.__getitem__(0)
+            return first.__getitem__(0) if isinstance(first, list) else str(first)
     except Exception:
-        return txt
+        pass
+    return txt
 
 @app.post("/api/v1/translate-batch")
 async def translate_batch(payload: dict):
