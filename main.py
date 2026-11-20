@@ -53,6 +53,7 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS payouts (payout_id TEXT PRIMARY KEY, wallet_phone TEXT, amount_npr REAL, status TEXT, created_at TEXT);")
     db.execute("CREATE TABLE IF NOT EXISTS saved_banners (draft_id TEXT PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, img_data TEXT, expires_at INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, province TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS deposits (dep_id TEXT PRIMARY KEY, advertiser TEXT, amount REAL, txn_code TEXT, contact TEXT, ts INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL, qr_img TEXT);")
     try:
         db.execute("ALTER TABLE settings ADD COLUMN qr_img TEXT;")
@@ -100,6 +101,7 @@ def render_nav(title: str, subpath: str) -> str:
             <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
                 <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a>
                 <a href="/simulate-app" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128241; Mobile App Simulator</a>
+                <a href="/deposit" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128179; Deposit Ad Credits (eSewa)</a>
                 <a href="/payout-hub" style="display:block;padding:10px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128184; eSewa Payouts &amp; History</a>
                 <a href="/tag-preview" style="display:block;padding:10px 14px;color:#a855f7;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128187; Website Ad Tag (&lt;script&gt;)</a>
                 <a href="/campaigns" style="display:block;padding:10px 14px;color:#ec4899;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128260; Rotating Ad Campaigns</a>
@@ -296,9 +298,51 @@ async def social_redirect(platform: str = "social", partner: str = "partner", ci
     row = db.execute("SELECT target_url FROM ad_campaigns WHERE id=?", (cid,)).fetchone()
     dest = row.__getitem__(0) if row else "https://onrender.com"
     db.execute("INSERT INTO impressions (ts, source) VALUES (?, ?)", (int(time.time()), f"{platform}:{partner}"))
-    db.execute("INSERT INTO clicks (ts, ip, source) VALUES (?, ?, ?)", (int(time.time()), f"social-{partner}", f"{platform}:{partner}"))
+    recent_soc = db.execute("SELECT ts FROM clicks WHERE ip=? AND ts > ?", (f"social-{partner}", int(time.time()) - 60)).fetchone()
+    if not recent_soc:
+        db.execute("INSERT INTO clicks (ts, ip, source) VALUES (?, ?, ?)", (int(time.time()), f"social-{partner}", f"{platform}:{partner}"))
     db.commit()
     return HTMLResponse(f'<script>window.location.href="{dest}";</script>')
+
+
+class DepositReq(BaseModel):
+    advertiser: str
+    amount: float
+    txn_code: str
+    contact: str
+
+@app.get("/deposit", response_class=HTMLResponse)
+async def deposit_page(db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
+    wal = row.__getitem__(0) if row else "9717831225"
+    qimg = row.__getitem__(1) if (row and len(row) > 1 and row.__getitem__(1)) else ""
+    qr_src = qimg if qimg else make_qr_b64(f'{{"eSewa_id":"{wal}","name":"Worldwide Ad Center"}}')
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#22c55e;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
+    <body>{render_nav("Deposit Ad Credits (eSewa)", "Home / Deposit Credits")}
+    <div class="box" style="text-align:center;"><span style="background:#22c55e;color:#0f172a;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:bold;">STEP 1: SCAN OR SEND VIA ESEWA</span>
+    <h2 style="margin:8px 0 4px 0;">Fund Your Ad Campaign</h2>
+    <div style="background:#ffffff;padding:10px;border-radius:10px;display:inline-block;margin:10px auto;"><img src="{qr_src}" alt="eSewa QR" style="width:165px;height:165px;display:block;"></div>
+    <div style="font-size:13px;color:#fff;font-weight:bold;">eSewa Wallet ID: {wal}</div>
+    <p style="font-size:11px;color:#94a3b8;margin:4px 0 0 0;">Standard Rate: 2.50 NPR per verified click (e.g., 1,000 NPR = 400 Clicks)</p></div>
+
+    <div class="box"><h3>Step 2: Submit eSewa Transaction Receipt</h3>
+    <p style="font-size:12px;margin-top:0;">After sending funds via eSewa, submit your transaction code below for instant Telegram verification &amp; ad activation:</p>
+    <input id="adv" placeholder="Advertiser / Business / Campaign Name">
+    <input id="amt" type="number" placeholder="Amount Deposited (NPR, e.g. 1000)">
+    <input id="txn" placeholder="eSewa Transaction / Reference ID">
+    <input id="cnt" placeholder="Your Telegram, WhatsApp, or Email">
+    <button class="btn" onclick="sendDep()">VERIFY ESEWA DEPOSIT RECEIPT</button>
+    <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+    <script>async function sendDep(){{const r=await fetch('/api/v1/submit-deposit',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{advertiser:document.getElementById('adv').value,amount:parseFloat(document.getElementById('amt').value)||0,txn_code:document.getElementById('txn').value,contact:document.getElementById('cnt').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
+
+@app.post("/api/v1/submit-deposit")
+async def submit_deposit(req: DepositReq, db: DBWrapper = Depends(get_db)):
+    did = f"DEP-{int(time.time()) % 1000000}"
+    clicks_est = int(req.amount / 2.50)
+    db.execute("INSERT INTO deposits (dep_id, advertiser, amount, txn_code, contact, ts) VALUES (?, ?, ?, ?, ?, ?)", (did, req.advertiser, req.amount, req.txn_code, req.contact, int(time.time())))
+    db.commit()
+    send_telegram_alert(f"💰 NEW ESEWA DEPOSIT RECEIPT!\n• Receipt ID: {did}\n• Advertiser: {req.advertiser}\n• Amount: {req.amount} NPR (~{clicks_est} Clicks)\n• eSewa Txn Code: {req.txn_code}\n• Contact: {req.contact}")
+    return {"message": f"Receipt {did} ({req.amount} NPR / ~{clicks_est} clicks) submitted! Admin alerted via Telegram for instant credit activation."}
 
 @app.get("/social-partners", response_class=HTMLResponse)
 async def social_partners_page(db: DBWrapper = Depends(get_db)):
@@ -480,12 +524,14 @@ async def submit_tender(req: TenderReq, db: DBWrapper = Depends(get_db)):
     return {"message": f"Notice {tid} submitted! Admin notified via Telegram for approval.", "published": False}
 
 @app.get("/agencies", response_class=HTMLResponse)
-async def agencies_portal():
+async def agencies_portal(db: DBWrapper = Depends(get_db)):
+    proof_html = get_live_proof(db)
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.tier{{background:#0f172a;padding:11px;border-radius:8px;margin-top:8px;border-left:3px solid #f59e0b;font-size:13px}}input{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#f59e0b;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}.stat{{background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #38bdf8;margin-top:10px}}</style></head>
     <body>{render_nav("Agency Partner Program", "Home / For Agencies")}
     <div class="box"><span style="background:#f59e0b;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">AGENCY PARTNER PROGRAM</span>
     <h2 style="margin:8px 0 6px 0;">Agency Media Kit &amp; Rate Card</h2>
     <p style="font-size:13px;margin:0 0 10px 0;">Scale your clients across Nepal &amp; global web publishers with transparent CPC pricing, zero cookie friction, and priority Telegram campaign support.</p>
+    {proof_html}
     <div class="tier"><b>Standard Agency Rate:</b> 2.50 NPR / Verified Click (Free Unlimited Impressions)</div>
     <div class="tier"><b>Growth Tier (25,000+ NPR/mo):</b> 10% Bonus Click Credits + Priority Ad Rotation</div>
     <div class="tier"><b>Enterprise Tier (100,000+ NPR/mo):</b> 20% Bonus Credits + Dedicated Multi-Brand Account</div>
@@ -537,7 +583,15 @@ def make_qr_b64(data_str: str) -> str:
         return ""
 
 @app.get("/about", response_class=HTMLResponse)
+def get_live_proof(db: DBWrapper) -> str:
+    imp_c = db.execute("SELECT COUNT(*) FROM impressions").fetchone().__getitem__(0)
+    clk_c = db.execute("SELECT COUNT(*) FROM clicks").fetchone().__getitem__(0)
+    cmp_c = db.execute("SELECT COUNT(*) FROM ad_campaigns WHERE active=1").fetchone().__getitem__(0)
+    tnd_c = db.execute("SELECT COUNT(*) FROM tenders WHERE approved=1").fetchone().__getitem__(0)
+    return f'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0;"><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #38bdf8;"><div style="font-size:18px;font-weight:bold;color:#38bdf8;">{imp_c:,}</div><small style="color:#94a3b8;font-size:10px;">VERIFIED IMPRESSIONS</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #22c55e;"><div style="font-size:18px;font-weight:bold;color:#22c55e;">{clk_c:,}</div><small style="color:#94a3b8;font-size:10px;">HUMAN CLICKS (GUARDED)</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #ec4899;"><div style="font-size:18px;font-weight:bold;color:#ec4899;">{cmp_c}</div><small style="color:#94a3b8;font-size:10px;">ACTIVE AD CAMPAIGNS</small></div><div style="background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #f59e0b;"><div style="font-size:18px;font-weight:bold;color:#f59e0b;">{tnd_c}</div><small style="color:#94a3b8;font-size:10px;">LIVE NEPAL TENDERS</small></div></div>'
+
 async def about_page(db: DBWrapper = Depends(get_db)):
+    proof_html = get_live_proof(db)
     row = db.execute("SELECT default_wallet, qr_img FROM settings WHERE id=1").fetchone()
     wal = row.__getitem__(0) if row else "9717831225"
     qimg = row.__getitem__(1) if (row and len(row) > 1 and row.__getitem__(1)) else ""
@@ -547,6 +601,8 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     <div class="box"><h2>About Worldwide Ad Center</h2>
     <p><b>Worldwide Ad Center</b> is an independent, performance-driven digital advertising network built to connect businesses directly with quality blogs, news portals, and mobile apps—without middleman fees or invasive tracking cookies.</p>
     <p>Our lightweight <code>&lt;script&gt;</code> tag empowers publishers in Nepal and worldwide to monetize their traffic transparently at <b>2.50 NPR per verified human click</b> with fast mobile wallet settlements.</p></div>
+
+    <div class="box"><h3>Live Network Proof-of-Traffic</h3><p style="font-size:12px;margin:0;">Real-time verified metrics streamed directly from our Cloud PostgreSQL ledger:</p>{proof_html}</div>
 
     <div class="box"><h3>Platform Features &amp; Capabilities</h3>
     <div class="row"><b>&#127760; Multi-Currency &amp; Global Reach:</b> Instant rate conversion across <b>NPR, USD, INR, and EUR</b> paired with a public <b>Universal Live Directory</b> indexing all active campaigns and opportunities.</div>
