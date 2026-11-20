@@ -1,3 +1,4 @@
+from deep_translator import GoogleTranslator
 import io, base64, qrcode, qrcode.image.svg
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import HTMLResponse, Response
@@ -150,31 +151,40 @@ def render_nav(title: str, subpath: str) -> str:
         hi: {{"Home":"होम","Tenders & Bids":"टेंडर और निविदा","For Agencies":"एजेंसी पोर्टल","Advertise":"विज्ञापन दें","Main Control Hub":"मुख्य नियंत्रण केंद्र","WORLDWIDE AD CENTER":"वर्ल्डवाइड एड सेंटर","IMPRESSIONS":"इंप्रेशन","LOCKED CLICKS":"सत्यापित क्लिक","CTR %":"सीटीआर %","AVAILABLE":"उपलब्ध शेष","1. MOBILE APP AD SIMULATOR":"1. मोबाइल ऐप विज्ञापन सिम्युलेटर","2. ESEWA WITHDRAWAL & HISTORY":"2. eSewa निकासी और इतिहास","3. GET WEBSITE AD TAG (<script>)":"3. वेबसाइट विज्ञापन टैग प्राप्त करें","4. MANAGE & ROTATE AD CAMPAIGNS":"4. विज्ञापन अभियान प्रबंधित करें","5. ADVERTISE WITH US (SUBMIT AD)":"5. हमारे साथ विज्ञापन दें","6. CONSTRUCTION & BIDDER NOTICES":"6. निर्माण और निविदा सूचनाएं","7. SEND TELEGRAM HEALTH REPORT":"7. टेलीग्राम रिपोर्ट भेजें"}},
         es: {{"Home":"Inicio","Tenders & Bids":"Licitaciones","For Agencies":"Agencias","Advertise":"Anunciar","Main Control Hub":"Panel Principal","WORLDWIDE AD CENTER":"CENTRO MUNDIAL DE ANUNCIOS","IMPRESSIONS":"IMPRESIONES","LOCKED CLICKS":"CLICS VERIFICADOS","CTR %":"CTR %","AVAILABLE":"DISPONIBLE","1. MOBILE APP AD SIMULATOR":"1. SIMULADOR DE ANUNCIOS MÓVILES","2. ESEWA WITHDRAWAL & HISTORY":"2. RETIRO E HISTORIAL ESEWA","3. GET WEBSITE AD TAG (<script>)":"3. OBTENER ETIQUETA DE ANUNCIO","4. MANAGE & ROTATE AD CAMPAIGNS":"4. GESTIONAR CAMPAÑAS","5. ADVERTISE WITH US (SUBMIT AD)":"5. ANÚNCIATE CON NOSOTROS","6. CONSTRUCTION & BIDDER NOTICES":"6. AVISOS DE CONSTRUCCIÓN","7. SEND TELEGRAM HEALTH REPORT":"7. ENVIAR INFORME TELEGRAM"}}
     }};
-    async function trText(txt, tl){{
-        const ck = 'tr_' + tl + '_' + txt;
-        const cached = localStorage.getItem(ck);
-        if(cached) return cached;
-        try{{
-            const res = await fetch('https://googleapis.com' + tl + '&dt=t&q=' + encodeURIComponent(txt));
-            const data = await res.json();
-            const out = data[0].map(x=>x[0]).join('');
-            localStorage.setItem(ck, out);
-            return out;
-        }}catch(e){{return txt;}}
-    }}
     async function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
-        const m = dict.hasOwnProperty(l)?dict[l]:{{}};
         const tl = l==='zh'?'zh-CN':l;
-        const nodes = document.querySelectorAll('a,b,div,small,button,h2,h3,h4,p,label,option');
-        for(const el of nodes){{
-            if(el.id==='langSel' || el.closest('#langSel')) continue;
-            const t = el.innerText.trim();
-            if(!t || el.children.length>0) continue;
-            if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{el.innerText=exitLbl[l];}}
-            else if(m.hasOwnProperty(t)){{el.innerText=m[t];}}
-            else if(t.length>1 && !t.startsWith('http')){{el.innerText = await trText(t, tl);}}
+        const m = dict.hasOwnProperty(l)?dict[l]:{{}};
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        const todo = [];
+        let node;
+        while((node = walker.nextNode())){{
+            const p = node.parentElement;
+            if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
+            const raw = node.nodeValue;
+            const t = raw.trim();
+            if(!t || t.length<2 || t.startsWith('http') || /^\d+(\.\d+)?$/.test(t)) continue;
+            if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
+            else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
+            else{{
+                const ck = 'wtr_' + tl + '_' + t;
+                const c = localStorage.getItem(ck);
+                if(c){{node.nodeValue = raw.replace(t, c);}}
+                else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
+            }}
+        }}
+        if(todo.length>0){{
+            try{{
+                const res = await fetch('/api/v1/translate-batch', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{tl:tl,texts:todo.map(x=>x.t)}})}});
+                const data = await res.json();
+                if(data.items){{
+                    todo.forEach((item, idx)=>{{
+                        const tr = data.items.at(idx);
+                        if(tr){{localStorage.setItem(item.ck, tr);item.node.nodeValue = item.raw.replace(item.t, tr);}}
+                    }});
+                }}
+            }}catch(e){{}}
         }}
     }}
     window.addEventListener('DOMContentLoaded', ()=>{{
@@ -411,6 +421,20 @@ async def feedback_page():
 async def submit_feedback(req: FeedbackReq):
     send_telegram_alert(f"💬 FEEDBACK / PREFERENCE:\n• {req.kind}\n• From: {req.sender} ({req.email_pref})\n• Msg: {req.message}")
     return {"message": "Thank you! Your message has been received honestly by our support desk (difft40y@gmail.com)."}
+
+
+@app.post("/api/v1/translate-batch")
+async def translate_batch(payload: dict):
+    tl = payload.get("tl", "en")
+    texts = payload.get("texts", [])
+    if tl == "en" or not texts:
+        return {"items": texts}
+    try:
+        tr = GoogleTranslator(source="en", target=tl)
+        out = [tr.translate(t) if t.strip() else t for t in texts]
+        return {"items": out}
+    except Exception:
+        return {"items": texts}
 
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
