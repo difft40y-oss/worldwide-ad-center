@@ -156,7 +156,7 @@ def render_nav(title: str, subpath: str) -> str:
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
             const raw = node.nodeValue;
             const t = raw.trim();
-            if(!t || t.length<2 || t.startsWith('http') || /^\\d+(\\.\\d+)?$/.test(t)) continue;
+            if(!t || t.length<2 || t.startsWith('http') || /^[0-9.]+$/.test(t)) continue;
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{
                 node.nodeValue = raw.replace(t, exitLbl[l]);
                 continue;
