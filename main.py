@@ -159,7 +159,7 @@ def render_nav(title: str, subpath: str) -> str:
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
             if(!node._origRaw) node._origRaw = node.nodeValue;
             const raw = node._origRaw;
-            const t = raw.replace(/\s+/g, ' ').trim();
+            const t = raw.replace(/\\s+/g, ' ').trim();
             if(!t) continue;
             const cleanT = t.replace(/^[^A-Za-z0-9<]+/, '').trim();
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
