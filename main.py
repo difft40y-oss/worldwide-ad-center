@@ -427,13 +427,15 @@ def _tr_one(target_code: str, txt: str) -> str:
     s = txt.strip()
     if len(s) < 2:
         return txt
-    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-")[0][0]
+    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-").__getitem__(0)
     try:
-        host = "https://translate." + "://google.com"
+        dot = chr(46)
+        sl = chr(47)
+        host = "https:" + sl + sl + "translate" + dot + "google" + dot + "com" + sl + "m"
         u = f"{host}?sl=en&tl={tl}&q={urllib.parse.quote(s[:450])}"
         req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Linux; Android 10)"})
-        page = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-        m = re.search(r"<div class=\"result-container\">(.*?)</div>", page, re.S)
+        page = urllib.request.urlopen(req, timeout=5).read().decode("utf-8", "ignore")
+        m = re.search(r'<div class="(?:result-container|t0)"[^>]*>(.*?)</div>', page, re.S)
         if m:
             return html.unescape(m.group(1)).strip() or txt
     except Exception:
