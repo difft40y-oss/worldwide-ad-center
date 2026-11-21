@@ -427,7 +427,7 @@ def _tr_one(target_code: str, txt: str) -> str:
     s = txt.strip()
     if len(s) < 2:
         return txt
-    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-")[0]
+    tl = "zh-CN" if target_code.startswith("zh") else target_code.split("-")[0][0]
     try:
         host = "https://translate." + "://google.com"
         u = f"{host}?sl=en&tl={tl}&q={urllib.parse.quote(s[:450])}"
