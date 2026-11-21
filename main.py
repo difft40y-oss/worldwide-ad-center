@@ -172,16 +172,16 @@ def render_nav(title: str, subpath: str) -> str:
                 else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
             }}
         }}
-        for(let i=0; i<todo.length; i+=15){{
-            const chunk = todo.slice(i, i+15);
+        for(const item of todo){{
             try{{
-                const res = await fetch('/api/v1/translate-batch', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{tl:l,texts:chunk.map(x=>x.t)}})}});
+                const tl = l==='zh'?'zh-CN':l;
+                const u = 'https://googleapis.com' + tl + '&dt=t&q=' + encodeURIComponent(item.t);
+                const res = await fetch(u);
                 const data = await res.json();
-                if(data.items){{
-                    chunk.forEach((item, idx)=>{{
-                        const tr = data.items.at(idx);
-                        if(tr && tr !== item.t){{localStorage.setItem(item.ck, tr);item.node.nodeValue = item.raw.replace(item.t, tr);}}
-                    }});
+                const tr = data.at(0).map(x=>x.at(0)).join('');
+                if(tr && tr !== item.t){{
+                    localStorage.setItem(item.ck, tr);
+                    item.node.nodeValue = item.raw.replace(item.t, tr);
                 }}
             }}catch(e){{}}
         }}
