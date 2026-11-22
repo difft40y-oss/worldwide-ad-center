@@ -57,6 +57,11 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS saved_banners (draft_id TEXT PRIMARY KEY, headline TEXT, subtext TEXT, btn_text TEXT, target_url TEXT, img_data TEXT, expires_at INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS tenders (tender_id TEXT PRIMARY KEY, title TEXT, issuer TEXT, province TEXT, category TEXT, deadline TEXT, contact_url TEXT, approved INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS deposits (dep_id TEXT PRIMARY KEY, advertiser TEXT, amount REAL, txn_code TEXT, contact TEXT, ts INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS editorial (ed_id TEXT PRIMARY KEY, category TEXT, title TEXT, summary TEXT, author TEXT, ts INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS careers (app_id TEXT PRIMARY KEY, role TEXT, name TEXT, region TEXT, contact TEXT, pitch TEXT, ts INTEGER);")
+    if db.execute("SELECT COUNT(*) FROM editorial").fetchone().__getitem__(0) == 0:
+        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-101", "Magnifying Mirror Econ", "Global Digital Ad Shift: Direct Publisher Networks vs. High-Fee Middlemen", "Examining how regional businesses, NGOs, and global brands achieve 3x higher verified engagement using transparent CPC networks across South Asia, East Asia, and worldwide.", "WAC Economic Desk", 1732200000))
+        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-102", "Advertising Strategies", "Multi-Language & Cross-Border Outreach Playbook for Institutions & Brands", "Combining localized landing pages, verified trust badges, and multi-currency billing (NPR, USD, INR, EUR) to convert international audiences.", "WAC Strategy Desk", 1732203600))
     db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL, qr_img TEXT);")
     try:
         db.execute("ALTER TABLE settings ADD COLUMN qr_img TEXT;")
@@ -103,7 +108,11 @@ def render_nav(title: str, subpath: str) -> str:
         <div style="position:relative;">
             <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
             <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
-                <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a><a href="/guide" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a><a href="/documents" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a><a href="/feedback" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
+                <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a><a href="/sectors" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127757; 35 Global Sectors &amp; Institutions</a>
+                <a href="/editorial" style="display:block;padding:11px 14px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128269; Magnifying Mirror Econ &amp; Strategy</a>
+                <a href="/careers" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129309; Hiring &amp; Brand Ambassadors</a>
+                <a href="/editor" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9997;&#65039; Editor Panel (Admin Publish)</a>
+                <a href="/guide" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a><a href="/documents" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a><a href="/feedback" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
                 <a href="/simulate-app" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128241; Mobile App Simulator</a>
                 <a href="/deposit" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128179; Deposit Ad Credits (eSewa)</a>
                 <a href="/payout-hub" style="display:block;padding:10px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128184; eSewa Payouts &amp; History</a>
@@ -459,6 +468,97 @@ async def translate_batch(payload: dict):
     tasks = [asyncio.to_thread(_tr_one, target_code, t) for t in texts]
     out = await asyncio.gather(*tasks)
     return {"items": list(out)}
+
+
+@app.get("/sectors", response_class=HTMLResponse)
+async def global_sectors():
+    groups = [
+        ("1. International Bodies & Public Governance", "UN • WTO • WHO • IMF • ADB • UNESCO • Governments • Non-Profit Organizations • NGO / INGO • Military & Police Forces", "Official public awareness campaigns, multilateral procurement notices, humanitarian outreach, and verified civic announcements."),
+        ("2. Education, Science & Recognition", "Schools • Colleges • Universities • AI Research Labs • Nobel Academy & Academic Awards", "Global student admissions, international symposium announcements, AI innovation showcases, and academic recognition notices."),
+        ("3. Media, Entertainment & Culture", "Media Houses • Television Channels • Film Cities • Beauty Contests • Social Sites • Leading Society Influencers", "Cross-platform audience syndication, premiere promotions, creator link monetization, and broadcast sponsorship campaigns."),
+        ("4. Finance, Commerce, Logistics & Legal", "Banks • Stock Markets • Industries • Super Markets • Online Shopping • Auctions • Courier Services • Law Firms", "High-conversion CPC/banner acquisition, financial disclosures, retail seasonal drives, e-commerce traffic, and corporate notices."),
+        ("5. Aviation, Transit & Global Tourism", "Airlines • Railways • Transports • Tour & Travels", "New flight/rail route launches, regional transit advisories, hospitality packages, and international tourism campaigns."),
+        ("6. Global Sports & Championship Events", "FIFA World Cup • Cricket Boards • Wrestling • Riding & Equestrian Federations", "Tournament sponsorships, live broadcast alerts, ticketing drives, and global fan engagement campaigns.")
+    ]
+    cards = "".join([f'<div class="box"><span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">SECTOR VERTICAL</span><h3 style="margin:8px 0 4px 0;">{g.__getitem__(0)}</h3><div style="font-size:12px;color:#f59e0b;font-weight:bold;margin-bottom:6px;">{g.__getitem__(1)}</div><p style="font-size:12px;margin:0 0 10px 0;">{g.__getitem__(2)}</p><a href="/advertise" style="display:inline-block;background:#22c55e;color:#0f172a;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">Launch Sector Campaign &rarr;</a></div>' for g in groups])
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
+    <body>{render_nav("35 Global Sectors & Institutions", "Home / Targeted Sectors")}
+    <div class="box"><h2>Targeted Institutional &amp; Commercial Approach</h2><p style="font-size:12px;margin:0;">Tailored advertising, public notices, and global media outreach across 35 specialized sectors worldwide:</p></div>
+    {cards}{FOOTER}</body></html>"""
+
+@app.get("/editorial", response_class=HTMLResponse)
+async def editorial_hub(db: DBWrapper = Depends(get_db)):
+    rows = db.execute("SELECT ed_id, category, title, summary, author FROM editorial ORDER BY ts DESC").fetchall()
+    items = "".join([f'<div class="box"><span style="background:#c084fc;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">{r.__getitem__(1)}</span><h3 style="margin:8px 0 6px 0;">{r.__getitem__(2)}</h3><p style="font-size:13px;margin:0 0 8px 0;">{r.__getitem__(3)}</p><small style="color:#94a3b8;">By {r.__getitem__(4)} &bull; Ref: {r.__getitem__(0)}</small></div>' for r in rows])
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
+    <body>{render_nav("Magnifying Mirror Econ & Strategy", "Home / Editorial Insights")}
+    <div class="box" style="border-left:4px solid #c084fc;"><h2>Magnifying Mirror Econ &amp; Advertising Strategies</h2><p style="font-size:12px;margin:0;">Global economic intelligence, cross-border market insights, and high-ROI digital advertising strategies.</p></div>
+    {items}{FOOTER}</body></html>"""
+
+
+class EditorialReq(BaseModel):
+    pin: str
+    category: str
+    title: str
+    summary: str
+    author: str
+
+class CareerReq(BaseModel):
+    role: str
+    name: str
+    region: str
+    contact: str
+    pitch: str
+
+@app.get("/careers", response_class=HTMLResponse)
+async def careers_portal():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input,select,textarea{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#22c55e;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
+    <body>{render_nav("Hiring & Brand Ambassadors", "Home / Careers & Ambassadors")}
+    <div class="box"><h2>Hiring &amp; Global Brand Ambassador Program</h2>
+    <p style="font-size:12px;margin-top:0;">Join Worldwide Ad Center as a regional representative, institutional liaison, or Brand Ambassador:</p>
+    <select id="crole"><option>Brand Ambassador (Commission &amp; Referral Partner)</option><option>Regional Ad Sales &amp; Agency Coordinator</option><option>Institutional &amp; NGO Outreach Specialist</option><option>Technical Publisher Integration Engineer</option></select>
+    <input id="cname" placeholder="Full Name">
+    <input id="creg" placeholder="Country / Province / City">
+    <input id="ccnt" placeholder="Email, WhatsApp, or Telegram">
+    <textarea id="cpitch" rows="3" placeholder="Briefly describe your network, experience, or social reach..."></textarea>
+    <button class="btn" onclick="sendApp()">SUBMIT APPLICATION</button>
+    <p id="cres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+    <script>async function sendApp(){{const r=await fetch('/api/v1/apply-career',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{role:document.getElementById('crole').value,name:document.getElementById('cname').value,region:document.getElementById('creg').value,contact:document.getElementById('ccnt').value,pitch:document.getElementById('cpitch').value}})}});const d=await r.json();document.getElementById('cres').innerText=d.message;}}</script></body></html>"""
+
+@app.post("/api/v1/apply-career")
+async def apply_career(req: CareerReq, db: DBWrapper = Depends(get_db)):
+    aid = f"APP-{int(time.time()) % 100000}"
+    db.execute("INSERT INTO careers VALUES (?, ?, ?, ?, ?, ?, ?)", (aid, req.role, req.name, req.region, req.contact, req.pitch, int(time.time())))
+    db.commit()
+    send_telegram_alert(f"🤝 NEW HIRING / AMBASSADOR APPLICATION!\n• ID: {aid}\n• Role: {req.role}\n• Name: {req.name}\n• Region: {req.region}\n• Contact: {req.contact}\n• Pitch: {req.pitch}")
+    return {"message": f"Application {aid} submitted! Our leadership team (difft40y@gmail.com) has been notified via Telegram."}
+
+@app.get("/editor", response_class=HTMLResponse)
+async def editor_panel():
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input,select,textarea{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#f59e0b;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
+    <body>{render_nav("Editor Panel (Admin Publish)", "Home / Editor Panel")}
+    <div class="box"><h2>Admin Editor Panel</h2>
+    <p style="font-size:12px;margin-top:0;">Publish new <b>Magnifying Mirror Econ</b> reports, <b>Advertising Strategies</b>, or <b>Official Bulletins</b> live:</p>
+    <input id="epin" type="password" placeholder="Admin PIN (Default: 1234)">
+    <select id="ecat"><option>Magnifying Mirror Econ</option><option>Advertising Strategies</option><option>Institutional &amp; Global Bulletin</option></select>
+    <input id="etit" placeholder="Article / Strategy Headline">
+    <textarea id="esum" rows="4" placeholder="Write clear, concise analysis or announcement..."></textarea>
+    <input id="eaut" value="WAC Editorial Desk" placeholder="Author / Desk Name">
+    <button class="btn" onclick="pubEd()">PUBLISH TO LIVE PLATFORM</button>
+    <p id="eres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+    <script>async function pubEd(){{const r=await fetch('/api/v1/publish-editorial',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('epin').value,category:document.getElementById('ecat').value,title:document.getElementById('etit').value,summary:document.getElementById('esum').value,author:document.getElementById('eaut').value}})}});const d=await r.json();document.getElementById('eres').innerText=d.message||d.detail;}}</script></body></html>"""
+
+@app.post("/api/v1/publish-editorial")
+async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
+    valid_pin = row.__getitem__(0) if row else "1234"
+    if req.pin != valid_pin:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN")
+    eid = f"ED-{int(time.time()) % 100000}"
+    db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", (eid, req.category, req.title, req.summary, req.author, int(time.time())))
+    db.commit()
+    send_telegram_alert(f"✍️ NEW EDITORIAL PUBLISHED ({eid})!\n• Category: {req.category}\n• Title: {req.title}")
+    return {"message": f"Published {eid} live on /editorial!"}
 
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
