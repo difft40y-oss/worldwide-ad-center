@@ -100,7 +100,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             </a>
             <div>
                 <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div>
-                <div style="font-size:10px;color:#38bdf8;word-break:break-all;">{breadcrumb}</div>
+                <div id="wacUrl" style="font-size:10px;color:#38bdf8;word-break:break-all;">https://worldwide-ad-center-1.onrender.com</div><script>document.getElementById("wacUrl").innerText=window.location.href;</script>
             </div>
         </div>
         <div style="position:relative;">
