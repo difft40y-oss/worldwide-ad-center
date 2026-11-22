@@ -679,9 +679,9 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     combined = (ad_html + tn_html) or '<p style="color:#94a3b8;font-size:12px;">No matching ads or tenders found.</p>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}</style></head>
     <body>{render_nav("Universal Live Directory", "Home / Universal Directory")}
-    <div class="box"><h2>&#128269; Magnifying Mirror Econ &mdash; Universal Directory Search</h2>
+    <div class="box"><h2>Universal Global &amp; Local Directory</h2>
     <p style="font-size:12px;margin-top:0;">Search live sponsored campaigns, brands, and Nepal construction tenders in one unified index:</p>
-    <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;">&#128269; Magnifying Mirror Econ Search</button></form>
+    <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;" aria-label="Search">&#128269;</button></form>
     {combined}</div>{FOOTER}</body></html>"""
 
 @app.get("/verify-badge", response_class=HTMLResponse)
