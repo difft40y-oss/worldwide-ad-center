@@ -489,7 +489,10 @@ async def global_sectors():
 @app.get("/editorial", response_class=HTMLResponse)
 async def editorial_hub(db: DBWrapper = Depends(get_db)):
     rows = db.execute("SELECT ed_id, category, title, summary, author FROM editorial ORDER BY ts DESC").fetchall()
-    items = "".join([f'<div class="box"><span style="background:#c084fc;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">{r.__getitem__(1)}</span><h3 style="margin:8px 0 6px 0;">{r.__getitem__(2)}</h3><p style="font-size:13px;margin:0 0 8px 0;">{r.__getitem__(3)}</p><small style="color:#94a3b8;">By {r.__getitem__(4)} &bull; Ref: {r.__getitem__(0)}</small></div>' for r in rows])
+    items = ""
+    for r in rows:
+        eid, cat, tit, sm, aut = r[0], r[1], r[2], r[3], r[4]
+        items += f'<div class="box"><span style="background:#c084fc;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">{cat}</span><h3 style="margin:8px 0 6px 0;">{tit}</h3><p style="font-size:13px;margin:0 0 8px 0;">{sm}</p><small style="color:#94a3b8;">By {aut} &bull; Ref: {eid}</small></div>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
     <body>{render_nav("Magnifying Mirror Econ & Strategy", "Home / Editorial Insights")}
     <div class="box" style="border-left:4px solid #c084fc;"><h2>Magnifying Mirror Econ &amp; Advertising Strategies</h2><p style="font-size:12px;margin:0;">Global economic intelligence, cross-border market insights, and high-ROI digital advertising strategies.</p></div>
@@ -538,9 +541,9 @@ async def editor_panel():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input,select,textarea{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#f59e0b;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
     <body>{render_nav("Editor Panel (Admin Publish)", "Home / Editor Panel")}
     <div class="box"><h2>Admin Editor Panel</h2>
-    <p style="font-size:12px;margin-top:0;">Publish new <b>Magnifying Mirror Econ</b> reports, <b>Advertising Strategies</b>, or <b>Official Bulletins</b> live:</p>
+    <p style="font-size:12px;margin-top:0;">Publish new <b>Advertising Strategies</b> or <b>Institutional &amp; Global Bulletins</b> live:</p>
     <input id="epin" type="password" placeholder="Admin PIN (Default: 1234)">
-    <select id="ecat"><option>Magnifying Mirror Econ</option><option>Advertising Strategies</option><option>Institutional &amp; Global Bulletin</option></select>
+    <select id="ecat"><option>Advertising Strategies</option><option>Institutional &amp; Global Bulletin</option></select>
     <input id="etit" placeholder="Article / Strategy Headline">
     <textarea id="esum" rows="4" placeholder="Write clear, concise analysis or announcement..."></textarea>
     <input id="eaut" value="WAC Editorial Desk" placeholder="Author / Desk Name">
