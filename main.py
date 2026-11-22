@@ -90,55 +90,51 @@ def send_telegram_alert(message: str) -> str:
     except Exception as e:
         return str(e)
 
-def render_nav(title: str, subpath: str) -> str:
-    return f"""<div style="background:#1e293b;padding:12px 14px;border-radius:12px;border:1px solid #334155;margin-bottom:14px;position:relative;">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff;">
-            <span style="background:#0f172a;border:1px solid #38bdf8;padding:5px 9px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;">
-                <svg width="26" height="32" viewBox="0 0 60 74" xmlns="http://w3.org">
-                    <polygon points="6,4 54,34 22,34 56,68 6,68" fill="#dc143c" stroke="#003893" stroke-width="5" stroke-linejoin="round"/>
-                    <circle cx="19" cy="24" r="4.2" fill="#ffffff"/>
-                    <circle cx="21" cy="52" r="5.5" fill="#ffffff"/>
-                </svg>
-                <span style="font-weight:900;font-size:16px;color:#ffffff;letter-spacing:1.2px;">WAC</span>
-            </span>
-            <div><div style="font-weight:bold;font-size:14px;line-height:1.1;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div><div style="font-size:11px;color:#38bdf8;margin-top:2px;">{subpath} <span id="urlParam" style="color:#94a3b8;font-family:monospace;word-break:break-all;font-size:10px;"></span></div>
-    <script>document.getElementById("urlParam").innerText="("+window.location.href+")";</script></div>
-        </a>
+def render_nav(active_title: str, breadcrumb: str = "Home"):
+    return f"""<div style="background:#1e293b;padding:12px 14px;border-radius:12px;border:1px solid #334155;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <a href="/" aria-label="Home" style="display:flex;align-items:center;justify-content:center;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:4px 7px;text-decoration:none;">
+                <svg width="20" height="26" viewBox="0 0 30 38"><polygon points="0,0 30,15 11,15 30,38 0,38" fill="#DC143C" stroke="#003893" stroke-width="2.5"/><circle cx="8" cy="10" r="2.5" fill="#fff"/><circle cx="8" cy="28" r="3.5" fill="#fff"/></svg>
+                <span style="color:#fff;font-weight:900;font-size:13px;margin-left:5px;">WAC</span>
+            </a>
+            <div>
+                <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:0.3px;">WORLDWIDE AD CENTER</div>
+                <div style="font-size:10px;color:#38bdf8;word-break:break-all;">{breadcrumb}</div>
+            </div>
+        </div>
         <div style="position:relative;">
-            <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
-            <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
-                <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a><a href="/sectors" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127757; 35 Global Sectors &amp; Institutions</a>
-                <a href="/editorial" style="display:block;padding:11px 14px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128200; Advertising Strategies &amp; Bulletins</a>
-                <a href="/careers" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129309; Hiring &amp; Brand Ambassadors</a>
-                <a href="/editor" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9997;&#65039; Editor Panel (Admin Publish)</a>
-                <a href="/guide" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a><a href="/documents" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a><a href="/feedback" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
-                <a href="/simulate-app" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128241; Mobile App Simulator</a>
-                <a href="/deposit" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128179; Deposit Ad Credits (eSewa)</a>
-                <a href="/payout-hub" style="display:block;padding:10px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128184; eSewa Payouts &amp; History</a>
-                <a href="/tag-preview" style="display:block;padding:10px 14px;color:#a855f7;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128187; Website Ad Tag (&lt;script&gt;)</a>
-                <a href="/campaigns" style="display:block;padding:10px 14px;color:#ec4899;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128260; Rotating Ad Campaigns</a>
-                <a href="/faq" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
-                <a href="/about" style="display:block;padding:10px 14px;color:#cbd5e1;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
-                <a href="/privacy" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
-                <a href="/terms" style="display:block;padding:10px 14px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
-                <a href="/directory" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127760; Universal Live Directory</a>
-                <a href="/social-partners" style="display:block;padding:10px 14px;color:#f43f5e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128242; Social Partners (FB/TikTok/IG)</a>
-                <a href="/verify-badge" style="display:block;padding:10px 14px;color:#14b8a6;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
-                <a href="/gallery" style="display:block;padding:10px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
-                <a href="/settings" style="display:block;padding:10px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
-                <a href="javascript:void(0)" onclick="if(window.history.length>1){{window.history.back();}}else{{window.location.href='/';}}" style="display:block;padding:11px 14px;background:#ffffff;color:#000000;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
+            <button onclick="var m=document.getElementById('wacMenu');m.style.display=m.style.display==='block'?'none':'block';" aria-label="Menu" style="background:#0f172a;color:#38bdf8;border:1px solid #475569;border-radius:8px;width:40px;height:40px;font-size:18px;font-weight:bold;cursor:pointer;">&#8942;</button>
+            <div id="wacMenu" style="display:none;position:absolute;right:0;top:46px;width:230px;max-height:70vh;overflow-y:auto;background:#0f172a;border:1px solid #38bdf8;border-radius:10px;z-index:999;box-shadow:0 10px 25px rgba(0,0,0,0.6);">
+                <a href="/sectors" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127757; 35 Global Sectors &amp; Institutions</a>
+                <a href="/editorial" style="display:block;padding:10px 13px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128200; Advertising Strategies &amp; Bulletins</a>
+                <a href="/careers" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129309; Hiring &amp; Brand Ambassadors</a>
+                <a href="/editor" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9997;&#65039; Editor Panel (Admin Publish)</a>
+                <a href="/guide" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a>
+                <a href="/documents" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a>
+                <a href="/deposit" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128179; Deposit Ad Credits (eSewa)</a>
+                <a href="/social-partners" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128242; Social Partners (FB/TikTok/IG)</a>
+                <a href="/verify-badge" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
+                <a href="/gallery" style="display:block;padding:10px 13px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
+                <a href="/feedback" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
+                <a href="/faq" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
+                <a href="/about" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
+                <a href="/privacy" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
+                <a href="/terms" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
+                <a href="/settings" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
+                <a href="/" onclick="document.getElementById('wacMenu').style.display='none';" style="display:block;padding:10px 13px;color:#ef4444;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
             </div>
         </div>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid #334155;">
-        <a href="/" style="background:#0f172a;color:#e2e8f0;border:1px solid #475569;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Home</a>
-        <a href="/tenders" style="background:#38bdf8;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Tenders &amp; Bids</a>
-        <a href="/agencies" style="background:#f59e0b;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">For Agencies</a>
-        <a href="/advertise" style="background:#14b8a6;color:#0f172a;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Advertise</a>
+    <div style="display:flex;justify-content:flex-start;gap:8px;margin-bottom:8px;">
+        <a href="/" aria-label="Home" style="display:flex;align-items:center;justify-content:center;width:44px;height:40px;background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;text-decoration:none;font-size:17px;">&#127968;</a>
+        <a href="/directory" aria-label="Search" style="display:flex;align-items:center;justify-content:center;width:44px;height:40px;background:#38bdf8;color:#0f172a;border-radius:8px;text-decoration:none;font-size:17px;">&#128269;</a>
+        <a href="/tenders" aria-label="Tenders" style="display:flex;align-items:center;justify-content:center;width:44px;height:40px;background:#0284c7;color:#fff;border-radius:8px;text-decoration:none;font-size:17px;">&#127959;&#65039;</a>
+        <a href="/agencies" aria-label="Agencies" style="display:flex;align-items:center;justify-content:center;width:44px;height:40px;background:#f59e0b;color:#0f172a;border-radius:8px;text-decoration:none;font-size:17px;">&#127970;</a>
+        <a href="/advertise" aria-label="Advertise" style="display:flex;align-items:center;justify-content:center;width:44px;height:40px;background:#10b981;color:#0f172a;border-radius:8px;text-decoration:none;font-size:17px;">&#128226;</a>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;">
-        <div style="font-size:12px;color:#94a3b8;">Section: <b style="color:#fff;">{title}</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <div style="font-size:11px;color:#94a3b8;">Section: <b style="color:#fff;">{active_title}</b></div>
         <select id="langSel" onchange="applyLang(this.value)" style="background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;border-radius:6px;padding:3px 6px;font-size:11px;font-weight:bold;min-height:28px;width:auto;">
             <option value="en">&#127760; English</option>
             <option value="zh">&#127464;&#127475; 中文 (Chinese)</option>
@@ -160,9 +156,9 @@ def render_nav(title: str, subpath: str) -> str:
     async function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
-        if(!fullDict){{const r=await fetch('/api/v1/dict.json');fullDict=await r.json();}}const m = fullDict.hasOwnProperty(l)?fullDict[l]:{{}};
+        if(!fullDict){{const r=await fetch('/api/v1/dict.json');fullDict=await r.json();}}
+        const m = fullDict.hasOwnProperty(l)?fullDict[l]:{{}};
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-        const todo = [];
         let node;
         while((node = walker.nextNode())){{
             const p = node.parentElement;
@@ -175,25 +171,7 @@ def render_nav(title: str, subpath: str) -> str:
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
             else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else if(t.length > 2 && !t.startsWith('http')){{
-                const ck = 'wac3_' + l + '_' + t;
-                const c = localStorage.getItem(ck);
-                if(c){{node.nodeValue = raw.replace(t, c);}}
-                else{{todo.push({{node:node, raw:raw, t:t, ck:ck}});}}
-            }}
-        }}
-        for(const item of todo){{
-            try{{
-                const tl = l==='zh'?'zh-CN':l;
-                const u = 'https://googleapis.com' + tl + '&dt=t&q=' + encodeURIComponent(item.t);
-                const res = await fetch(u);
-                const data = await res.json();
-                const tr = data.at(0).map(x=>x.at(0)).join('');
-                if(tr && tr !== item.t){{
-                    localStorage.setItem(item.ck, tr);
-                    item.node.nodeValue = item.raw.replace(item.t, tr);
-                }}
-            }}catch(e){{}}
+            else{{node.nodeValue = raw;}}
         }}
     }}
     setTimeout(()=>{{
