@@ -488,6 +488,11 @@ async def global_sectors():
 
 @app.get("/editorial", response_class=HTMLResponse)
 async def editorial_hub(db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS editorial (ed_id TEXT PRIMARY KEY, category TEXT, title TEXT, summary TEXT, author TEXT, ts INTEGER);")
+    if db.execute("SELECT COUNT(*) FROM editorial").fetchone().__getitem__(0) == 0:
+        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-101", "Magnifying Mirror Econ", "Global Digital Ad Shift: Direct Publisher Networks vs. High-Fee Middlemen", "Examining how regional businesses, NGOs, and global brands achieve 3x higher verified engagement using transparent CPC networks across South Asia, East Asia, and worldwide.", "WAC Economic Desk", 1732200000))
+        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-102", "Advertising Strategies", "Multi-Language & Cross-Border Outreach Playbook for Institutions & Brands", "Combining localized landing pages, verified trust badges, and multi-currency billing (NPR, USD, INR, EUR) to convert international audiences.", "WAC Strategy Desk", 1732203600))
+        db.commit()
     rows = db.execute("SELECT ed_id, category, title, summary, author FROM editorial ORDER BY ts DESC").fetchall()
     items = ""
     for r in rows:
@@ -553,6 +558,7 @@ async def editor_panel():
 
 @app.post("/api/v1/publish-editorial")
 async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS editorial (ed_id TEXT PRIMARY KEY, category TEXT, title TEXT, summary TEXT, author TEXT, ts INTEGER);")
     row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
     valid_pin = row.__getitem__(0) if row else "1234"
     if req.pin != valid_pin:
