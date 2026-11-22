@@ -59,8 +59,8 @@ def init_db():
     db.execute("CREATE TABLE IF NOT EXISTS deposits (dep_id TEXT PRIMARY KEY, advertiser TEXT, amount REAL, txn_code TEXT, contact TEXT, ts INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS editorial (ed_id TEXT PRIMARY KEY, category TEXT, title TEXT, summary TEXT, author TEXT, ts INTEGER);")
     db.execute("CREATE TABLE IF NOT EXISTS careers (app_id TEXT PRIMARY KEY, role TEXT, name TEXT, region TEXT, contact TEXT, pitch TEXT, ts INTEGER);")
+    db.execute("DELETE FROM editorial WHERE ed_id='ED-101'")
     if db.execute("SELECT COUNT(*) FROM editorial").fetchone().__getitem__(0) == 0:
-        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-101", "Magnifying Mirror Econ", "Global Digital Ad Shift: Direct Publisher Networks vs. High-Fee Middlemen", "Examining how regional businesses, NGOs, and global brands achieve 3x higher verified engagement using transparent CPC networks across South Asia, East Asia, and worldwide.", "WAC Economic Desk", 1732200000))
         db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-102", "Advertising Strategies", "Multi-Language & Cross-Border Outreach Playbook for Institutions & Brands", "Combining localized landing pages, verified trust badges, and multi-currency billing (NPR, USD, INR, EUR) to convert international audiences.", "WAC Strategy Desk", 1732203600))
     db.execute("CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, default_wallet TEXT, cpc_rate REAL, qr_img TEXT);")
     try:
@@ -109,7 +109,7 @@ def render_nav(title: str, subpath: str) -> str:
             <button onclick="var m=document.getElementById('dotMenu');m.style.display=m.style.display==='block'?'none':'block';" style="background:#0f172a;color:#fff;border:1px solid #475569;border-radius:8px;padding:6px 11px;font-size:16px;font-weight:bold;cursor:pointer;">&#8942;</button>
             <div id="dotMenu" style="display:none;position:absolute;right:0;top:38px;background:#0f172a;border:1px solid #475569;border-radius:10px;min-width:190px;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,0.5);overflow:hidden;">
                 <a href="/" style="display:block;padding:10px 14px;color:#fff;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127968; Main Dashboard Hub</a><a href="/sectors" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127757; 35 Global Sectors &amp; Institutions</a>
-                <a href="/editorial" style="display:block;padding:11px 14px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128269; Magnifying Mirror Econ &amp; Strategy</a>
+                <a href="/editorial" style="display:block;padding:11px 14px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128200; Advertising Strategies &amp; Bulletins</a>
                 <a href="/careers" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129309; Hiring &amp; Brand Ambassadors</a>
                 <a href="/editor" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9997;&#65039; Editor Panel (Admin Publish)</a>
                 <a href="/guide" style="display:block;padding:11px 14px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a><a href="/documents" style="display:block;padding:11px 14px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a><a href="/feedback" style="display:block;padding:11px 14px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
@@ -489,8 +489,8 @@ async def global_sectors():
 @app.get("/editorial", response_class=HTMLResponse)
 async def editorial_hub(db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS editorial (ed_id TEXT PRIMARY KEY, category TEXT, title TEXT, summary TEXT, author TEXT, ts INTEGER);")
+    db.execute("DELETE FROM editorial WHERE ed_id='ED-101'")
     if db.execute("SELECT COUNT(*) FROM editorial").fetchone().__getitem__(0) == 0:
-        db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-101", "Magnifying Mirror Econ", "Global Digital Ad Shift: Direct Publisher Networks vs. High-Fee Middlemen", "Examining how regional businesses, NGOs, and global brands achieve 3x higher verified engagement using transparent CPC networks across South Asia, East Asia, and worldwide.", "WAC Economic Desk", 1732200000))
         db.execute("INSERT INTO editorial VALUES (?, ?, ?, ?, ?, ?)", ("ED-102", "Advertising Strategies", "Multi-Language & Cross-Border Outreach Playbook for Institutions & Brands", "Combining localized landing pages, verified trust badges, and multi-currency billing (NPR, USD, INR, EUR) to convert international audiences.", "WAC Strategy Desk", 1732203600))
         db.commit()
     rows = db.execute("SELECT ed_id, category, title, summary, author FROM editorial ORDER BY ts DESC").fetchall()
@@ -499,8 +499,8 @@ async def editorial_hub(db: DBWrapper = Depends(get_db)):
         eid, cat, tit, sm, aut = r[0], r[1], r[2], r[3], r[4]
         items += f'<div class="box"><span style="background:#c084fc;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">{cat}</span><h3 style="margin:8px 0 6px 0;">{tit}</h3><p style="font-size:13px;margin:0 0 8px 0;">{sm}</p><small style="color:#94a3b8;">By {aut} &bull; Ref: {eid}</small></div>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
-    <body>{render_nav("Magnifying Mirror Econ & Strategy", "Home / Editorial Insights")}
-    <div class="box" style="border-left:4px solid #c084fc;"><h2>Magnifying Mirror Econ &amp; Advertising Strategies</h2><p style="font-size:12px;margin:0;">Global economic intelligence, cross-border market insights, and high-ROI digital advertising strategies.</p></div>
+    <body>{render_nav("Advertising Strategies & Bulletins", "Home / Advertising Strategies")}
+    <div class="box" style="border-left:4px solid #c084fc;"><h2>Advertising Strategies &amp; Institutional Bulletins</h2><p style="font-size:12px;margin:0;">Actionable digital advertising strategies, multi-currency outreach playbooks, and verified institutional bulletins.</p></div>
     {items}{FOOTER}</body></html>"""
 
 
@@ -679,9 +679,9 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     combined = (ad_html + tn_html) or '<p style="color:#94a3b8;font-size:12px;">No matching ads or tenders found.</p>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}</style></head>
     <body>{render_nav("Universal Live Directory", "Home / Universal Directory")}
-    <div class="box"><h2>Universal Global &amp; Local Directory</h2>
+    <div class="box"><h2>&#128269; Magnifying Mirror Econ &mdash; Universal Directory Search</h2>
     <p style="font-size:12px;margin-top:0;">Search live sponsored campaigns, brands, and Nepal construction tenders in one unified index:</p>
-    <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;">Search</button></form>
+    <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;">&#128269; Magnifying Mirror Econ Search</button></form>
     {combined}</div>{FOOTER}</body></html>"""
 
 @app.get("/verify-badge", response_class=HTMLResponse)
