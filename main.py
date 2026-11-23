@@ -641,15 +641,15 @@ async def social_partners_page(db: DBWrapper = Depends(get_db)):
 @app.get("/directory", response_class=HTMLResponse)
 async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     for sd in [
-        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station (Lumbini Province)", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply (Bagmati Province)", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97219", "Biratnagar River Embankment & Flood Protection (Koshi Province)", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction (Madhesh Province)", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion (Karnali Province)", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply (Sudurpashchim Province)", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
+        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station", "Lumbini Province", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply", "Bagmati Province", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97219", "Biratnagar River Embankment & Flood Protection", "Koshi Province", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction", "Madhesh Province", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion", "Karnali Province", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply", "Sudurpashchim Province", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
     ]:
-        if db.execute("SELECT COUNT(*) FROM tenders WHERE bid_id=?", (sd[0],)).fetchone()[0] == 0:
-            db.execute("INSERT INTO tenders (bid_id, title, issuer, category, deadline, contact_url, status, ts) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
+        if db.execute("SELECT COUNT(*) FROM tenders WHERE tender_id=?", (sd[0],)).fetchone()[0] == 0:
+            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved, ts) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
     db.commit()
     like_q = f"%{q}%"
     ads = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1 AND (headline LIKE ? OR subtext LIKE ?) ORDER BY id DESC", (like_q, like_q)).fetchall()
@@ -738,15 +738,15 @@ async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_portal(db: DBWrapper = Depends(get_db)):
     for sd in [
-        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station (Lumbini Province)", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply (Bagmati Province)", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97219", "Biratnagar River Embankment & Flood Protection (Koshi Province)", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction (Madhesh Province)", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion (Karnali Province)", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
-        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply (Sudurpashchim Province)", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
+        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station", "Lumbini Province", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply", "Bagmati Province", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97219", "Biratnagar River Embankment & Flood Protection", "Koshi Province", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction", "Madhesh Province", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion", "Karnali Province", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply", "Sudurpashchim Province", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
     ]:
-        if db.execute("SELECT COUNT(*) FROM tenders WHERE bid_id=?", (sd[0],)).fetchone()[0] == 0:
-            db.execute("INSERT INTO tenders (bid_id, title, issuer, category, deadline, contact_url, status, ts) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
+        if db.execute("SELECT COUNT(*) FROM tenders WHERE tender_id=?", (sd[0],)).fetchone()[0] == 0:
+            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved, ts) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
     db.commit()
     rows = db.execute("SELECT tender_id, title, issuer, category, deadline, contact_url FROM tenders WHERE approved=1 ORDER BY tender_id DESC LIMIT 20").fetchall()
     cards = ""
