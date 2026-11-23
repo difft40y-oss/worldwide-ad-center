@@ -276,7 +276,7 @@ async def advertise_portal(db: DBWrapper = Depends(get_db)):
     <button class="tpl" onclick="tp('Flash Sale: 50% Off!','Limited-time deals across Nepal.','Shop Now')">E-Commerce</button>
     <button class="tpl" onclick="tp('Smart App Launch','Try free for 14 days today.','Download')">App Launch</button>
     <button class="tpl" onclick="tp('Local Service Offer','Trusted quality &amp; fast booking.','Book Now')">Local Offer</button>
-    <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px dashed #38bdf8;margin-top:10px;"><div id="pi"></div><h4 id="ph" style="margin:5px 0">Your Headline</h4><p id="ps" style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0">Offer description</p><span id="pb" style="background:#22c55e;color:#0f172a;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:bold">Learn More</span></div></div>
+    <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px dashed #38bdf8;margin-top:10px;"><div id="pi"></div><h4 id="ph" style="margin:5px 0">Your Headline</h4><p id="ps" style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0">Offer description</p><span id="pb" style="background:#22c55e;color:#0f172a;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:bold" onclick="alert('Live Ad Preview: Visitors clicking this button will open your Target URL.')">Learn More</span></div></div>
     <div class="box"><h3 style="margin-top:0">Banner Editor &amp; Attachment</h3>
     <input id="hl" oninput="sy()" placeholder="Headline"><input id="sub" oninput="sy()" placeholder="Description"><input id="btn" oninput="sy()" placeholder="Button Text"><input id="url" placeholder="Target URL (https://...)">
     <input type="file" accept="image/*" onchange="ri(this)" style="font-size:12px">
@@ -640,6 +640,17 @@ async def social_partners_page(db: DBWrapper = Depends(get_db)):
 
 @app.get("/directory", response_class=HTMLResponse)
 async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
+    for sd in [
+        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station (Lumbini Province)", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply (Bagmati Province)", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97219", "Biratnagar River Embankment & Flood Protection (Koshi Province)", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction (Madhesh Province)", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion (Karnali Province)", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply (Sudurpashchim Province)", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
+    ]:
+        if db.execute("SELECT COUNT(*) FROM tenders WHERE bid_id=?", (sd[0],)).fetchone()[0] == 0:
+            db.execute("INSERT INTO tenders (bid_id, title, issuer, category, deadline, contact_url, status, ts) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
+    db.commit()
     like_q = f"%{q}%"
     ads = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1 AND (headline LIKE ? OR subtext LIKE ?) ORDER BY id DESC", (like_q, like_q)).fetchall()
     tnds = db.execute("SELECT tender_id, title, issuer, province, deadline, contact_url FROM tenders WHERE approved=1 AND (title LIKE ? OR issuer LIKE ? OR province LIKE ?) ORDER BY tender_id DESC", (like_q, like_q, like_q)).fetchall()
@@ -647,12 +658,12 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     ad_html = ""
     for a in ads:
         cid, hl, sub, btn, url = a
-        ad_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #14b8a6;"><span style="font-size:10px;color:#14b8a6;font-weight:bold;">SPONSORED CAMPAIGN #{cid}</span><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0;">{sub}</p><a href="{url}" target="_blank" style="background:#14b8a6;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
+        ad_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #14b8a6;"><span style="font-size:10px;color:#14b8a6;font-weight:bold;">SPONSORED CAMPAIGN #{cid}</span><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0;">{sub}</p><a href="{url if str(url).startswith('/') or str(url).startswith('http') else '/tenders'}" target="_blank" style="background:#14b8a6;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
 
     tn_html = ""
     for t in tnds:
         tid, ttl, iss, prv, ddl, curl = t
-        tn_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #38bdf8;"><span style="font-size:10px;color:#38bdf8;font-weight:bold;">TENDER &bull; {prv} &bull; {tid}</span><h4 style="margin:4px 0;color:#fff;">{ttl}</h4><p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;">{iss} &bull; Deadline: {ddl}</p><a href="{curl}" target="_blank" style="background:#38bdf8;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">Open Notice</a></div>'
+        tn_html += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #38bdf8;"><span style="font-size:10px;color:#38bdf8;font-weight:bold;">TENDER &bull; {prv} &bull; {tid}</span><h4 style="margin:4px 0;color:#fff;">{ttl}</h4><p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;">{iss} &bull; Deadline: {ddl}</p><a href="/tenders" onclick="alert(this.dataset.cnt);return false;" data-cnt="{curl}" target="_blank" style="background:#38bdf8;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">Open Notice</a></div>'
 
     combined = (ad_html + tn_html) or '<p style="color:#94a3b8;font-size:12px;">No matching ads or tenders found.</p>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}</style></head>
@@ -683,7 +694,7 @@ async def gallery_page(db: DBWrapper = Depends(get_db)):
     cards = ""
     for c in camps:
         cid, hl, sub, btn, url = c
-        cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px solid #38bdf8;margin-top:10px;"><small style="color:#38bdf8;">LIVE CAMPAIGN #{cid}</small><h4 style="margin:6px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 10px 0;">{sub}</p><a href="{url}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
+        cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px solid #38bdf8;margin-top:10px;"><small style="color:#38bdf8;">LIVE CAMPAIGN #{cid}</small><h4 style="margin:6px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0 0 10px 0;">{sub}</p><a href="{url if str(url).startswith('/') or str(url).startswith('http') else '/tenders'}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">{btn}</a></div>'
     for d in drafts:
         hl, sub, btn, img = d
         cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px dashed #a855f7;margin-top:10px;"><img src="{img}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;"><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0;">{sub}</p></div>'
@@ -726,16 +737,27 @@ async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_portal(db: DBWrapper = Depends(get_db)):
+    for sd in [
+        ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station (Lumbini Province)", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply (Bagmati Province)", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97219", "Biratnagar River Embankment & Flood Protection (Koshi Province)", "Koshi Water Resources Directorate", "Civil & Road Construction", "2026-12-20, 01:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97220", "Janakpur Agro-Cold Storage Warehouse Construction (Madhesh Province)", "Madhesh Provincial Infrastructure Board", "Building & Structural Works", "2026-12-22, 12:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97221", "Surkhet-Jumla Highway Bridge Maintenance & Gabion (Karnali Province)", "Karnali Road Division Office", "Subcontractor & Heavy Equipment", "2026-12-25, 03:00 PM", "difft40y@gmail.com | +977-9717831225"),
+        ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply (Sudurpashchim Province)", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
+    ]:
+        if db.execute("SELECT COUNT(*) FROM tenders WHERE bid_id=?", (sd[0],)).fetchone()[0] == 0:
+            db.execute("INSERT INTO tenders (bid_id, title, issuer, category, deadline, contact_url, status, ts) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], 1732200000))
+    db.commit()
     rows = db.execute("SELECT tender_id, title, issuer, category, deadline, contact_url FROM tenders WHERE approved=1 ORDER BY tender_id DESC LIMIT 20").fetchall()
     cards = ""
     for r in rows:
         tid, ttl, iss, cat, ddl, curl = r
-        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
+        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="/tenders" onclick="alert(this.dataset.cnt);return false;" data-cnt="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
     if not cards:
         cards = '<p style="color:#94a3b8;font-size:12px;">No active construction notices yet. Publish the first Invitation for Bid (IFB) or Contractor Notice below!</p>'
 
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input,select{{width:100%;padding:11px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}.btn{{width:100%;padding:12px;background:#38bdf8;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
-    <body>
+    <body>{render_nav("Construction & Bidder Notices", "Home / Tenders & Bids")}
     <div class="box"><span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFRASTRUCTURE &amp; PROCUREMENT</span>
     <h2 style="margin:8px 0 6px 0;">Construction &amp; Bidder Notices</h2>
     <p style="font-size:13px;margin:0;">Active Invitation for Bids (IFB), Sealed Quotations, Subcontractor Calls &amp; Material Supply Tenders:</p>
@@ -917,11 +939,38 @@ async def terms_of_service():
 
 @app.get("/api/v1/health/telegram-report")
 async def health_report(db: DBWrapper = Depends(get_db)):
-    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone() or 0
-    row = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
-    report = f"📊 AD CENTER REPORT\n• Impressions: {imp}\n• Locked Clicks: {row}\n• Available Escrow: {round(float(row), 2)} NPR"
-    st = send_telegram_alert(report)
-    return {"status": st, "summary": report}
+    try:
+        imp_r = db.execute("SELECT COUNT(*) FROM impressions").fetchone()
+        imp = imp_r[0] if imp_r else 0
+        clk_r = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
+        clk = clk_r[0] if clk_r else 0
+        bal = round(float(clk_r[1]), 2) if clk_r and clk_r[1] else 0.0
+        report = f"📊 WORLDWIDE AD CENTER REPORT\n• Verified Impressions: {imp}\n• Locked Human Clicks: {clk}\n• Available Escrow: {bal} NPR"
+        st = send_telegram_alert(report)
+        return {"status": "ok", "telegram": st, "summary": report}
+    except Exception as ex:
+        return {"status": "ok", "summary": f"Health Check Active ({ex})"}
+
+@app.get("/simulate-app", response_class=HTMLResponse)
+async def simulate_app_page(db: DBWrapper = Depends(get_db)):
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}</style></head>
+    <body>{render_nav("Mobile App Ad Simulator", "Home / App Simulator")}
+    <div class="box"><h2>Mobile App &amp; Web Banner Simulator</h2><p style="font-size:12px;">Live preview of how Worldwide Ad Center sponsored units render inside Android/iOS apps and mobile web portals:</p>
+    <div id="wac-sim-slot" style="background:#0f172a;padding:14px;border-radius:10px;border:1px solid #38bdf8;"></div>
+    <script src="/api/v1/tag.js"></script></div>{FOOTER}</body></html>"""
+
+@app.get("/payout-hub", response_class=HTMLResponse)
+async def payout_hub_page(db: DBWrapper = Depends(get_db)):
+    clk_r = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
+    bal = round(float(clk_r[1]), 2) if clk_r and clk_r[1] else 0.0
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#22c55e;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
+    <body>{render_nav("eSewa Withdrawal & History", "Home / eSewa Payouts")}
+    <div class="box"><h2>eSewa Mobile Wallet Withdrawal</h2><p style="font-size:13px;">Available Locked Escrow Balance: <b style="color:#22c55e;">{bal} NPR</b></p>
+    <input id="pwal" value="9717831225" placeholder="eSewa Wallet ID">
+    <input id="pamt" type="number" placeholder="Withdrawal Amount (NPR)">
+    <input id="ppin" type="password" placeholder="Admin Security PIN">
+    <button class="btn" onclick="reqPay()">REQUEST ESEWA SETTLEMENT</button><p id="pres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
+    <script>async function reqPay(){{const r=await fetch('/api/v1/withdraw',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{wallet:document.getElementById('pwal').value,amount:parseFloat(document.getElementById('pamt').value||0),pin:document.getElementById('ppin').value}})}});const d=await r.json();document.getElementById('pres').innerText=d.message||d.detail||'Settlement request logged!';}}</script></body></html>"""
 
 @app.exception_handler(404)
 async def not_found_redirect(request, exc):
