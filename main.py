@@ -649,7 +649,7 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
         ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply", "Sudurpashchim Province", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
     ]:
         if db.execute("SELECT COUNT(*) FROM tenders WHERE tender_id=?", (sd[0],)).fetchone()[0] == 0:
-            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved, ts) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], sd[6], 1732200000))
+            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved) VALUES (?, ?, ?, ?, ?, ?, ?, 1)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], sd[6]))
     db.commit()
     like_q = f"%{q}%"
     ads = db.execute("SELECT id, headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1 AND (headline LIKE ? OR subtext LIKE ?) ORDER BY id DESC", (like_q, like_q)).fetchall()
@@ -746,7 +746,7 @@ async def tenders_portal(db: DBWrapper = Depends(get_db)):
         ("BID-97222", "Dhangadhi Technical School Lab Equipment Supply", "Sudurpashchim Province", "Sudurpashchim Education & Works Office", "Consultancy & Engineering", "2026-12-28, 12:00 PM", "difft40y@gmail.com | +977-9717831225")
     ]:
         if db.execute("SELECT COUNT(*) FROM tenders WHERE tender_id=?", (sd[0],)).fetchone()[0] == 0:
-            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved, ts) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], sd[6], 1732200000))
+            db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved) VALUES (?, ?, ?, ?, ?, ?, ?, 1)", (sd[0], sd[1], sd[2], sd[3], sd[4], sd[5], sd[6]))
     db.commit()
     rows = db.execute("SELECT tender_id, title, issuer, category, deadline, contact_url FROM tenders WHERE approved=1 ORDER BY tender_id DESC LIMIT 20").fetchall()
     cards = ""
@@ -787,7 +787,7 @@ async def submit_tender(req: TenderReq, db: DBWrapper = Depends(get_db)):
     tid = f"BID-{int(time.time()) % 1000000}"
     is_admin = (req.pin == ADMIN_PIN and req.pin != "")
     approved = 1 if is_admin else 0
-    db.execute("INSERT INTO tenders (tender_id, title, issuer, category, deadline, contact_url, approved) VALUES (?, ?, ?, ?, ?, ?, ?)", (tid, req.title, req.issuer, req.category, req.deadline, req.contact_url, approved))
+    db.execute("INSERT INTO tenders (tender_id, title, issuer, category, province, deadline, contact_url, approved) VALUES (?, ?, ?, ?, ?, ?, ?, 1)", (tid, req.title, req.issuer, req.category, req.deadline, req.contact_url, approved))
     db.commit()
     st_txt = "PUBLISHED LIVE" if is_admin else "PENDING REVIEW"
     send_telegram_alert(f"🏗️ CONSTRUCTION / BIDDER NOTICE ({st_txt})!\n• ID: {tid}\n• Title: {req.title}\n• Issuer: {req.issuer}\n• Category: {req.category}\n• Deadline: {req.deadline}\n• Contact: {req.contact_url}")
