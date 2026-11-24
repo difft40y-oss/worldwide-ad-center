@@ -672,7 +672,7 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
 We invite your organization to partner with Worldwide Ad Center (https://worldwide-ad-center-1.onrender.com) for direct, cookie-free digital outreach at 2.50 NPR per verified click.
 
 Best regards,
-Juna • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
+Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
     <div style="display:flex;flex-wrap:wrap;gap:8px;">
         <button class="btn" style="background:#22c55e;color:#0f172a;" onclick="sendM('sent')">SEND &amp; LOG TO SENT</button>
         <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="sendM('outbox')">QUEUE IN OUTBOX</button>
@@ -682,7 +682,7 @@ Juna • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
     <div id="prefs" class="box"><h3>Email &amp; Notification Preferences</h3>
     <p style="font-size:12px;margin:4px 0;">Primary Desk Email: <b>difft40y@gmail.com</b> &bull; Telegram Alerts: <b>@WorldwideAdCenterNotificationBot</b></p>
     <select id="pnotif"><option>Instant Telegram + Mail Hub Sync (Recommended)</option><option>Daily Summary Digest Only</option><option>Quiet Mode (Log in Inbox Only)</option></select>
-    <input id="psig" value="Juna • Founder, Worldwide Ad Center | difft40y@gmail.com | +977-9717831225" placeholder="Default Email Signature">
+    <input id="psig" value="Hari Prasad Parajuli • Founder, Worldwide Ad Center | difft40y@gmail.com | +977-9717831225" placeholder="Default Email Signature">
     <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="document.getElementById('pres').innerText='Email preferences & signature saved!';">SAVE EMAIL PREFERENCES</button>
     <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
     <script>
