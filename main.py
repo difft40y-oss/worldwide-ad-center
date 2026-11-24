@@ -120,7 +120,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                 <a href="/faq" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
                 <a href="/about" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
                 <a href="/privacy" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
-                <a href="/terms" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a>
+                <a href="/terms" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a> &bull; <a href="/sitemap.xml" style="color:#38bdf8;text-decoration:none;">Sitemap</a>
                 <a href="/status" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128269; Track Application / Deposit ID</a>
                 <a href="/settings" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
                 <a href="/" onclick="document.getElementById('wacMenu').style.display='none';" style="display:block;padding:10px 13px;color:#ef4444;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
@@ -187,7 +187,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
     </script>
 </div>"""
 
-FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center. All Rights Reserved. &bull; Gandaki Province, Nepal</span></div>'
+FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a> &bull; <a href="/sitemap.xml" style="color:#38bdf8;text-decoration:none;">Sitemap</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center. All Rights Reserved. &bull; Gandaki Province, Nepal</span></div>'
 
 
 @app.get("/api/v1/dict.json")
@@ -562,6 +562,8 @@ async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/status", response_class=HTMLResponse)
 async def status_tracker(ref: str = "", db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS careers (app_id TEXT PRIMARY KEY, role TEXT, name TEXT, region TEXT, contact TEXT, pitch TEXT, ts INTEGER);")
+    db.execute("CREATE TABLE IF NOT EXISTS deposits (dep_id TEXT PRIMARY KEY, advertiser TEXT, amount REAL, txn_code TEXT, contact TEXT, ts INTEGER);")
     msg = ""
     r_clean = ref.strip().upper()
     if r_clean:
