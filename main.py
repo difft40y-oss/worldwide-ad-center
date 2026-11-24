@@ -121,6 +121,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                 <a href="/about" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
                 <a href="/privacy" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
                 <a href="/terms" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a> &bull; <a href="/sitemap.xml" style="color:#38bdf8;text-decoration:none;">Sitemap</a>
+                <a href="/analytics" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128202; Live Network &amp; Campaign Analytics</a>
                 <a href="/status" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128269; Track Application / Deposit ID</a>
                 <a href="/settings" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
                 <a href="/" onclick="document.getElementById('wacMenu').style.display='none';" style="display:block;padding:10px 13px;color:#ef4444;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
@@ -197,7 +198,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -559,6 +560,34 @@ async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
     db.commit()
     send_telegram_alert(f"✍️ NEW EDITORIAL PUBLISHED ({eid})!\n• Category: {req.category}\n• Title: {req.title}")
     return {"message": f"Published {eid} live on /editorial!"}
+
+@app.get("/analytics", response_class=HTMLResponse)
+async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
+    imp_r = db.execute("SELECT COUNT(*) FROM impressions").fetchone()
+    imp = imp_r.__getitem__(0) if imp_r else 0
+    clk_r = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
+    clk = clk_r.__getitem__(0) if clk_r else 0
+    esc = round(float(clk_r.__getitem__(1)), 2) if clk_r and clk_r.__getitem__(1) else 0.0
+    ctr = round((clk / imp * 100), 2) if imp > 0 else 0.0
+    t_cnt = db.execute("SELECT COUNT(*) FROM tenders WHERE approved=1").fetchone().__getitem__(0)
+    camps = db.execute("SELECT id, headline, btn_text, active FROM ad_campaigns ORDER BY id DESC").fetchall()
+    bars = ""
+    for c in camps:
+        cid, hl, bt, act = c.__getitem__(0), c.__getitem__(1), c.__getitem__(2), c.__getitem__(3)
+        st = "LIVE" if act == 1 else "PENDING"
+        col = "#22c55e" if act == 1 else "#f59e0b"
+        bars += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid {col};"><div style="display:flex;justify-content:space-between;font-size:11px;color:{col};font-weight:bold;"><span>CAMPAIGN #AD-{cid}</span><span>{st}</span></div><div style="color:#fff;font-size:13px;font-weight:bold;margin:4px 0;">{hl}</div><div style="font-size:11px;color:#94a3b8;">CTA: {bt} &bull; Rate: 2.50 NPR / Verified Click</div></div>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:20px;font-weight:bold;color:#22c55e}}</style></head>
+    <body>{render_nav("Live Network & Campaign Analytics", "Home / Analytics")}
+    <div class="box"><h2>Live Network Performance Ledger</h2><p style="font-size:12px;">Real-time verified delivery metrics streamed from Cloud PostgreSQL:</p>
+    <div class="grid">
+        <div class="stat"><div class="val">{imp}</div><div style="font-size:10px;color:#94a3b8;">VERIFIED IMPRESSIONS</div></div>
+        <div class="stat"><div class="val">{clk}</div><div style="font-size:10px;color:#94a3b8;">GUARDED HUMAN CLICKS</div></div>
+        <div class="stat"><div class="val">{ctr}%</div><div style="font-size:10px;color:#94a3b8;">NETWORK CTR</div></div>
+        <div class="stat"><div class="val">{esc} NPR</div><div style="font-size:10px;color:#94a3b8;">ESCROW SETTLED</div></div>
+    </div></div>
+    <div class="box"><h2>Active &amp; Queued Campaigns ({len(camps)}) &bull; Live Tenders ({t_cnt})</h2>{bars}
+    <a href="/documents" style="display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px;">DOWNLOAD SIGNED TAX / PERFORMANCE STATEMENT</a></div>{FOOTER}</body></html>"""
 
 @app.get("/status", response_class=HTMLResponse)
 async def status_tracker(ref: str = "", db: DBWrapper = Depends(get_db)):
