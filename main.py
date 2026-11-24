@@ -109,6 +109,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                 <a href="/sectors" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#127757; 35 Global Sectors &amp; Institutions</a>
                 <a href="/editorial" style="display:block;padding:10px 13px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128200; Advertising Strategies &amp; Bulletins</a>
                 <a href="/careers" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129309; Hiring &amp; Brand Ambassadors</a>
+                <a href="/admin-desk" style="display:block;padding:10px 13px;color:#22c55e;font-weight:bold;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128737;&#65039; One-Tap Admin Command Center</a>
                 <a href="/editor" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9997;&#65039; Editor Panel (Admin Publish)</a>
                 <a href="/guide" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128216; Beginner Guide &amp; Rules</a>
                 <a href="/documents" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#129534; Invoice, Receipt &amp; Tax PDF</a>
@@ -198,7 +199,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -560,6 +561,54 @@ async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
     db.commit()
     send_telegram_alert(f"✍️ NEW EDITORIAL PUBLISHED ({eid})!\n• Category: {req.category}\n• Title: {req.title}")
     return {"message": f"Published {eid} live on /editorial!"}
+
+class AdminActionReq(BaseModel):
+    pin: str
+    kind: str
+    item_id: str
+    action: str
+
+@app.post("/api/v1/admin-action")
+async def admin_action(req: AdminActionReq, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
+    valid_pin = row.__getitem__(0) if row else "1234"
+    if req.pin != valid_pin:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN")
+    if req.kind == "ad":
+        if req.action == "approve":
+            db.execute("UPDATE ad_campaigns SET active=1 WHERE CAST(id AS TEXT)=?", (req.item_id,))
+        elif req.action == "pause":
+            db.execute("UPDATE ad_campaigns SET active=0 WHERE CAST(id AS TEXT)=?", (req.item_id,))
+        elif req.action == "delete":
+            db.execute("DELETE FROM ad_campaigns WHERE CAST(id AS TEXT)=?", (req.item_id,))
+    elif req.kind == "tender":
+        if req.action == "approve":
+            db.execute("UPDATE tenders SET approved=1 WHERE tender_id=?", (req.item_id,))
+        elif req.action == "delete":
+            db.execute("DELETE FROM tenders WHERE tender_id=?", (req.item_id,))
+    elif req.kind == "career":
+        db.execute("DELETE FROM careers WHERE app_id=?", (req.item_id,))
+    db.commit()
+    return {"message": f"Action '{req.action}' completed on {req.kind.upper()} #{req.item_id}!"}
+
+@app.get("/admin-desk", response_class=HTMLResponse)
+async def admin_command_center(db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS careers (app_id TEXT PRIMARY KEY, role TEXT, name TEXT, region TEXT, contact TEXT, pitch TEXT, ts INTEGER);")
+    ads = db.execute("SELECT id, headline, active FROM ad_campaigns ORDER BY id DESC").fetchall()
+    tnds = db.execute("SELECT tender_id, title, approved FROM tenders ORDER BY tender_id DESC").fetchall()
+    apps = db.execute("SELECT app_id, role, name, contact FROM careers ORDER BY ts DESC").fetchall()
+    ad_rows = "".join([f'<div style="background:#0f172a;padding:10px;border-radius:8px;margin-bottom:8px;border-left:4px solid {"#22c55e" if a.__getitem__(2)==1 else "#f59e0b"};"><div style="font-size:12px;color:#fff;font-weight:bold;">#AD-{a.__getitem__(0)} • {a.__getitem__(1)}</div><div style="margin-top:6px;display:flex;gap:6px;"><button onclick="act(\'ad\',\'{a.__getitem__(0)}\',\'approve\')" style="background:#22c55e;color:#0f172a;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Approve / Live</button><button onclick="act(\'ad\',\'{a.__getitem__(0)}\',\'pause\')" style="background:#f59e0b;color:#0f172a;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Pause</button><button onclick="act(\'ad\',\'{a.__getitem__(0)}\',\'delete\')" style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Delete</button></div></div>' for a in ads])
+    tn_rows = "".join([f'<div style="background:#0f172a;padding:10px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;"><div style="font-size:12px;color:#fff;font-weight:bold;">{t.__getitem__(0)} • {t.__getitem__(1)}</div><div style="margin-top:6px;display:flex;gap:6px;"><button onclick="act(\'tender\',\'{t.__getitem__(0)}\',\'approve\')" style="background:#22c55e;color:#0f172a;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Approve</button><button onclick="act(\'tender\',\'{t.__getitem__(0)}\',\'delete\')" style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Remove</button></div></div>' for t in tnds])
+    ap_rows = "".join([f'<div style="background:#0f172a;padding:10px;border-radius:8px;margin-bottom:8px;border-left:4px solid #c084fc;"><div style="font-size:12px;color:#fff;font-weight:bold;">{c.__getitem__(0)} • {c.__getitem__(2)} ({c.__getitem__(1)})</div><div style="font-size:11px;color:#94a3b8;">Contact: {c.__getitem__(3)}</div></div>' for c in apps]) or '<p style="font-size:12px;color:#94a3b8;">No pending applications yet.</p>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;margin:6px 0 10px 0;border-radius:8px;border:1px solid #38bdf8;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}</style></head>
+    <body>{render_nav("One-Tap Admin Command Center", "Home / Admin Command Center")}
+    <div class="box"><h2>Admin Control Security</h2><p style="font-size:12px;margin:0 0 6px 0;">Enter your Admin PIN once to manage campaigns, tenders, and ledger exports:</p>
+    <input id="apin" type="password" placeholder="Admin PIN (Default: 1234)"><p id="ares" style="color:#22c55e;font-size:12px;font-weight:bold;margin:4px 0;"></p>
+    <a href="/api/v1/export-ledger.csv" style="display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:11px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:12px;margin-top:8px;">DOWNLOAD ACCOUNTING LEDGER (.CSV)</a></div>
+    <div class="box"><h3>Manage Ad Campaigns ({len(ads)})</h3>{ad_rows}</div>
+    <div class="box"><h3>Manage Construction Tenders ({len(tnds)})</h3>{tn_rows}</div>
+    <div class="box"><h3>Hiring &amp; Brand Ambassador Applications ({len(apps)})</h3>{ap_rows}</div>{FOOTER}
+    <script>async function act(kind,id,action){{const pin=document.getElementById('apin').value;if(!pin){{alert('Enter Admin PIN first!');return;}}const r=await fetch('/api/v1/admin-action',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:pin,kind:kind,item_id:id,action:action}})}});const d=await r.json();document.getElementById('ares').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script></body></html>"""
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
@@ -1032,7 +1081,7 @@ async def payout_hub_page(db: DBWrapper = Depends(get_db)):
     bal = round(float(clk_r[1]), 2) if clk_r and clk_r[1] else 0.0
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#22c55e;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
     <body>{render_nav("eSewa Withdrawal & History", "Home / eSewa Payouts")}
-    <div class="box"><h2>eSewa Mobile Wallet Withdrawal</h2><p style="font-size:13px;">Available Locked Escrow Balance: <b style="color:#22c55e;">{bal} NPR</b></p>
+    <div class="box"><h2>eSewa Mobile Wallet Withdrawal</h2><p style="font-size:13px;">Verified eSewa & Telegram Merchant: <b>+977-9717831225</b><br>Available Locked Escrow Balance: <b style="color:#22c55e;">{bal} NPR</b></p>
     <input id="pwal" value="9717831225" placeholder="eSewa Wallet ID">
     <input id="pamt" type="number" placeholder="Withdrawal Amount (NPR)">
     <input id="ppin" type="password" placeholder="Admin Security PIN">
