@@ -240,7 +240,39 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <a href="/campaigns" class="btn" style="background:#ec4899;color:#fff;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISE WITH US (SUBMIT AD)</a>
     <a href="/tenders" class="btn" style="background:#0ea5e9;color:#0f172a;">6. CONSTRUCTION &amp; BIDDER NOTICES</a>
-    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}</body></html>"""
+    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/campaigns", response_class=HTMLResponse)
 async def campaigns_page(db: DBWrapper = Depends(get_db)):
@@ -254,7 +286,39 @@ async def campaigns_page(db: DBWrapper = Depends(get_db)):
     <input id="hl" placeholder="Ad Headline"><input id="sub" placeholder="Short Description"><input id="btn" placeholder="Button Label (e.g. Visit Site)"><input id="url" placeholder="Destination URL (https://...)"><input id="pin" type="password" placeholder="Admin PIN (Default: 2026)">
     <button class="btn" onclick="addC()">ADD TO ROTATION</button><p id="res" style="color:#22c55e"></p></div>
     <div class="box"><h3>Active Rotating Ads ({len(rows)})</h3>{items}</div>{FOOTER}
-    <script>async function addC(){{const r=await fetch('/api/v1/add-campaign',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}}</script></body></html>"""
+    <script>async function addC(){{const r=await fetch('/api/v1/add-campaign',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 class CampaignReq(BaseModel):
     headline: str
@@ -304,7 +368,39 @@ async def advertise_portal(db: DBWrapper = Depends(get_db)):
     function ri(i){{const f=i.files.item(0);if(!f)return;if(f.size>520000){{alert('Max 500KB');return}}const r=new FileReader();r.onload=e=>{{im=e.target.result;document.getElementById('pi').innerHTML='<img src="'+im+'" style="width:100%;max-height:90px;object-fit:cover;border-radius:5px">'}};r.readAsDataURL(f)}}
     async function sv(){{const r=await fetch('/api/v1/save-banner-draft',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value||'Draft',subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value||'Learn More',target_url:document.getElementById('url').value,img_data:im}})}});const d=await r.json();document.getElementById('res').innerText=d.message;setTimeout(()=>location.reload(),900)}}
     async function ld(id){{const r=await fetch('/api/v1/load-banner-draft/'+id);const d=await r.json();document.getElementById('hl').value=d.headline;document.getElementById('sub').value=d.subtext;document.getElementById('btn').value=d.btn_text;document.getElementById('url').value=d.target_url;im=d.img_data||'';document.getElementById('pi').innerHTML=im?'<img src="'+im+'" style="width:100%;max-height:90px;object-fit:cover;border-radius:5px">':'';sy()}}
-    async function sb(){{const r=await fetch('/api/v1/submit-advertiser',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,img_data:im}})}});const d=await r.json();document.getElementById('res').innerText=d.message}}</script></body></html>"""
+    async function sb(){{const r=await fetch('/api/v1/submit-advertiser',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value,subtext:document.getElementById('sub').value,btn_text:document.getElementById('btn').value,target_url:document.getElementById('url').value,img_data:im}})}});const d=await r.json();document.getElementById('res').innerText=d.message}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/save-banner-draft")
 async def save_banner_draft(req: CampaignReq, db: DBWrapper = Depends(get_db)):
@@ -340,7 +436,39 @@ async def tag_preview():
     base = "https://" + "worldwide-ad-center-1" + ".onrender.com"
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#fff;padding:20px}}code{{display:block;background:#1e293b;padding:12px;border-radius:8px;color:#38bdf8;word-break:break-all;margin:15px 0}}</style></head>
     <body>{render_nav("Website Ad Tag (<script>)", "Home / Website Ad Tag")}<h2>Website Ad Tag (&lt;script&gt;)</h2><p>Paste this single line into any website HTML:</p><code>&lt;script src="{base}/api/v1/tag.js"&gt;&lt;/script&gt;</code>
-    <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}</body></html>"""
+    <h3>Live Rotating Ad Preview:</h3><script src="/api/v1/tag.js"></script>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 
 
@@ -414,7 +542,39 @@ async def documents_hub():
         <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:flex-end;"><small style="color:#15803d;font-weight:bold;">&#9989; CLEARANCE VERIFIED</small><div style="border-top:1px dashed #000;padding-top:3px;text-align:right;"><b style="font-family:cursive;color:#003893;">WAC Authorized Desk</b><br><small id="pS">Digital Signature</small></div></div>
     </div>
     <div class="box no-print" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button class="btn" style="background:#38bdf8;margin:0;" onclick="window.print()">PRINT / SAVE PDF</button><button class="btn" style="background:#f59e0b;margin:0;" onclick="dlH()">SAVE AS HTML</button></div><div class="no-print">{FOOTER}</div>
-    <script>document.getElementById('pD').innerText=new Date().toLocaleString('en-US',{{timeZone:'Asia/Kathmandu'}})+' NPT';function mkDoc(){{const b=parseFloat(document.getElementById('cam').value)||0,t=parseFloat(document.getElementById('ctx').value)||0,tx=b*(t/100),rf=document.getElementById('crf').value||'WAC-2026';document.getElementById('pT').innerText=document.getElementById('dtp').value;document.getElementById('pC').innerText=document.getElementById('cnm').value||'Partner';document.getElementById('pP').innerText=document.getElementById('cpn').value||'N/A';document.getElementById('pR').innerText=rf;document.getElementById('pB').innerText=b.toFixed(2)+' NPR';document.getElementById('pX').innerText=tx.toFixed(2)+' NPR';document.getElementById('pTot').innerText=(b+tx).toFixed(2)+' NPR';document.getElementById('pS').innerText='SIG-'+btoa(rf).slice(0,8).toUpperCase();}}function dlH(){{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.getElementById('paper').outerHTML],{{type:'text/html'}}));a.download='WAC_Receipt.html';a.click();}}</script></body></html>"""
+    <script>document.getElementById('pD').innerText=new Date().toLocaleString('en-US',{{timeZone:'Asia/Kathmandu'}})+' NPT';function mkDoc(){{const b=parseFloat(document.getElementById('cam').value)||0,t=parseFloat(document.getElementById('ctx').value)||0,tx=b*(t/100),rf=document.getElementById('crf').value||'WAC-2026';document.getElementById('pT').innerText=document.getElementById('dtp').value;document.getElementById('pC').innerText=document.getElementById('cnm').value||'Partner';document.getElementById('pP').innerText=document.getElementById('cpn').value||'N/A';document.getElementById('pR').innerText=rf;document.getElementById('pB').innerText=b.toFixed(2)+' NPR';document.getElementById('pX').innerText=tx.toFixed(2)+' NPR';document.getElementById('pTot').innerText=(b+tx).toFixed(2)+' NPR';document.getElementById('pS').innerText='SIG-'+btoa(rf).slice(0,8).toUpperCase();}}function dlH(){{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.getElementById('paper').outerHTML],{{type:'text/html'}}));a.download='WAC_Receipt.html';a.click();}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/feedback", response_class=HTMLResponse)
 async def feedback_page():
@@ -424,7 +584,39 @@ async def feedback_page():
     <select id="fk"><option>Suggestion / Feature Request</option><option>Complaint / Honest Issue Report</option><option>Email Preference Update</option></select>
     <input id="fs" placeholder="Your Name"><input id="fe" placeholder="Email or Telegram/WhatsApp"><textarea id="fm" rows="3" placeholder="Write honest, clear message..."></textarea>
     <button class="btn" onclick="sFb()">SEND FEEDBACK</button><p id="fr" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function sFb(){{const r=await fetch('/api/v1/submit-feedback',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{kind:document.getElementById('fk').value,sender:document.getElementById('fs').value,email_pref:document.getElementById('fe').value,message:document.getElementById('fm').value}})}});const d=await r.json();document.getElementById('fr').innerText=d.message;}}</script></body></html>"""
+    <script>async function sFb(){{const r=await fetch('/api/v1/submit-feedback',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{kind:document.getElementById('fk').value,sender:document.getElementById('fs').value,email_pref:document.getElementById('fe').value,message:document.getElementById('fm').value}})}});const d=await r.json();document.getElementById('fr').innerText=d.message;}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/submit-feedback")
 async def submit_feedback(req: FeedbackReq):
@@ -478,7 +670,39 @@ async def global_sectors():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
     <body>{render_nav("35 Global Sectors & Institutions", "Home / Targeted Sectors")}
     <div class="box"><h2>Targeted Institutional &amp; Commercial Approach</h2><p style="font-size:12px;margin:0 0 8px 0;">Tailored advertising, public notices, and global media outreach across 35 specialized sectors worldwide:</p><input id="secQ" oninput="var q=this.value.toLowerCase();document.querySelectorAll('.box').forEach((b,i)=>{{if(i>0)b.style.display=b.innerText.toLowerCase().includes(q)?'block':'none';}});" placeholder="Filter sectors (e.g. UN, Airlines, Banks, FIFA, AI...)" style="width:100%;padding:10px;border-radius:8px;border:1px solid #38bdf8;background:#0f172a;color:#fff;box-sizing:border-box;font-size:13px;"></div>
-    {cards}{FOOTER}</body></html>"""
+    {cards}{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/editorial", response_class=HTMLResponse)
 async def editorial_hub(db: DBWrapper = Depends(get_db)):
@@ -495,7 +719,39 @@ async def editorial_hub(db: DBWrapper = Depends(get_db)):
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}</style></head>
     <body>{render_nav("Advertising Strategies & Bulletins", "Home / Advertising Strategies")}
     <div class="box" style="border-left:4px solid #c084fc;"><h2>Advertising Strategies &amp; Institutional Bulletins</h2><p style="font-size:12px;margin:0;">Actionable digital advertising strategies, multi-currency outreach playbooks, and verified institutional bulletins.</p></div>
-    {items}{FOOTER}</body></html>"""
+    {items}{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 
 class EditorialReq(BaseModel):
@@ -525,7 +781,39 @@ async def careers_portal():
     <textarea id="cpitch" rows="3" placeholder="Briefly describe your network, experience, or social reach..."></textarea>
     <button class="btn" onclick="sendApp()">SUBMIT APPLICATION</button>
     <p id="cres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function sendApp(){{const r=await fetch('/api/v1/apply-career',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{role:document.getElementById('crole').value,name:document.getElementById('cname').value,region:document.getElementById('creg').value,contact:document.getElementById('ccnt').value,pitch:document.getElementById('cpitch').value}})}});const d=await r.json();document.getElementById('cres').innerText=d.message;}}</script></body></html>"""
+    <script>async function sendApp(){{const r=await fetch('/api/v1/apply-career',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{role:document.getElementById('crole').value,name:document.getElementById('cname').value,region:document.getElementById('creg').value,contact:document.getElementById('ccnt').value,pitch:document.getElementById('cpitch').value}})}});const d=await r.json();document.getElementById('cres').innerText=d.message;}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/apply-career")
 async def apply_career(req: CareerReq, db: DBWrapper = Depends(get_db)):
@@ -548,7 +836,39 @@ async def editor_panel():
     <input id="eaut" value="WAC Editorial Desk" placeholder="Author / Desk Name">
     <button class="btn" onclick="pubEd()">PUBLISH TO LIVE PLATFORM</button>
     <p id="eres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function pubEd(){{const r=await fetch('/api/v1/publish-editorial',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('epin').value,category:document.getElementById('ecat').value,title:document.getElementById('etit').value,summary:document.getElementById('esum').value,author:document.getElementById('eaut').value}})}});const d=await r.json();document.getElementById('eres').innerText=d.message||d.detail;}}</script></body></html>"""
+    <script>async function pubEd(){{const r=await fetch('/api/v1/publish-editorial',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('epin').value,category:document.getElementById('ecat').value,title:document.getElementById('etit').value,summary:document.getElementById('esum').value,author:document.getElementById('eaut').value}})}});const d=await r.json();document.getElementById('eres').innerText=d.message||d.detail;}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/publish-editorial")
 async def publish_editorial(req: EditorialReq, db: DBWrapper = Depends(get_db)):
@@ -609,7 +929,39 @@ async def admin_command_center(db: DBWrapper = Depends(get_db)):
     <div class="box"><h3>Manage Ad Campaigns ({len(ads)})</h3>{ad_rows}</div>
     <div class="box"><h3>Manage Construction Tenders ({len(tnds)})</h3>{tn_rows}</div>
     <div class="box"><h3>Hiring &amp; Brand Ambassador Applications ({len(apps)})</h3>{ap_rows}</div>{FOOTER}
-    <script>async function act(kind,id,action){{const pin=document.getElementById('apin').value;if(!pin){{alert('Enter Admin PIN first!');return;}}const r=await fetch('/api/v1/admin-action',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:pin,kind:kind,item_id:id,action:action}})}});const d=await r.json();document.getElementById('ares').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script></body></html>"""
+    <script>async function act(kind,id,action){{const pin=document.getElementById('apin').value;if(!pin){{alert('Enter Admin PIN first!');return;}}const r=await fetch('/api/v1/admin-action',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:pin,kind:kind,item_id:id,action:action}})}});const d=await r.json();document.getElementById('ares').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 class MailReq(BaseModel):
     folder: str
@@ -687,9 +1039,44 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
     <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
     <script>
     function fillDir(v){{if(v!=='Direct Contact'){{document.getElementById('msub').value='Partnership & Digital Outreach — ' + v;}}}}
+    const qp = new URLSearchParams(window.location.search);
+    if(qp.get('to')) document.getElementById('mrec').value = qp.get('to');
+    if(qp.get('sub')) document.getElementById('msub').value = qp.get('sub');
     async function sendM(folder){{const r=await fetch('/api/v1/mail/save',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,recipient:document.getElementById('mrec').value||'Directory Outreach',sector:document.getElementById('msec').value,subject:document.getElementById('msub').value,body:document.getElementById('mbdy').value}})}});const d=await r.json();document.getElementById('mres').innerText=d.message;}}
     function openGmail(){{const to=encodeURIComponent(document.getElementById('mrec').value);const su=encodeURIComponent(document.getElementById('msub').value);const bd=encodeURIComponent(document.getElementById('mbdy').value);window.open('https://mail.google.com/mail/?view=cm&to=' + to + '&su=' + su + '&body=' + bd, '_blank');}}
-    </script></body></html>"""
+    </script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
@@ -717,7 +1104,39 @@ async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
         <div class="stat"><div class="val">{esc} NPR</div><div style="font-size:10px;color:#94a3b8;">ESCROW SETTLED</div></div>
     </div></div>
     <div class="box"><h2>Active &amp; Queued Campaigns ({len(camps)}) &bull; Live Tenders ({t_cnt})</h2>{bars}
-    <a href="/documents" style="display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px;">DOWNLOAD SIGNED TAX / PERFORMANCE STATEMENT</a></div>{FOOTER}</body></html>"""
+    <a href="/documents" style="display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px;">DOWNLOAD SIGNED TAX / PERFORMANCE STATEMENT</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/status", response_class=HTMLResponse)
 async def status_tracker(ref: str = "", db: DBWrapper = Depends(get_db)):
@@ -742,7 +1161,39 @@ async def status_tracker(ref: str = "", db: DBWrapper = Depends(get_db)):
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#38bdf8;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:6px;cursor:pointer;font-size:14px}}</style></head>
     <body>{render_nav("Track Application / Deposit ID", "Home / Status Tracker")}
     <div class="box"><h2>Self-Service Status Tracker</h2><p style="font-size:12px;">Enter your Campaign ID (<b>AD-...</b>), eSewa Deposit ID (<b>DEP-...</b>), or Application ID (<b>APP-...</b>):</p>
-    <form method="get" action="/status"><input name="ref" value="{r_clean}" placeholder="e.g. DEP-12345 or APP-67890"><button class="btn" type="submit">CHECK LIVE STATUS</button></form>{msg}</div>{FOOTER}</body></html>"""
+    <form method="get" action="/status"><input name="ref" value="{r_clean}" placeholder="e.g. DEP-12345 or APP-67890"><button class="btn" type="submit">CHECK LIVE STATUS</button></form>{msg}</div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/guide", response_class=HTMLResponse)
 async def beginner_guide():
@@ -756,7 +1207,39 @@ async def beginner_guide():
     <div class="box"><h3>Official Moderation Standards</h3>
     <div class="step" style="border-left-color:#22c55e;"><b>&#128591; Grateful Acceptance:</b> "Thank you for partnering with Worldwide Ad Center! We are grateful for your submission—your campaign is now live."</div>
     <div class="step" style="border-left-color:#f59e0b;"><b>&#129309; Humble Apology / Rejection:</b> "We sincerely apologize, but we cannot approve this submission under our safety/clarity rules. Please edit and resubmit anytime."</div>
-    <div class="step" style="border-left-color:#a855f7;"><b>&#129529; System Scanner &amp; Cache Cleaner:</b><button class="btn" onclick="localStorage.clear();sessionStorage.clear();document.getElementById('cln').innerText='Scan Complete: Cache cleared, 0 spam trackers, mobile controls healthy.';">RUN SCANNER &amp; CLEANER</button><p id="cln" style="color:#22c55e;font-size:12px;margin:6px 0 0 0;"></p></div></div>{FOOTER}</body></html>"""
+    <div class="step" style="border-left-color:#a855f7;"><b>&#129529; System Scanner &amp; Cache Cleaner:</b><button class="btn" onclick="localStorage.clear();sessionStorage.clear();document.getElementById('cln').innerText='Scan Complete: Cache cleared, 0 spam trackers, mobile controls healthy.';">RUN SCANNER &amp; CLEANER</button><p id="cln" style="color:#22c55e;font-size:12px;margin:6px 0 0 0;"></p></div></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/deposit", response_class=HTMLResponse)
 async def deposit_page(db: DBWrapper = Depends(get_db)):
@@ -780,7 +1263,39 @@ async def deposit_page(db: DBWrapper = Depends(get_db)):
     <input id="cnt" placeholder="Your Telegram, WhatsApp, or Email">
     <button class="btn" onclick="sendDep()">VERIFY ESEWA DEPOSIT RECEIPT</button>
     <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function sendDep(){{const r=await fetch('/api/v1/submit-deposit',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{advertiser:document.getElementById('adv').value,amount:parseFloat(document.getElementById('amt').value)||0,txn_code:document.getElementById('txn').value,contact:document.getElementById('cnt').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script></body></html>"""
+    <script>async function sendDep(){{const r=await fetch('/api/v1/submit-deposit',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{advertiser:document.getElementById('adv').value,amount:parseFloat(document.getElementById('amt').value)||0,txn_code:document.getElementById('txn').value,contact:document.getElementById('cnt').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||d.detail;}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/submit-deposit")
 async def submit_deposit(req: DepositReq, db: DBWrapper = Depends(get_db)):
@@ -833,7 +1348,39 @@ async def social_partners_page(db: DBWrapper = Depends(get_db)):
         document.getElementById('slink').value = window.location.origin + '/go/social?platform=' + p + '&partner=' + h + '&cid=' + c;
         document.getElementById('outBox').style.display = 'block';
     }}
-    </script></body></html>"""
+    </script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/directory", response_class=HTMLResponse)
 async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
@@ -860,7 +1407,7 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     tn_html = ""
     for t in tnds:
         tid, ttl, iss, prv, ddl, curl = t
-        tn_html += f'<div class="t-card" style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #38bdf8;"><span style="font-size:10px;color:#38bdf8;font-weight:bold;">TENDER &bull; {prv} &bull; {tid}</span><h4 style="margin:4px 0;color:#fff;">{ttl}</h4><p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;">{iss} &bull; Deadline: {ddl}</p><a href="/tenders" onclick="alert(this.dataset.cnt);return false;" data-cnt="{curl}" target="_blank" style="background:#38bdf8;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">Open Notice</a></div>'
+        tn_html += f'<div class="t-card" style="background:#0f172a;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #38bdf8;"><span style="font-size:10px;color:#38bdf8;font-weight:bold;">TENDER &bull; {prv} &bull; {tid}</span><h4 style="margin:4px 0;color:#fff;">{ttl}</h4><p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;">{iss} &bull; Deadline: {ddl}</p><a href="/tenders" onclick="openBidModal(this);return false;" data-cnt="{curl}" target="_blank" style="background:#38bdf8;color:#0f172a;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:bold;text-decoration:none;">Open Notice</a></div>'
 
     combined = (ad_html + tn_html) or '<p style="color:#94a3b8;font-size:12px;">No matching ads or tenders found.</p>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box}}</style></head>
@@ -868,7 +1415,39 @@ async def universal_directory(q: str = "", db: DBWrapper = Depends(get_db)):
     <div class="box"><h2>Universal Global &amp; Local Directory</h2>
     <p style="font-size:12px;margin-top:0;">Search live sponsored campaigns, brands, and Nepal construction tenders in one unified index:</p>
     <form method="get" action="/directory" style="display:flex;gap:6px;"><input name="q" value="{q}" placeholder="Search keyword, brand, or province..."><button type="submit" style="background:#38bdf8;color:#0f172a;border:none;border-radius:8px;padding:0 14px;font-weight:bold;cursor:pointer;" aria-label="Search">&#128269;</button></form>
-    {combined}</div>{FOOTER}</body></html>"""
+    {combined}</div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/verify-badge", response_class=HTMLResponse)
 async def verify_badge_page():
@@ -882,7 +1461,39 @@ async def verify_badge_page():
     </div>
     <label style="font-size:12px;color:#94a3b8;">Copy &amp; Paste HTML Embed Code:</label>
     <textarea id="bcode" readonly>{badge_code}</textarea>
-    <button onclick="navigator.clipboard.writeText(document.getElementById('bcode').value);this.innerText='Badge HTML Copied!';" style="width:100%;padding:11px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer;">COPY TRUST BADGE CODE</button></div>{FOOTER}</body></html>"""
+    <button onclick="navigator.clipboard.writeText(document.getElementById('bcode').value);this.innerText='Badge HTML Copied!';" style="width:100%;padding:11px;background:#14b8a6;color:#0f172a;border:none;border-radius:6px;font-weight:bold;margin-top:8px;cursor:pointer;">COPY TRUST BADGE CODE</button></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/gallery", response_class=HTMLResponse)
 async def gallery_page(db: DBWrapper = Depends(get_db)):
@@ -897,7 +1508,39 @@ async def gallery_page(db: DBWrapper = Depends(get_db)):
         cards += f'<div style="background:#0f172a;padding:14px;border-radius:10px;text-align:center;border:1px dashed #a855f7;margin-top:10px;"><img src="{img}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;"><h4 style="margin:4px 0;color:#fff;">{hl}</h4><p style="font-size:12px;color:#cbd5e1;margin:0;">{sub}</p></div>'
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:18px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}</style></head>
     <body>{render_nav("Ad Creative Gallery", "Home / Gallery")}
-    <div class="box"><h2>Ad Creative &amp; Visual Gallery</h2><p style="font-size:13px;margin-top:0;">Showcase of active sponsored banners and attached visual creatives across our network:</p>{cards}</div>{FOOTER}</body></html>"""
+    <div class="box"><h2>Ad Creative &amp; Visual Gallery</h2><p style="font-size:13px;margin-top:0;">Showcase of active sponsored banners and attached visual creatives across our network:</p>{cards}</div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(db: DBWrapper = Depends(get_db)):
@@ -919,7 +1562,39 @@ async def settings_page(db: DBWrapper = Depends(get_db)):
     <button class="btn" onclick="saveSet()">SAVE NETWORK SETTINGS</button>
     <p id="res" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
     <script>let qrData="";function readQr(i){{const f=i.files.item(0);if(!f)return;if(f.size>520000){{alert('Max 500KB');return}}const r=new FileReader();r.onload=e=>{{qrData=e.target.result;}};r.readAsDataURL(f)}}
-    async function saveSet(){{const r=await fetch('/api/v1/save-settings',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{default_wallet:document.getElementById('wal').value,cpc_rate:parseFloat(document.getElementById('rt').value),qr_img:qrData,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}}</script></body></html>"""
+    async function saveSet(){{const r=await fetch('/api/v1/save-settings',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{default_wallet:document.getElementById('wal').value,cpc_rate:parseFloat(document.getElementById('rt').value),qr_img:qrData,pin:document.getElementById('pin').value}})}});const d=await r.json();document.getElementById('res').innerText=d.message||(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/save-settings")
 async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
@@ -949,7 +1624,7 @@ async def tenders_portal(db: DBWrapper = Depends(get_db)):
     cards = ""
     for r in rows:
         tid, ttl, iss, cat, ddl, curl = r
-        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="/tenders" onclick="alert(this.dataset.cnt);return false;" data-cnt="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
+        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="/tenders" onclick="openBidModal(this);return false;" data-cnt="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
     if not cards:
         cards = '<p style="color:#94a3b8;font-size:12px;">No active construction notices yet. Publish the first Invitation for Bid (IFB) or Contractor Notice below!</p>'
 
@@ -977,7 +1652,39 @@ async def tenders_portal(db: DBWrapper = Depends(get_db)):
         const d = await r.json(); document.getElementById('res').innerText = d.message || d.detail;
         if(d.published) setTimeout(()=>location.reload(), 1000);
     }}
-    </script></body></html>"""
+    </script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/submit-tender")
 async def submit_tender(req: TenderReq, db: DBWrapper = Depends(get_db)):
@@ -1035,7 +1742,39 @@ async def agencies_portal(db: DBWrapper = Depends(get_db)):
         const r = await fetch('/api/v1/agency-fast-track',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{agency_name:document.getElementById('ag').value,contact_info:document.getElementById('ct').value,monthly_budget:document.getElementById('mb').value,client_count:document.getElementById('cc').value}})}});
         const d = await r.json(); document.getElementById('res').innerText = d.message;
     }}
-    </script></body></html>"""
+    </script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.post("/api/v1/agency-fast-track")
 async def agency_fast_track(req: AgencyReq):
@@ -1100,7 +1839,39 @@ async def about_page(db: DBWrapper = Depends(get_db)):
     </div>
     <a href="https://t.me" target="_blank" class="btn">MESSAGE US ON TELEGRAM</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;">SUBMIT AN AD CAMPAIGN</a></div>
-    {FOOTER}</body></html>"""
+    {FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/faq", response_class=HTMLResponse)
 async def faq_page():
@@ -1122,17 +1893,113 @@ async def faq_page():
     <span class="tag">E-Commerce &amp; Retail</span><span class="tag">Tech &amp; Mobile Apps</span><span class="tag">Education &amp; Courses</span><span class="tag">Local Nepal Businesses</span><span class="tag">Finance &amp; SaaS</span><span class="tag">Blogs &amp; Media</span>
     <p style="margin:14px 0 6px 0;color:#fff;font-size:13px;"><b>Strictly Prohibited Topics:</b></p>
     <span class="tag ban">Adult / Explicit Content</span><span class="tag ban">Gambling &amp; Betting</span><span class="tag ban">Malware / Fake Downloads</span><span class="tag ban">Illegal Products</span><span class="tag ban">Click-Fraud Schemes</span></div>
-    {FOOTER}</body></html>"""
+    {FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px}}h2,h3{{color:#fff}}</style></head>
-    <body>{render_nav("Privacy Policy", "Home / Legal / Privacy Policy")}<div class="box"><h2>Privacy Policy</h2><p><b>Effective Date:</b> November 2026</p><h3>1. Cookie-Free Ad Delivery</h3><p>Worldwide Ad Center delivers contextual advertisements without storing third-party tracking cookies on visitor browsers.</p><h3>2. Impression &amp; Click Logging</h3><p>We log anonymized impression counts, verified click events, and basic anti-fraud rate limits solely to calculate publisher earnings and prevent automated bot traffic.</p><h3>3. Publisher Payout Data</h3><p>Registered mobile wallet numbers (such as eSewa IDs) are used strictly for processing requested publisher settlements.</p></div>{FOOTER}</body></html>"""
+    <body>{render_nav("Privacy Policy", "Home / Legal / Privacy Policy")}<div class="box"><h2>Privacy Policy</h2><p><b>Effective Date:</b> November 2026</p><h3>1. Cookie-Free Ad Delivery</h3><p>Worldwide Ad Center delivers contextual advertisements without storing third-party tracking cookies on visitor browsers.</p><h3>2. Impression &amp; Click Logging</h3><p>We log anonymized impression counts, verified click events, and basic anti-fraud rate limits solely to calculate publisher earnings and prevent automated bot traffic.</p><h3>3. Publisher Payout Data</h3><p>Registered mobile wallet numbers (such as eSewa IDs) are used strictly for processing requested publisher settlements.</p></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/terms", response_class=HTMLResponse)
 async def terms_of_service():
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:20px;line-height:1.6}}.box{{background:#1e293b;padding:20px;border-radius:12px}}h2,h3{{color:#fff}}</style></head>
-    <body>{render_nav("Terms of Service", "Home / Legal / Terms of Service")}<div class="box"><h2>Terms of Service</h2><h3>1. Publisher Guidelines</h3><p>Publishers embedding the Worldwide Ad Center script tag must not generate artificial clicks, automated refreshes, or incentivized click fraud.</p><h3>2. Escrow &amp; Settlements</h3><p>Verified clicks accrue in locked escrow and become eligible for settlement via supported mobile wallets upon admin verification.</p></div>{FOOTER}</body></html>"""
+    <body>{render_nav("Terms of Service", "Home / Legal / Terms of Service")}<div class="box"><h2>Terms of Service</h2><h3>1. Publisher Guidelines</h3><p>Publishers embedding the Worldwide Ad Center script tag must not generate artificial clicks, automated refreshes, or incentivized click fraud.</p><h3>2. Escrow &amp; Settlements</h3><p>Verified clicks accrue in locked escrow and become eligible for settlement via supported mobile wallets upon admin verification.</p></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/api/v1/health/telegram-report")
 async def health_report(db: DBWrapper = Depends(get_db)):
@@ -1154,7 +2021,39 @@ async def simulate_app_page(db: DBWrapper = Depends(get_db)):
     <body>{render_nav("Mobile App Ad Simulator", "Home / App Simulator")}
     <div class="box"><h2>Mobile App &amp; Web Banner Simulator</h2><p style="font-size:12px;">Live preview of how Worldwide Ad Center sponsored units render inside Android/iOS apps and mobile web portals:</p>
     <div id="wac-sim-slot" style="background:#0f172a;padding:14px;border-radius:10px;border:1px solid #38bdf8;"></div>
-    <script src="/api/v1/tag.js"></script></div>{FOOTER}</body></html>"""
+    <script src="/api/v1/tag.js"></script></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.get("/payout-hub", response_class=HTMLResponse)
 async def payout_hub_page(db: DBWrapper = Depends(get_db)):
@@ -1167,7 +2066,39 @@ async def payout_hub_page(db: DBWrapper = Depends(get_db)):
     <input id="pamt" type="number" placeholder="Withdrawal Amount (NPR)">
     <input id="ppin" type="password" placeholder="Admin Security PIN">
     <button class="btn" onclick="reqPay()">REQUEST ESEWA SETTLEMENT</button><p id="pres" style="color:#22c55e;font-size:13px;"></p></div>{FOOTER}
-    <script>async function reqPay(){{const r=await fetch('/api/v1/withdraw',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{wallet:document.getElementById('pwal').value,amount:parseFloat(document.getElementById('pamt').value||0),pin:document.getElementById('ppin').value}})}});const d=await r.json();document.getElementById('pres').innerText=d.message||d.detail||'Settlement request logged!';}}</script></body></html>"""
+    <script>async function reqPay(){{const r=await fetch('/api/v1/withdraw',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{wallet:document.getElementById('pwal').value,amount:parseFloat(document.getElementById('pamt').value||0),pin:document.getElementById('ppin').value}})}});const d=await r.json();document.getElementById('pres').innerText=d.message||d.detail||'Settlement request logged!';}}</script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
+      <button onclick="document.getElementById('bidModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <h3 id="bmTitle" style="color:#fff;margin:4px 0 8px 0;font-size:15px;">Tender Inquiry</h3>
+    <div id="bmContact" style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;color:#22c55e;font-size:12px;font-weight:bold;word-break:break-all;margin-bottom:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="copyBidCnt()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#128203; Copy Contact</button>
+      <a id="bmMail" href="/mail#compose" style="display:flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;text-decoration:none;">&#9993;&#65039; 1-Tap Bid Inquiry</a>
+    </div>
+    <p id="bmMsg" style="color:#f59e0b;font-size:11px;margin:4px 0 0 0;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openBidModal(el){{
+  const card = el.closest('div');
+  const h = card ? card.querySelector('h3,h4') : null;
+  const title = h ? h.innerText.trim() : 'Tender & Procurement Notice';
+  const cnt = el.dataset.cnt || 'difft40y@gmail.com | +977-9717831225';
+  const email = cnt.includes('@') ? cnt.split('|')[0].trim() : 'difft40y@gmail.com';
+  document.getElementById('bmTitle').innerText = title;
+  document.getElementById('bmContact').innerText = cnt;
+  document.getElementById('bmMsg').innerText = '';
+  document.getElementById('bmMail').href = '/mail?to=' + encodeURIComponent(email) + '&sub=' + encodeURIComponent('Bid Inquiry: ' + title) + '#compose';
+  document.getElementById('bidModal').style.display = 'flex';
+}}
+function copyBidCnt(){{
+  navigator.clipboard.writeText(document.getElementById('bmContact').innerText);
+  document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
+}}
+</script></body></html>"""
 
 @app.exception_handler(404)
 async def not_found_redirect(request, exc):
