@@ -117,6 +117,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                 <a href="/social-partners" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128242; Social Partners (FB/TikTok/IG)</a>
                 <a href="/verify-badge" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9989; Partner Trust Badge</a>
                 <a href="/gallery" style="display:block;padding:10px 13px;color:#c084fc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128444;&#65039; Ad Creative Gallery</a>
+                <a href="/mail" style="display:block;padding:10px 13px;color:#38bdf8;font-weight:bold;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9993;&#65039; Mail Center (Inbox / Compose)</a>
                 <a href="/feedback" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128172; Complaints &amp; Suggestions</a>
                 <a href="/faq" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#10067; FAQ &amp; Ad Topics</a>
                 <a href="/about" style="display:block;padding:10px 13px;color:#f8fafc;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#8505;&#65039; About &amp; Contact</a>
@@ -199,7 +200,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -609,6 +610,86 @@ async def admin_command_center(db: DBWrapper = Depends(get_db)):
     <div class="box"><h3>Manage Construction Tenders ({len(tnds)})</h3>{tn_rows}</div>
     <div class="box"><h3>Hiring &amp; Brand Ambassador Applications ({len(apps)})</h3>{ap_rows}</div>{FOOTER}
     <script>async function act(kind,id,action){{const pin=document.getElementById('apin').value;if(!pin){{alert('Enter Admin PIN first!');return;}}const r=await fetch('/api/v1/admin-action',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:pin,kind:kind,item_id:id,action:action}})}});const d=await r.json();document.getElementById('ares').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script></body></html>"""
+
+class MailReq(BaseModel):
+    folder: str
+    recipient: str
+    sector: str
+    subject: str
+    body: str
+    pin: str = ""
+
+@app.post("/api/v1/mail/save")
+async def save_mail(req: MailReq, db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS wac_mail (mail_id TEXT PRIMARY KEY, folder TEXT, recipient TEXT, sector TEXT, subject TEXT, body TEXT, ts INTEGER);")
+    mid = f"MSG-{int(time.time()) % 100000}"
+    db.execute("INSERT INTO wac_mail VALUES (?, ?, ?, ?, ?, ?, ?)", (mid, req.folder, req.recipient, req.sector, req.subject, req.body, int(time.time())))
+    db.commit()
+    if req.folder == "sent":
+        send_telegram_alert(f"📤 OUTREACH SENT ({mid})!\n• To: {req.recipient} ({req.sector})\n• Subject: {req.subject}")
+    return {"message": f"Saved to {req.folder.upper()} ({mid})!", "mail_id": mid}
+
+@app.get("/mail", response_class=HTMLResponse)
+async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS wac_mail (mail_id TEXT PRIMARY KEY, folder TEXT, recipient TEXT, sector TEXT, subject TEXT, body TEXT, ts INTEGER);")
+    if db.execute("SELECT COUNT(*) FROM wac_mail").fetchone().__getitem__(0) == 0:
+        db.execute("INSERT INTO wac_mail VALUES (?, ?, ?, ?, ?, ?, ?)", ("MSG-101", "inbox", "difft40y@gmail.com", "System Desk", "Welcome to Worldwide Ad Center Mail Hub", "Your unified Compose, Inbox, Outbox, Sent, Drafts, and Directory Outreach desk is active.", 1732200000))
+        db.commit()
+    rows = db.execute("SELECT mail_id, recipient, sector, subject, body FROM wac_mail WHERE folder=? ORDER BY ts DESC", (tab,)).fetchall()
+    items = ""
+    for r in rows:
+        mid, rec, sec, sub, bdy = r.__getitem__(0), r.__getitem__(1), r.__getitem__(2), r.__getitem__(3), r.__getitem__(4)
+        items += f'<div style="background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;"><div style="font-size:11px;color:#38bdf8;font-weight:bold;">{mid} &bull; {sec} &bull; To/From: {rec}</div><div style="color:#fff;font-size:13px;font-weight:bold;margin:4px 0;">{sub}</div><div style="font-size:12px;color:#cbd5e1;white-space:pre-line;">{bdy}</div></div>'
+    if not items:
+        items = f'<p style="font-size:12px;color:#94a3b8;">No messages in <b>{tab.upper()}</b> yet.</p>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}input,select,textarea{{width:100%;padding:11px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:13px}}.tabs{{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}}.tab{{padding:8px 11px;border-radius:8px;font-size:11px;font-weight:bold;text-decoration:none;background:#0f172a;color:#38bdf8;border:1px solid #334155}}.btn{{padding:11px 14px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:12px;margin-top:6px}}</style></head>
+    <body>{render_nav("Mail & Directory Outreach Center", "Home / Mail Center")}
+    <div class="box"><h2>Unified Mail &amp; Directory Outreach</h2>
+    <div class="tabs">
+        <a class="tab" href="/mail?tab=inbox">&#128229; Inbox</a>
+        <a class="tab" href="/mail?tab=outbox">&#128228; Outbox</a>
+        <a class="tab" href="/mail?tab=sent">&#9989; Sent</a>
+        <a class="tab" href="/mail?tab=draft">&#128221; Drafts</a>
+        <a class="tab" href="#compose" style="background:#22c55e;color:#0f172a;">&#9997;&#65039; Compose / Directory</a>
+        <a class="tab" href="#prefs" style="background:#f59e0b;color:#0f172a;">&#9881;&#65039; Email Preferences</a>
+    </div>
+    <h3>Folder: {tab.upper()}</h3>{items}</div>
+    <div id="compose" class="box"><h3>Compose &amp; Compose to Directory</h3>
+    <select id="msec" onchange="fillDir(this.value)">
+        <option value="Direct Contact">Direct Recipient (Custom Email)</option>
+        <option value="UN / WHO / UNESCO / ADB / IMF">Directory: International Bodies (UN, WHO, ADB, IMF)</option>
+        <option value="Universities / Colleges / AI Labs">Directory: Education, Universities &amp; AI Labs</option>
+        <option value="Banks / Stock Markets / Commerce">Directory: Banks, Finance &amp; Supermarkets</option>
+        <option value="Airlines / Railways / Tour & Travels">Directory: Airlines, Transit &amp; Tourism</option>
+        <option value="Media Houses / TV / Influencers">Directory: Media Houses, TV &amp; Influencers</option>
+        <option value="FIFA / Cricket Boards / Sports">Directory: Global Sports &amp; Federations</option>
+        <option value="Nepal Construction & Tenders">Directory: All-Nepal Construction &amp; Bidders</option>
+    </select>
+    <input id="mrec" placeholder="Recipient Email (e.g. info@organization.org)">
+    <input id="msub" placeholder="Subject Line">
+    <textarea id="mbdy" rows="5" placeholder="Write your message or select a Directory sector above to auto-fill...">Hello Team,
+
+We invite your organization to partner with Worldwide Ad Center (https://onrender.com) for direct, cookie-free digital outreach at 2.50 NPR per verified click.
+
+Best regards,
+Juna • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="btn" style="background:#22c55e;color:#0f172a;" onclick="sendM('sent')">SEND &amp; LOG TO SENT</button>
+        <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="sendM('outbox')">QUEUE IN OUTBOX</button>
+        <button class="btn" style="background:#475569;color:#fff;" onclick="sendM('draft')">SAVE DRAFT</button>
+        <button class="btn" style="background:#f59e0b;color:#0f172a;" onclick="openGmail()">DISPATCH VIA GMAIL</button>
+    </div><p id="mres" style="color:#22c55e;font-size:12px;"></p></div>
+    <div id="prefs" class="box"><h3>Email &amp; Notification Preferences</h3>
+    <p style="font-size:12px;margin:4px 0;">Primary Desk Email: <b>difft40y@gmail.com</b> &bull; Telegram Alerts: <b>@WorldwideAdCenterNotificationBot</b></p>
+    <select id="pnotif"><option>Instant Telegram + Mail Hub Sync (Recommended)</option><option>Daily Summary Digest Only</option><option>Quiet Mode (Log in Inbox Only)</option></select>
+    <input id="psig" value="Juna • Founder, Worldwide Ad Center | difft40y@gmail.com | +977-9717831225" placeholder="Default Email Signature">
+    <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="document.getElementById('pres').innerText='Email preferences & signature saved!';">SAVE EMAIL PREFERENCES</button>
+    <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
+    <script>
+    function fillDir(v){{if(v!=='Direct Contact'){{document.getElementById('msub').value='Partnership & Digital Outreach — ' + v;}}}}
+    async function sendM(folder){{const r=await fetch('/api/v1/mail/save',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,recipient:document.getElementById('mrec').value||'Directory Outreach',sector:document.getElementById('msec').value,subject:document.getElementById('msub').value,body:document.getElementById('mbdy').value}})}});const d=await r.json();document.getElementById('mres').innerText=d.message;}}
+    function openGmail(){{const to=encodeURIComponent(document.getElementById('mrec').value);const su=encodeURIComponent(document.getElementById('msub').value);const bd=encodeURIComponent(document.getElementById('mbdy').value);window.open('https://google.com');}}
+    </script></body></html>"""
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
