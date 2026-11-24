@@ -330,7 +330,7 @@ async def ad_tag_js(db: DBWrapper = Depends(get_db)):
     db.execute("INSERT INTO impressions (impression_id, publisher_id, timestamp) VALUES (?, 'pub_dev_773x92', 'now')", (imp_id,))
     db.commit()
     rows = db.execute("SELECT headline, subtext, btn_text, target_url FROM ad_campaigns WHERE active=1").fetchall()
-    hl, sub, btn, url = random.choice(rows) if rows else ("Worldwide Ad Center", "Grow your reach today.", "Learn More", "https://onrender.com")
+    hl, sub, btn, url = random.choice(rows) if rows else ("Worldwide Ad Center", "Grow your reach today.", "Learn More", "https://worldwide-ad-center-1.onrender.com")
     base = "https://" + "worldwide-ad-center-1" + ".onrender.com"
     js = f"""(function(){{var d=document.createElement('div');d.style='background:#1e293b;color:#fff;padding:16px;border-radius:10px;text-align:center;font-family:sans-serif;border:1px solid #38bdf8;margin:12px 0;';d.innerHTML='<small style="color:#38bdf8;letter-spacing:1px;">SPONSORED &bull; <a href="{base}/privacy" target="_blank" style="color:#94a3b8;text-decoration:none;">Ad Privacy</a></small><h4 style="margin:6px 0;font-size:18px;">{hl}</h4><p style="margin:0 0 12px 0;font-size:13px;color:#cbd5e1;">{sub}</p><button onclick="fetch(\\'{base}/api/v1/simulate-click\\',{{method:\\'POST\\'}});window.open(\\'{url}\\',\\'_blank\\');" style="background:#22c55e;color:#0f172a;border:none;padding:9px 18px;border-radius:6px;font-weight:bold;cursor:pointer;">{btn}</button>';document.currentScript.parentNode.insertBefore(d,document.currentScript);}})();"""
     return Response(content=js, media_type="application/javascript")
@@ -372,7 +372,7 @@ class SettingsReq(BaseModel):
 @app.get("/go/social")
 async def social_redirect(platform: str = "social", partner: str = "partner", cid: int = 1, db: DBWrapper = Depends(get_db)):
     row = db.execute("SELECT target_url FROM ad_campaigns WHERE id=?", (cid,)).fetchone()
-    dest = row.__getitem__(0) if row else "https://onrender.com"
+    dest = row.__getitem__(0) if row else "https://worldwide-ad-center-1.onrender.com"
     db.execute("INSERT INTO impressions (ts, source) VALUES (?, ?)", (int(time.time()), f"{platform}:{partner}"))
     recent_soc = db.execute("SELECT ts FROM clicks WHERE ip=? AND ts > ?", (f"social-{partner}", int(time.time()) - 60)).fetchone()
     if not recent_soc:
@@ -653,7 +653,7 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
         <a class="tab" href="#compose" style="background:#22c55e;color:#0f172a;">&#9997;&#65039; Compose / Directory</a>
         <a class="tab" href="#prefs" style="background:#f59e0b;color:#0f172a;">&#9881;&#65039; Email Preferences</a>
     </div>
-    <h3>Folder: {tab.upper()}</h3>{items}</div>
+    <h3>{tab.upper()}</h3>{items}</div>
     <div id="compose" class="box"><h3>Compose &amp; Compose to Directory</h3>
     <select id="msec" onchange="fillDir(this.value)">
         <option value="Direct Contact">Direct Recipient (Custom Email)</option>
@@ -669,7 +669,7 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
     <input id="msub" placeholder="Subject Line">
     <textarea id="mbdy" rows="5" placeholder="Write your message or select a Directory sector above to auto-fill...">Hello Team,
 
-We invite your organization to partner with Worldwide Ad Center (https://onrender.com) for direct, cookie-free digital outreach at 2.50 NPR per verified click.
+We invite your organization to partner with Worldwide Ad Center (https://worldwide-ad-center-1.onrender.com) for direct, cookie-free digital outreach at 2.50 NPR per verified click.
 
 Best regards,
 Juna • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
@@ -688,7 +688,7 @@ Juna • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)</textarea>
     <script>
     function fillDir(v){{if(v!=='Direct Contact'){{document.getElementById('msub').value='Partnership & Digital Outreach — ' + v;}}}}
     async function sendM(folder){{const r=await fetch('/api/v1/mail/save',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,recipient:document.getElementById('mrec').value||'Directory Outreach',sector:document.getElementById('msec').value,subject:document.getElementById('msub').value,body:document.getElementById('mbdy').value}})}});const d=await r.json();document.getElementById('mres').innerText=d.message;}}
-    function openGmail(){{const to=encodeURIComponent(document.getElementById('mrec').value);const su=encodeURIComponent(document.getElementById('msub').value);const bd=encodeURIComponent(document.getElementById('mbdy').value);window.open('https://google.com');}}
+    function openGmail(){{const to=encodeURIComponent(document.getElementById('mrec').value);const su=encodeURIComponent(document.getElementById('msub').value);const bd=encodeURIComponent(document.getElementById('mbdy').value);window.open('https://mail.google.com/mail/?view=cm&to=' + to + '&su=' + su + '&body=' + bd, '_blank');}}
     </script></body></html>"""
 
 @app.get("/analytics", response_class=HTMLResponse)
