@@ -957,7 +957,7 @@ async def official_media_kit(db: DBWrapper = Depends(get_db)):
     <tr><td>Agency Enterprise Tier</td><td>50,000+ NPR Deposit</td><td>+20% Free Bonus Clicks (24,000+ Total Clicks)</td></tr>
     <tr><td>Procurement &amp; Tender Notice</td><td>Standard / Verified Listing</td><td>Indexed in Global &amp; 7-Province Directory + 1-Tap Bid Desk</td></tr></table></div><div class="no-print">{FOOTER}</div></body></html>"""
 
-@app.get("/roadmap", "/media-kit", response_class=HTMLResponse)
+@app.get("/roadmap", response_class=HTMLResponse)
 async def project_roadmap(db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS wac_roadmap (item_id TEXT PRIMARY KEY, branch TEXT, title TEXT, ts INTEGER);")
     custom = db.execute("SELECT branch, title FROM wac_roadmap ORDER BY ts ASC").fetchall()
