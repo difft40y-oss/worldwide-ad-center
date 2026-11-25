@@ -1423,24 +1423,29 @@ async def beginner_guide(db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS wac_meta (k TEXT PRIMARY KEY, v TEXT);")
     vrow = db.execute("SELECT v FROM wac_meta WHERE k='demo_video'").fetchone()
     vurl = vrow.__getitem__(0) if vrow and vrow.__getitem__(0) else ""
-    player = f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid #38bdf8;margin:10px 0;"><iframe src="{vurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>' if vurl else '''<div id="demoStage" style="position:relative;background:#090d16;border:1px solid #38bdf8;border-radius:12px;padding:14px;margin:10px 0;overflow:hidden;min-height:210px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
-    <span id="dBadge" style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">SCENE 1 / 4 &bull; MULTI-LANGUAGE</span>
-    <div style="display:flex;gap:5px;">
+    player = f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid #38bdf8;margin:10px 0;"><iframe src="{vurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>' if vurl else '''<div id="demoStage" style="position:relative;background:#090d16;border:1px solid #38bdf8;border-radius:12px;padding:12px;margin:10px 0;overflow:hidden;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:8px;gap:4px;">
+    <span id="dBadge" style="background:#38bdf8;color:#0f172a;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:bold;">SCENE 1 / 8 &bull; GLOBAL SETUP</span>
+    <div style="display:flex;gap:4px;">
+      <button onclick="prevScene()" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">&laquo;</button>
       <button onclick="toggleDemo()" id="dPlayBtn" style="background:#22c55e;color:#0f172a;border:none;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">Pause</button>
-      <button onclick="nextScene()" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">Next &raquo;</button>
+      <button onclick="nextScene()" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">&raquo;</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
-    <div id="boxLang" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#38bdf8;">&#127760; 6 Languages + Currency</b><div id="txtLang" style="color:#cbd5e1;margin-top:3px;">English &bull; 2.50 NPR/Click</div></div>
-    <div id="boxAd" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#22c55e;">&#128226; Live Banner Studio</b><div id="txtAd" style="color:#cbd5e1;margin-top:3px;">Ad #AD-1 Rotating Live</div></div>
-    <div id="boxPay" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#f59e0b;">&#128179; Verified Click &amp; eSewa</b><div id="txtPay" style="color:#cbd5e1;margin-top:3px;">Clicks: 2 &bull; Escrow: 5.0 NPR</div></div>
-    <div id="boxBid" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#c084fc;">&#127959;&#65039; Global Tenders &amp; Mail</b><div id="txtBid" style="color:#cbd5e1;margin-top:3px;">11 Active Global &amp; Nepal Bids</div></div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px;">
+    <a href="/" id="b0" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#38bdf8;">1. &#127760; Language &amp; Currency</b><div id="t0" style="color:#cbd5e1;margin-top:2px;">6 Languages &bull; 2.50 NPR</div></a>
+    <a href="/advertise" id="b1" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#22c55e;">2. &#128226; Ad Banner Studio</b><div id="t1" style="color:#cbd5e1;margin-top:2px;">Templates + 7-Day Vault</div></a>
+    <a href="/deposit" id="b2" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#f59e0b;">3. &#128179; eSewa Escrow Deposit</b><div id="t2" style="color:#cbd5e1;margin-top:2px;">QR 9717831225 &bull; DEP-ID</div></a>
+    <a href="/payout-hub" id="b3" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#38bdf8;">4. &#128187; Publisher Tag &amp; Payout</b><div id="t3" style="color:#cbd5e1;margin-top:2px;">JS Tag &bull; +2.50 NPR/Click</div></a>
+    <a href="/tenders" id="b4" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#c084fc;">5. &#127959;&#65039; Global &amp; Nepal Tenders</b><div id="t4" style="color:#cbd5e1;margin-top:2px;">1-Tap Bid Inquiry Desk</div></a>
+    <a href="/mail" id="b5" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#22c55e;">6. &#9993;&#65039; Mail &amp; 35 Sectors</b><div id="t5" style="color:#cbd5e1;margin-top:2px;">Expandable Dir + Templates</div></a>
+    <a href="/analytics" id="b6" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#f59e0b;">7. &#128202; Analytics &amp; Media Kit</b><div id="t6" style="color:#cbd5e1;margin-top:2px;">Live CTR &bull; Tax/Kit PDF</div></a>
+    <a href="/roadmap" id="b7" style="text-decoration:none;background:#1e293b;padding:8px;border-radius:8px;border:1px solid #334155;font-size:10px;"><b style="color:#ef4444;">8. &#128737;&#65039; Admin &amp; Project Tree</b><div id="t7" style="color:#cbd5e1;margin-top:2px;">1-Tap Control &bull; CSV Export</div></a>
   </div>
-  <div id="dCaption" style="background:#0f172a;border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px;font-size:12px;color:#fff;">Cursor selecting Chinese / Spanish localization &amp; live currency rate...</div>
-  <div id="simCursor" style="position:absolute;top:70px;left:45px;transition:all 0.85s cubic-bezier(0.22,1,0.36,1);pointer-events:none;z-index:20;">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="#22c55e" stroke="#0f172a" stroke-width="1.5"><path d="M4 2l16 11-7 2 4 7-3 1.5-4-7-6 4.5z"/></svg>
-    <span id="simRing" style="position:absolute;top:-4px;left:-4px;width:24px;height:24px;border-radius:50%;border:2px solid #38bdf8;opacity:0;transition:all 0.4s;"></span>
+  <div id="dCaption" style="background:#0f172a;border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px;font-size:11px;color:#fff;">1. Switch between 6 languages &amp; 4 currencies (NPR, USD, INR, EUR) instantly. (Tap any card above to open!)</div>
+  <div id="simCursor" style="position:absolute;top:58px;left:55px;transition:all 0.8s cubic-bezier(0.22,1,0.36,1);pointer-events:none;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e" stroke="#0f172a" stroke-width="1.5"><path d="M4 2l16 11-7 2 4 7-3 1.5-4-7-6 4.5z"/></svg>
+    <span id="simRing" style="position:absolute;top:-4px;left:-4px;width:22px;height:22px;border-radius:50%;border:2px solid #38bdf8;opacity:0;transition:all 0.4s;"></span>
   </div>
 </div>'''
     demo_box = f"""<div class="box" style="border:1px solid #22c55e;"><span style="background:#22c55e;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">INTERACTIVE DEMO TOUR</span><h2 style="margin-top:6px;">How Global Users Operate Worldwide Ad Center</h2>{player}
@@ -1458,19 +1463,23 @@ async def beginner_guide(db: DBWrapper = Depends(get_db)):
         <p id="vres" style="color:#22c55e;font-size:12px;margin:4px 0 0 0;"></p>
     </div></div>
     <script>
-let dIdx=0, dRun=true, dClk=2;
+let dIdx=0, dRun=true;
 const scenes=[
-  {{b:'SCENE 1 / 4 • MULTI-LANGUAGE',x:65,y:68,box:'boxLang',txt:'txtLang',val:'中文 / Español • $0.019 USD',cap:'1. Visitors switch between 6 languages & 4 currencies instantly.'}},
-  {{b:'SCENE 2 / 4 • CREATE BANNER',x:220,y:68,box:'boxAd',txt:'txtAd',val:'New Banner Published (#AD-2)',cap:'2. Advertisers create responsive banners in /advertise with live preview.'}},
-  {{b:'SCENE 3 / 4 • VERIFIED CLICK',x:65,y:128,box:'boxPay',txt:'txtPay',val:'Clicks: 3 (+1) • eSewa 9717831225',cap:'3. Anti-bot guard credits 2.50 NPR per verified human click to eSewa.'}},
-  {{b:'SCENE 4 / 4 • GLOBAL TENDERS',x:220,y:128,box:'boxBid',txt:'txtBid',val:'1-Tap Bid Inquiry Sent via /mail',cap:'4. Contractors filter worldwide tenders & send 1-tap inquiries via /mail.'}}
+  {{b:'SCENE 1 / 8 • GLOBAL SETUP',x:60,y:58,box:'b0',txt:'t0',val:'中文 / Español • $0.019 USD',cap:'1. Visitors switch between 6 languages & 4 currencies instantly. (Tap card to open)'}},
+  {{b:'SCENE 2 / 8 • AD STUDIO',x:215,y:58,box:'b1',txt:'t1',val:'Banner #AD-2 Preview Live!',cap:'2. Advertisers design banners in /advertise with 7-day draft vault.'}},
+  {{b:'SCENE 3 / 8 • ESEWA ESCROW',x:60,y:108,box:'b2',txt:'t2',val:'Deposit DEP-884 Verified!',cap:'3. Fund campaign balance via eSewa QR 9717831225 & track DEP-ID.'}},
+  {{b:'SCENE 4 / 8 • PUBLISHER TAG',x:215,y:108,box:'b3',txt:'t3',val:'+2.50 NPR Credited (Guarded)',cap:'4. Embed 1-line JS tag or social link to earn 2.50 NPR per verified click.'}},
+  {{b:'SCENE 5 / 8 • GLOBAL TENDERS',x:60,y:158,box:'b4',txt:'t4',val:'BID-98001 Inquiry Opened',cap:'5. Filter worldwide & 7-province Nepal tenders with 1-Tap Bid Inquiry.'}},
+  {{b:'SCENE 6 / 8 • MAIL & SECTORS',x:215,y:158,box:'b5',txt:'t5',val:'Outreach Logged to Sent!',cap:'6. Select organizations from Worldwide Directory & send 1-tap templates.'}},
+  {{b:'SCENE 7 / 8 • ANALYTICS & PDF',x:60,y:208,box:'b6',txt:'t6',val:'Media Kit & Tax PDF Ready',cap:'7. Audit live impressions/CTR in /analytics & download PDF Media Kit.'}},
+  {{b:'SCENE 8 / 8 • ADMIN & TREE',x:215,y:208,box:'b7',txt:'t7',val:'CSV Ledger & Tree Synced',cap:'8. Manage campaigns in /admin-desk & expand /roadmap Project Tree.'}}
 ];
 function runScene(i){{
   const s=scenes[i];
   const cur=document.getElementById('simCursor'), ring=document.getElementById('simRing');
   if(!cur) return;
   cur.style.left=s.x+'px'; cur.style.top=s.y+'px';
-  ['boxLang','boxAd','boxPay','boxBid'].forEach(id=>{{const el=document.getElementById(id);if(el)el.style.borderColor='#334155';}});
+  for(let k=0;k<8;k++){{const el=document.getElementById('b'+k);if(el)el.style.borderColor='#334155';}}
   setTimeout(()=>{{
     const target=document.getElementById(s.box);
     if(target) target.style.borderColor='#22c55e';
@@ -1480,11 +1489,12 @@ function runScene(i){{
     document.getElementById('dCaption').innerText=s.cap;
     ring.style.opacity='1'; ring.style.transform='scale(1.6)';
     setTimeout(()=>{{ring.style.opacity='0'; ring.style.transform='scale(0.8)';}},400);
-  }},650);
+  }},600);
 }}
 function nextScene(){{dIdx=(dIdx+1)%scenes.length;runScene(dIdx);}}
+function prevScene(){{dIdx=(dIdx-1+scenes.length)%scenes.length;runScene(dIdx);}}
 function toggleDemo(){{dRun=!dRun;document.getElementById('dPlayBtn').innerText=dRun?'Pause':'Play';}}
-setInterval(()=>{{if(dRun) nextScene();}},3200);
+setInterval(()=>{{if(dRun) nextScene();}},3000);
 setTimeout(()=>runScene(0),400);
 async function saveVid(){{const r=await fetch('/api/v1/guide/set-video',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('vpin').value,video_url:document.getElementById('vurl').value}})}});const d=await r.json();document.getElementById('vres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script>""" 
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.step{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;font-size:13px}}.btn{{display:block;width:100%;padding:13px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
