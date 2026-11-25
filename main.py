@@ -1478,7 +1478,7 @@ function runScene(i){{
   const s=scenes[i];
   const cur=document.getElementById('simCursor'), ring=document.getElementById('simRing');
   if(!cur) return;
-  cur.style.left=s.x+'px'; cur.style.top=s.y+'px';
+  const tgt=document.getElementById(s.box);if(tgt){{cur.style.left=(tgt.offsetLeft+tgt.offsetWidth*0.65)+'px';cur.style.top=(tgt.offsetTop+tgt.offsetHeight*0.55)+'px';}}
   for(let k=0;k<8;k++){{const el=document.getElementById('b'+k);if(el)el.style.borderColor='#334155';}}
   setTimeout(()=>{{
     const target=document.getElementById(s.box);
