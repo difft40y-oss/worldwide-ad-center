@@ -204,7 +204,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/roadmap", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/roadmap", "/media-kit", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -245,7 +245,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISE WITH US (SUBMIT AD)</a>
     <a href="/tenders" class="btn" style="background:#0ea5e9;color:#0f172a;">6. CONSTRUCTION &amp; BIDDER NOTICES</a>
     <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a>
-    <a href="/roadmap" class="btn" style="display:block;background:#991b1b;color:#fff;text-align:center;padding:14px;border-radius:10px;text-decoration:none;font-weight:bold;margin-top:10px;font-size:13px;">8. PROJECT TREE &amp; FEATURE ROADMAP</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <a href="/roadmap", "/media-kit" class="btn" style="display:block;background:#991b1b;color:#fff;text-align:center;padding:14px;border-radius:10px;text-decoration:none;font-weight:bold;margin-top:10px;font-size:13px;">8. PROJECT TREE &amp; FEATURE ROADMAP</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
@@ -934,7 +934,30 @@ async def add_roadmap_item(req: RoadmapReq, db: DBWrapper = Depends(get_db)):
     db.commit()
     return {"message": f"Added '{req.title}' to {req.branch}!"}
 
-@app.get("/roadmap", response_class=HTMLResponse)
+@app.get("/media-kit", response_class=HTMLResponse)
+async def official_media_kit(db: DBWrapper = Depends(get_db)):
+    imp = db.execute("SELECT COUNT(*) FROM impressions").fetchone().__getitem__(0)
+    clk = db.execute("SELECT COUNT(*) FROM clicks").fetchone().__getitem__(0)
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}table{{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}}td,th{{border:1px solid #334155;padding:8px;text-align:left}}th{{background:#0f172a;color:#38bdf8}}@media print{{.no-print{{display:none !important}}body{{background:#fff;color:#000}}.box{{background:#fff;border:1px solid #ccc}}h2,h3{{color:#000}}}}</style></head>
+    <body><div class="no-print">{render_nav("Official Media Kit & Rate Card", "Home / Official Media Kit")}</div>
+    <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;"><h2 style="margin:0;">OFFICIAL MEDIA KIT &amp; RATE CARD</h2><button class="no-print" onclick="window.print()" style="background:#22c55e;color:#0f172a;border:none;padding:9px 14px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">PRINT / SAVE PDF</button></div>
+    <p style="font-size:12px;color:#38bdf8;margin:4px 0;">https://worldwide-ad-center-1.onrender.com &bull; Gandaki Province, Nepal</p>
+    <p style="font-size:12px;"><b>Founder &amp; Managing Desk:</b> Hari Prasad Parajuli &bull; <b>Email:</b> difft40y@gmail.com &bull; <b>eSewa / Direct:</b> +977-9717831225</p>
+    <h3>1. Verified Network Reach &amp; Specifications</h3>
+    <table><tr><th>Metric / Specification</th><th>Standard</th></tr>
+    <tr><td>Geographic Coverage</td><td>All 7 Provinces of Nepal + Global Web Traffic (6 Languages)</td></tr>
+    <tr><td>Industry Verticals</td><td>35 Specialized Institutional &amp; Commercial Sectors</td></tr>
+    <tr><td>Live Verified Activity</td><td>{imp} Impressions Served &bull; {clk} Guarded Human Clicks</td></tr>
+    <tr><td>Ad Formats Supported</td><td>Responsive Banner Card (600&times;160 / Fluid), Text Headline + CTA, Direct Social Link</td></tr>
+    <tr><td>Privacy &amp; Fraud Guard</td><td>Zero Third-Party Tracking Cookies &bull; Server-Side Click-Delay Verification</td></tr></table>
+    <h3>2. Transparent Rate Card &amp; Agency Bonus Tiers</h3>
+    <table><tr><th>Package Tier</th><th>Rate / Minimum</th><th>Included Bonus</th></tr>
+    <tr><td>Direct Self-Serve CPC</td><td>2.50 NPR / Verified Click</td><td>Unlimited Free Impressions + Live Analytics</td></tr>
+    <tr><td>Agency Growth Tier</td><td>10,000 NPR Deposit</td><td>+10% Free Bonus Clicks (4,400 Total Clicks)</td></tr>
+    <tr><td>Agency Enterprise Tier</td><td>50,000+ NPR Deposit</td><td>+20% Free Bonus Clicks (24,000+ Total Clicks)</td></tr>
+    <tr><td>Procurement &amp; Tender Notice</td><td>Standard / Verified Listing</td><td>Indexed in Global &amp; 7-Province Directory + 1-Tap Bid Desk</td></tr></table></div><div class="no-print">{FOOTER}</div></body></html>"""
+
+@app.get("/roadmap", "/media-kit", response_class=HTMLResponse)
 async def project_roadmap(db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS wac_roadmap (item_id TEXT PRIMARY KEY, branch TEXT, title TEXT, ts INTEGER);")
     custom = db.execute("SELECT branch, title FROM wac_roadmap ORDER BY ts ASC").fetchall()
@@ -977,8 +1000,8 @@ async def project_roadmap(db: DBWrapper = Depends(get_db)):
                 <div class="it">Status Tracker (/status)</div>
                 <div class="it">Tax Invoice PDF (/documents)</div>
                 <div class="it">CSV Ledger &amp; 24/7 Ping</div>
-                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">[+] 1-Tap Mail Templates</div>
-                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">[+] Official Media Kit PDF</div>
+                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">&#10003; 1-Tap Mail Templates (/mail)</div>
+                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">&#10003; Official Media Kit PDF (/media-kit)</div>
                 {extra_b3}
             </div>
         </div>
@@ -1086,6 +1109,13 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
     </div>
     <h3>{tab.upper()}</h3>{items}</div>
     <div id="compose" class="box"><h3>Compose &amp; Compose to Directory</h3>
+    <select id="mtpl" onchange="loadTpl(this.value)" style="border:1px solid #22c55e;">
+        <option value="">-- Load 1-Tap Outreach Template --</option>
+        <option value="bank">Template 1: Banks, Airlines &amp; Commercial Brands</option>
+        <option value="edu">Template 2: Universities, Colleges &amp; AI Research Labs</option>
+        <option value="ngo">Template 3: UN, WHO, ADB, NGOs &amp; Public Governance</option>
+        <option value="media">Template 4: Media Houses, TV Channels &amp; Influencers</option>
+    </select>
     <select id="msec" onchange="fillDir(this.value)">
         <option value="Direct Contact">Direct Recipient (Custom Email)</option>
         <option value="UN / WHO / UNESCO / ADB / IMF">Directory: International Bodies (UN, WHO, ADB, IMF)</option>
@@ -1117,6 +1147,13 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
     <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="document.getElementById('pres').innerText='Email preferences & signature saved!';">SAVE EMAIL PREFERENCES</button>
     <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
     <script>
+    function loadTpl(t){{
+        const sig = '\n\nWarm regards,\nHari Prasad Parajuli • Founder, Worldwide Ad Center\nWebsite: https://worldwide-ad-center-1.onrender.com\nEmail: difft40y@gmail.com | Phone / WhatsApp: +977-9717831225';
+        if(t==='bank'){{document.getElementById('msub').value='High-Conversion CPC Brand Outreach — Worldwide Ad Center';document.getElementById('mbdy').value='Dear Marketing & Brand Partnerships Team,\n\nPromote your seasonal offers and digital services across Nepal (all 7 provinces) and global web traffic at a flat 2.50 NPR per verified human click (all impressions free, multi-currency NPR/USD/INR/EUR).' + sig;}}
+        else if(t==='edu'){{document.getElementById('msub').value='Student Admissions & Academic Symposium Outreach — Worldwide Ad Center';document.getElementById('mbdy').value='Dear Admissions & Communications Desk,\n\nReach prospective students, researchers, and global delegates through targeted campaigns across our Education & AI network at 2.50 NPR per verified click.' + sig;}}
+        else if(t==='ngo'){{document.getElementById('msub').value='Cookie-Free Public Awareness & Tender Syndication — Worldwide Ad Center';document.getElementById('mbdy').value='Dear Public Information & Procurement Unit,\n\nWorldwide Ad Center provides privacy-first, multi-language public awareness campaigns (6 languages) and instant tender publication across all 7 Nepal provinces and international regions.' + sig;}}
+        else if(t==='media'){{document.getElementById('msub').value='Traffic Monetization & Creator Partnership — Worldwide Ad Center';document.getElementById('mbdy').value='Dear Digital & Monetization Lead,\n\nMonetize your website or social audience immediately using our lightweight ad tag or tracked creator links with transparent eSewa payouts (2.50 NPR per verified click).' + sig;}}
+    }}
     function fillDir(v){{if(v!=='Direct Contact'){{document.getElementById('msub').value='Partnership & Digital Outreach — ' + v;}}}}
     const qp = new URLSearchParams(window.location.search);
     if(qp.get('to')) document.getElementById('mrec').value = qp.get('to');
