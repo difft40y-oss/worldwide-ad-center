@@ -181,6 +181,10 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             if(!el._origPh) el._origPh = el.placeholder;
             if(m.hasOwnProperty(el._origPh)) el.placeholder = m[el._origPh];
         }});
+        document.querySelectorAll('select:not(#langSel) option').forEach(opt=>{{
+            if(!opt._origTxt) opt._origTxt = opt.textContent.trim();
+            if(m.hasOwnProperty(opt._origTxt)) opt.textContent = m[opt._origTxt];
+        }});
     }}
     setTimeout(()=>{{
         const saved = localStorage.getItem('wac_lang');
@@ -1041,7 +1045,12 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
     function fillDir(v){{if(v!=='Direct Contact'){{document.getElementById('msub').value='Partnership & Digital Outreach — ' + v;}}}}
     const qp = new URLSearchParams(window.location.search);
     if(qp.get('to')) document.getElementById('mrec').value = qp.get('to');
-    if(qp.get('sub')) document.getElementById('msub').value = qp.get('sub');
+    if(qp.get('sub')){{
+        document.getElementById('msub').value = qp.get('sub');
+        if(qp.get('sub').startsWith('Bid Inquiry:')){{
+            document.getElementById('mbdy').value = 'Dear Procurement Desk,\n\nWe are interested in submitting a formal bid / quotation for: ' + qp.get('sub').replace('Bid Inquiry: ', '') + '. Please share tender documents and submission guidelines.\n\nBest regards,\nHari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-9717831225)';
+        }}
+    }}
     async function sendM(folder){{const r=await fetch('/api/v1/mail/save',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,recipient:document.getElementById('mrec').value||'Directory Outreach',sector:document.getElementById('msec').value,subject:document.getElementById('msub').value,body:document.getElementById('mbdy').value}})}});const d=await r.json();document.getElementById('mres').innerText=d.message;}}
     function openGmail(){{const to=encodeURIComponent(document.getElementById('mrec').value);const su=encodeURIComponent(document.getElementById('msub').value);const bd=encodeURIComponent(document.getElementById('mbdy').value);window.open('https://mail.google.com/mail/?view=cm&to=' + to + '&su=' + su + '&body=' + bd, '_blank');}}
     </script><div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
