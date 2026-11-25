@@ -156,47 +156,54 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
     </div>
     <script>
     const exitLbl = {{
-        zh: "← 退出 (Back / Exit)",
-        ja: "← 戻る / 終了 (Back / Exit)",
-        ko: "← 뒤로 / 나가기 (Back / Exit)",
-            ar: "← رجوع / خروج (Back / Exit)",
-            nl: "← Terug / Sluiten (Back / Exit)",
-            fr: "← Retour / Quitter (Back / Exit)",
-            ru: "← Назад / Выход (Back / Exit)",
-            de: "← Zurück / Beenden (Back / Exit)",
-            pt: "← Voltar / Sair (Back / Exit)",
-        hi: "← वापस / बाहर निकलें (Back / Exit)",
-        es: "← Volver / Salir (Back / Exit)", fr: "← Retour / Quitter (Back / Exit)"
+        zh: "← 退出 (Back / Exit)", ja: "← 戻る / 終了 (Back / Exit)", ko: "← 뒤로 / 나가기 (Back / Exit)",
+        es: "← Volver / Salir (Back / Exit)", ar: "← رجوع / خروج (Back / Exit)", nl: "← Terug / Afsluiten (Back / Exit)",
+        fr: "← Retour / Quitter (Back / Exit)", ru: "← Назад / Выход (Back / Exit)", de: "← Zurück / Beenden (Back / Exit)",
+        pt: "← Voltar / Sair (Back / Exit)"
     }};
     let fullDict = null;
     async function applyLang(l){{
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
         if(!fullDict){{const r=await fetch('/api/v1/dict.json');fullDict=await r.json();}}
-        const m = fullDict.hasOwnProperty(l)?fullDict[l]:{{}};
+        const cacheKey = 'wac_tr_' + l;
+        const cached = JSON.parse(localStorage.getItem(cacheKey) || '{{}}');
+        const m = Object.assign({{}}, fullDict.hasOwnProperty(l)?fullDict[l]:{{}}, cached);
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-        let node;
+        let node, missing = new Set(), nodes = [];
         while((node = walker.nextNode())){{
             const p = node.parentElement;
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
             if(!node._origRaw) node._origRaw = node.nodeValue;
             const raw = node._origRaw;
             const t = raw.replace(/\\s+/g, ' ').trim();
-            if(!t) continue;
-            const cleanT = t.replace(/^[^A-Za-z0-9<]+/, '').trim();
+            if(!t || /^[0-9.,%+\-$\s:/•]+$/.test(t) || t.startsWith('http')) continue;
+            nodes.push({{node, raw, t}});
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
-            else if(m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else{{node.nodeValue = raw;}}
+            else{{missing.add(t);}}
         }}
         document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
             if(!el._origPh) el._origPh = el.placeholder;
             if(m.hasOwnProperty(el._origPh)) el.placeholder = m[el._origPh];
+            else if(el._origPh) missing.add(el._origPh);
         }});
-        document.querySelectorAll('select:not(#langSel) option').forEach(opt=>{{
-            if(!opt._origTxt) opt._origTxt = opt.textContent.trim();
-            if(m.hasOwnProperty(opt._origTxt)) opt.textContent = m[opt._origTxt];
-        }});
+        if(missing.size > 0){{
+            try{{
+                const res = await fetch('/api/v1/auto-tr', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target:l,texts:Array.from(missing)}})}});
+                const d = await res.json();
+                if(d.translations){{
+                    Object.assign(cached, d.translations);
+                    localStorage.setItem(cacheKey, JSON.stringify(cached));
+                    nodes.forEach(item=>{{
+                        if(d.translations.hasOwnProperty(item.t)){{item.node.nodeValue = item.raw.replace(item.t, d.translations[item.t]);}}
+                    }});
+                    document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
+                        if(d.translations.hasOwnProperty(el._origPh)) el.placeholder = d.translations[el._origPh];
+                    }});
+                }}
+            }}catch(err){{}}
+        }}
     }}
     setTimeout(()=>{{
         const saved = localStorage.getItem('wac_lang');
@@ -208,6 +215,31 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
 
 FOOTER = '<div style="text-align:center;margin-top:24px;padding-top:14px;border-top:1px solid #334155;font-size:12px;color:#94a3b8;"><a href="/" style="color:#38bdf8;text-decoration:none;">Hub Home</a> &bull; <a href="/about" style="color:#38bdf8;text-decoration:none;">About &amp; Contact</a> &bull; <a href="/advertise" style="color:#38bdf8;text-decoration:none;">Advertise With Us</a> &bull; <a href="/agencies" style="color:#f59e0b;text-decoration:none;">For Agencies</a> &bull; <a href="/tenders" style="color:#38bdf8;text-decoration:none;">Tenders &amp; Bids</a> &bull; <a href="/faq" style="color:#38bdf8;text-decoration:none;">FAQ &amp; Ad Topics</a> &bull; <a href="/privacy" style="color:#38bdf8;text-decoration:none;">Privacy Policy</a> &bull; <a href="/terms" style="color:#38bdf8;text-decoration:none;">Terms of Service</a> &bull; <a href="/sitemap.xml" style="color:#38bdf8;text-decoration:none;">Sitemap</a><br><span style="font-size:11px;color:#64748b;">&copy; 2026 Worldwide Ad Center. All Rights Reserved. &bull; Gandaki Province, Nepal</span></div>'
 
+
+class AutoTrReq(BaseModel):
+    target: str
+    texts: list
+
+@app.post("/api/v1/auto-tr")
+async def auto_translate_batch(req: AutoTrReq):
+    import urllib.request, urllib.parse, json
+    dot, sl = chr(46), chr(47)
+    ep = "https:" + sl + sl + "translate" + dot + "googleapis" + dot + "com" + sl + "translate_a" + sl + "single"
+    out = {}
+    for raw in req.texts[:120]:
+        t = str(raw).strip()
+        if not t or "Back / Exit" in t:
+            continue
+        try:
+            u = f"{ep}?client=gtx&sl=en&tl={urllib.parse.quote(req.target)}&dt=t&q={urllib.parse.quote(t[:450])}"
+            r = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+            data = json.loads(urllib.request.urlopen(r, timeout=5).read().decode("utf-8"))
+            tr = "".join([s for s in data if s and s])
+            if tr:
+                out[t] = tr
+        except Exception:
+            pass
+    return {"translations": out}
 
 @app.get("/api/v1/dict.json")
 async def get_dict_json():
