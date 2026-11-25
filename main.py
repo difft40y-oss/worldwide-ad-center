@@ -1423,7 +1423,26 @@ async def beginner_guide(db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS wac_meta (k TEXT PRIMARY KEY, v TEXT);")
     vrow = db.execute("SELECT v FROM wac_meta WHERE k='demo_video'").fetchone()
     vurl = vrow.__getitem__(0) if vrow and vrow.__getitem__(0) else ""
-    player = f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid #38bdf8;margin:10px 0;"><iframe src="{vurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>' if vurl else '<div style="background:#0f172a;border:1px dashed #38bdf8;border-radius:10px;padding:16px;text-align:center;margin:10px 0;"><div style="font-size:24px;">&#127916;</div><div style="color:#fff;font-weight:bold;font-size:13px;margin:4px 0;">Full Platform Video Walkthrough Ready Slot</div><div style="color:#94a3b8;font-size:11px;">Record your 60-second Redmi 13 demo, upload to YouTube, and paste the link below with your Admin PIN to embed it live here.</div></div>'
+    player = f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid #38bdf8;margin:10px 0;"><iframe src="{vurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>' if vurl else '''<div id="demoStage" style="position:relative;background:#090d16;border:1px solid #38bdf8;border-radius:12px;padding:14px;margin:10px 0;overflow:hidden;min-height:210px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
+    <span id="dBadge" style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">SCENE 1 / 4 &bull; MULTI-LANGUAGE</span>
+    <div style="display:flex;gap:5px;">
+      <button onclick="toggleDemo()" id="dPlayBtn" style="background:#22c55e;color:#0f172a;border:none;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">Pause</button>
+      <button onclick="nextScene()" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;">Next &raquo;</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
+    <div id="boxLang" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#38bdf8;">&#127760; 6 Languages + Currency</b><div id="txtLang" style="color:#cbd5e1;margin-top:3px;">English &bull; 2.50 NPR/Click</div></div>
+    <div id="boxAd" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#22c55e;">&#128226; Live Banner Studio</b><div id="txtAd" style="color:#cbd5e1;margin-top:3px;">Ad #AD-1 Rotating Live</div></div>
+    <div id="boxPay" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#f59e0b;">&#128179; Verified Click &amp; eSewa</b><div id="txtPay" style="color:#cbd5e1;margin-top:3px;">Clicks: 2 &bull; Escrow: 5.0 NPR</div></div>
+    <div id="boxBid" style="background:#1e293b;padding:9px;border-radius:8px;border:1px solid #334155;font-size:11px;"><b style="color:#c084fc;">&#127959;&#65039; Global Tenders &amp; Mail</b><div id="txtBid" style="color:#cbd5e1;margin-top:3px;">11 Active Global &amp; Nepal Bids</div></div>
+  </div>
+  <div id="dCaption" style="background:#0f172a;border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px;font-size:12px;color:#fff;">Cursor selecting Chinese / Spanish localization &amp; live currency rate...</div>
+  <div id="simCursor" style="position:absolute;top:70px;left:45px;transition:all 0.85s cubic-bezier(0.22,1,0.36,1);pointer-events:none;z-index:20;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="#22c55e" stroke="#0f172a" stroke-width="1.5"><path d="M4 2l16 11-7 2 4 7-3 1.5-4-7-6 4.5z"/></svg>
+    <span id="simRing" style="position:absolute;top:-4px;left:-4px;width:24px;height:24px;border-radius:50%;border:2px solid #38bdf8;opacity:0;transition:all 0.4s;"></span>
+  </div>
+</div>'''
     demo_box = f"""<div class="box" style="border:1px solid #22c55e;"><span style="background:#22c55e;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">INTERACTIVE DEMO TOUR</span><h2 style="margin-top:6px;">How Global Users Operate Worldwide Ad Center</h2>{player}
     <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
         <div style="background:#0f172a;padding:11px;border-radius:8px;border-left:4px solid #38bdf8;"><b style="color:#38bdf8;font-size:12px;">STEP 1: Global Language &amp; Currency Setup</b><p style="font-size:12px;margin:4px 0 0 0;">Select any of 6 languages (English, 中文, 日本語, 한국어, हिन्दी, Español) and convert live CPC rates across NPR, USD, INR, and EUR.</p></div>
@@ -1438,7 +1457,36 @@ async def beginner_guide(db: DBWrapper = Depends(get_db)):
         <button onclick="saveVid()" style="width:100%;padding:10px;background:#38bdf8;color:#0f172a;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:12px;margin-top:4px;">EMBED / UPDATE DEMO VIDEO</button>
         <p id="vres" style="color:#22c55e;font-size:12px;margin:4px 0 0 0;"></p>
     </div></div>
-    <script>async function saveVid(){{const r=await fetch('/api/v1/guide/set-video',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('vpin').value,video_url:document.getElementById('vurl').value}})}});const d=await r.json();document.getElementById('vres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script>""" 
+    <script>
+let dIdx=0, dRun=true, dClk=2;
+const scenes=[
+  {{b:'SCENE 1 / 4 • MULTI-LANGUAGE',x:65,y:68,box:'boxLang',txt:'txtLang',val:'中文 / Español • $0.019 USD',cap:'1. Visitors switch between 6 languages & 4 currencies instantly.'}},
+  {{b:'SCENE 2 / 4 • CREATE BANNER',x:220,y:68,box:'boxAd',txt:'txtAd',val:'New Banner Published (#AD-2)',cap:'2. Advertisers create responsive banners in /advertise with live preview.'}},
+  {{b:'SCENE 3 / 4 • VERIFIED CLICK',x:65,y:128,box:'boxPay',txt:'txtPay',val:'Clicks: 3 (+1) • eSewa 9717831225',cap:'3. Anti-bot guard credits 2.50 NPR per verified human click to eSewa.'}},
+  {{b:'SCENE 4 / 4 • GLOBAL TENDERS',x:220,y:128,box:'boxBid',txt:'txtBid',val:'1-Tap Bid Inquiry Sent via /mail',cap:'4. Contractors filter worldwide tenders & send 1-tap inquiries via /mail.'}}
+];
+function runScene(i){{
+  const s=scenes[i];
+  const cur=document.getElementById('simCursor'), ring=document.getElementById('simRing');
+  if(!cur) return;
+  cur.style.left=s.x+'px'; cur.style.top=s.y+'px';
+  ['boxLang','boxAd','boxPay','boxBid'].forEach(id=>{{const el=document.getElementById(id);if(el)el.style.borderColor='#334155';}});
+  setTimeout(()=>{{
+    const target=document.getElementById(s.box);
+    if(target) target.style.borderColor='#22c55e';
+    const tEl=document.getElementById(s.txt);
+    if(tEl) tEl.innerText=s.val;
+    document.getElementById('dBadge').innerText=s.b;
+    document.getElementById('dCaption').innerText=s.cap;
+    ring.style.opacity='1'; ring.style.transform='scale(1.6)';
+    setTimeout(()=>{{ring.style.opacity='0'; ring.style.transform='scale(0.8)';}},400);
+  }},650);
+}}
+function nextScene(){{dIdx=(dIdx+1)%scenes.length;runScene(dIdx);}}
+function toggleDemo(){{dRun=!dRun;document.getElementById('dPlayBtn').innerText=dRun?'Pause':'Play';}}
+setInterval(()=>{{if(dRun) nextScene();}},3200);
+setTimeout(()=>runScene(0),400);
+async function saveVid(){{const r=await fetch('/api/v1/guide/set-video',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('vpin').value,video_url:document.getElementById('vurl').value}})}});const d=await r.json();document.getElementById('vres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script>""" 
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.step{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;font-size:13px}}.btn{{display:block;width:100%;padding:13px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
     <body>{render_nav("Beginner Guide & Rules", "Home / Beginner Guide (English Subtitles)")}
     <div class="box">{demo_box}<h2>Step-by-Step Guide</h2><p style='font-size:12px;color:#38bdf8;margin-top:-6px;'>English Subtitles &amp; Clear Onboarding Instructions</p>
