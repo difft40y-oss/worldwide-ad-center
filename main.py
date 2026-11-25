@@ -146,6 +146,12 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             <option value="ja">&#127471;&#127477; 日本語 (Japanese)</option>
             <option value="ko">&#127472;&#127479; 한국어 (Korean)</option>
             <option value="es">&#127466;&#127480; Español</option>
+                    <option value="ar">&#127480;&#127462; العربية (Arabic)</option>
+                    <option value="nl">&#127475;&#127473; Nederlands (Dutch)</option>
+                    <option value="fr">&#127467;&#127479; Français (French)</option>
+                    <option value="ru">&#127479;&#127482; Русский (Russian)</option>
+                    <option value="de">&#127465;&#127466; Deutsch (German)</option>
+                    <option value="pt">&#127477;&#127481; Português (Portuguese)</option>
         </select>
     </div>
     <script>
@@ -153,6 +159,12 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
         zh: "← 退出 (Back / Exit)",
         ja: "← 戻る / 終了 (Back / Exit)",
         ko: "← 뒤로 / 나가기 (Back / Exit)",
+            ar: "← رجوع / خروج (Back / Exit)",
+            nl: "← Terug / Sluiten (Back / Exit)",
+            fr: "← Retour / Quitter (Back / Exit)",
+            ru: "← Назад / Выход (Back / Exit)",
+            de: "← Zurück / Beenden (Back / Exit)",
+            pt: "← Voltar / Sair (Back / Exit)",
         hi: "← वापस / बाहर निकलें (Back / Exit)",
         es: "← Volver / Salir (Back / Exit)"
     }};
