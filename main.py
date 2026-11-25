@@ -204,7 +204,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/roadmap", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -244,7 +244,8 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <a href="/campaigns" class="btn" style="background:#ec4899;color:#fff;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
     <a href="/advertise" class="btn" style="background:#14b8a6;color:#0f172a;">5. ADVERTISE WITH US (SUBMIT AD)</a>
     <a href="/tenders" class="btn" style="background:#0ea5e9;color:#0f172a;">6. CONSTRUCTION &amp; BIDDER NOTICES</a>
-    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <a href="/api/v1/health/telegram-report" class="btn" style="background:#22c55e;">7. SEND TELEGRAM HEALTH REPORT</a>
+    <a href="/roadmap" style="display:block;background:#0f172a;color:#38bdf8;padding:13px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:8px;border:1px solid #38bdf8;font-size:13px;">8. PROJECT TREE &amp; FEATURE ROADMAP</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">PROCUREMENT &amp; BID DESK</span>
@@ -915,6 +916,80 @@ async def admin_action(req: AdminActionReq, db: DBWrapper = Depends(get_db)):
         db.execute("DELETE FROM careers WHERE app_id=?", (req.item_id,))
     db.commit()
     return {"message": f"Action '{req.action}' completed on {req.kind.upper()} #{req.item_id}!"}
+
+class RoadmapReq(BaseModel):
+    pin: str
+    branch: str
+    title: str
+
+@app.post("/api/v1/roadmap/add")
+async def add_roadmap_item(req: RoadmapReq, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
+    valid_pin = row.__getitem__(0) if row else "1234"
+    if req.pin != valid_pin:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN")
+    db.execute("CREATE TABLE IF NOT EXISTS wac_roadmap (item_id TEXT PRIMARY KEY, branch TEXT, title TEXT, ts INTEGER);")
+    iid = f"RM-{int(time.time()) % 100000}"
+    db.execute("INSERT INTO wac_roadmap VALUES (?, ?, ?, ?)", (iid, req.branch, req.title, int(time.time())))
+    db.commit()
+    return {"message": f"Added '{req.title}' to {req.branch}!"}
+
+@app.get("/roadmap", response_class=HTMLResponse)
+async def project_roadmap(db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS wac_roadmap (item_id TEXT PRIMARY KEY, branch TEXT, title TEXT, ts INTEGER);")
+    custom = db.execute("SELECT branch, title FROM wac_roadmap ORDER BY ts ASC").fetchall()
+    extra_b3 = "".join([f'<div style="color:#f59e0b;font-size:11px;padding:3px 0;">[+] {r.__getitem__(1)} ({r.__getitem__(0)})</div>' for r in custom])
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{max-width:100%;overflow-x:hidden;}body{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.4}.box{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}h2,h3{color:#fff;margin-top:0}.tree-wrap{overflow-x:auto;padding:12px 4px;background:#0b1120;border-radius:10px;border:1px solid #334155}.tree-canvas{min-width:660px;transform-origin:top left;transition:transform 0.2s}.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.col{background:#1e293b;border:1px solid #38bdf8;border-radius:8px;padding:10px}.col-h{background:#0f172a;color:#38bdf8;font-weight:bold;font-size:11px;padding:6px;border-radius:6px;text-align:center;margin-bottom:6px;border:1px solid #334155}.it{font-size:11px;color:#e2e8f0;padding:3px 0;border-bottom:1px solid #0f172a}input,select{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:13px}.zbtn{background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;padding:6px 12px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer}</style></head>
+    <body>{render_nav("Project Tree & Feature Roadmap", "Home / Project Roadmap")}
+    <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h2 style="margin:0;font-size:16px;">Horizontal Project Tree</h2><div style="display:flex;gap:6px;"><button class="zbtn" onclick="zm(-0.15)">- Zoom</button><button class="zbtn" onclick="zm(0)">100%</button><button class="zbtn" onclick="zm(0.15)">+ Zoom</button></div></div>
+    <p style="font-size:11px;color:#94a3b8;margin:0 0 8px 0;">Swipe horizontally or use Zoom buttons to inspect all live modules and planned features:</p>
+    <div class="tree-wrap"><div id="tCanvas" class="tree-canvas">
+        <div style="text-align:center;background:#1e293b;border:2px solid #22c55e;border-radius:10px;padding:10px;max-width:360px;margin:0 auto;">
+            <div style="color:#fff;font-weight:bold;font-size:13px;">&#127757; WORLDWIDE AD CENTER</div>
+            <div style="color:#38bdf8;font-size:11px;margin-top:3px;word-break:break-all;">https://worldwide-ad-center-1.onrender.com</div>
+        </div>
+        <div style="width:2px;height:14px;background:#38bdf8;margin:0 auto;"></div>
+        <div style="height:2px;background:#38bdf8;width:68%;margin:0 auto;"></div>
+        <div class="cols">
+            <div class="col"><div class="col-h">1. HUB &amp; ADS (ROWS 1-8)</div>
+                <div class="it">1. App Simulator (/simulate-app)</div>
+                <div class="it">2. eSewa Hub (/payout-hub)</div>
+                <div class="it">3. Website Ad Tag (JS Engine)</div>
+                <div class="it">4. Manage &amp; Rotate Campaigns</div>
+                <div class="it">5. Ad Studio (/advertise)</div>
+                <div class="it">6. Global &amp; Nepal Tenders (/tenders)</div>
+                <div class="it">7. Telegram Health Bot</div>
+                <div class="it" style="color:#22c55e;font-weight:bold;">8. Project Tree (/roadmap)</div>
+            </div>
+            <div class="col"><div class="col-h">2. GLOBAL &amp; MAIL</div>
+                <div class="it">35 Global Sectors (/sectors)</div>
+                <div class="it">Live Directory (/directory)</div>
+                <div class="it">Agencies &amp; ROI (/agencies)</div>
+                <div class="it">Social Partners (/social-partners)</div>
+                <div class="it">Hiring &amp; Ambassadors (/careers)</div>
+                <div class="it">Strategies &amp; Bulletins (/editorial)</div>
+                <div class="it">Mail &amp; Bid Inquiry (/mail)</div>
+                <div class="it">6 Languages + English Exit</div>
+            </div>
+            <div class="col"><div class="col-h">3. ADMIN &amp; FUTURE</div>
+                <div class="it">Admin Command (/admin-desk)</div>
+                <div class="it">Live Analytics (/analytics)</div>
+                <div class="it">Status Tracker (/status)</div>
+                <div class="it">Tax Invoice PDF (/documents)</div>
+                <div class="it">CSV Ledger &amp; 24/7 Ping</div>
+                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">[+] 1-Tap Mail Templates</div>
+                <div style="color:#f59e0b;font-size:11px;padding:3px 0;">[+] Official Media Kit PDF</div>
+                {extra_b3}
+            </div>
+        </div>
+    </div></div></div>
+    <div class="box"><h3>Add Future Feature to Tree</h3>
+    <select id="rbr"><option>3. Admin &amp; Future</option><option>2. Global &amp; Mail</option><option>1. Hub &amp; Ads</option></select>
+    <input id="rtit" placeholder="New Feature Name (e.g. Auto-Invoice Emailer)">
+    <input id="rpin" type="password" placeholder="Admin PIN (Default: 1234)">
+    <button onclick="addRm()" style="width:100%;padding:12px;background:#22c55e;color:#0f172a;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:6px;">+ ADD TO PROJECT TREE</button>
+    <p id="rres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
+    <script>let sc=1;function zm(d){{sc=d===0?1:Math.max(0.6,Math.min(1.5,sc+d));document.getElementById('tCanvas').style.transform='scale('+sc+')';}}async function addRm(){{const r=await fetch('/api/v1/roadmap/add',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('rpin').value,branch:document.getElementById('rbr').value,title:document.getElementById('rtit').value}})}});const d=await r.json();document.getElementById('rres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script></body></html>"""
 
 @app.get("/admin-desk", response_class=HTMLResponse)
 async def admin_command_center(db: DBWrapper = Depends(get_db)):
