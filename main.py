@@ -1074,6 +1074,25 @@ class MailReq(BaseModel):
     body: str
     pin: str = ""
 
+class DirContactReq(BaseModel):
+    pin: str
+    sector: str
+    org_name: str
+    email: str
+    tpl_key: str = "ngo"
+
+@app.post("/api/v1/mail/add-contact")
+async def add_dir_contact(req: DirContactReq, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
+    valid_pin = row.__getitem__(0) if row else "1234"
+    if req.pin != valid_pin:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN")
+    db.execute("CREATE TABLE IF NOT EXISTS wac_contacts (cid TEXT PRIMARY KEY, sector TEXT, org_name TEXT, email TEXT, tpl_key TEXT, ts INTEGER);")
+    cid = f"CNT-{int(time.time()) % 100000}"
+    db.execute("INSERT INTO wac_contacts VALUES (?, ?, ?, ?, ?, ?)", (cid, req.sector, req.org_name, req.email.strip(), req.tpl_key, int(time.time())))
+    db.commit()
+    return {"message": f"Added '{req.org_name}' to Worldwide Directory!"}
+
 @app.post("/api/v1/mail/save")
 async def save_mail(req: MailReq, db: DBWrapper = Depends(get_db)):
     db.execute("CREATE TABLE IF NOT EXISTS wac_mail (mail_id TEXT PRIMARY KEY, folder TEXT, recipient TEXT, sector TEXT, subject TEXT, body TEXT, ts INTEGER);")
@@ -1086,6 +1105,40 @@ async def save_mail(req: MailReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/mail", response_class=HTMLResponse)
 async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS wac_contacts (cid TEXT PRIMARY KEY, sector TEXT, org_name TEXT, email TEXT, tpl_key TEXT, ts INTEGER);")
+    seeds = [
+        ("C-01", "1. UN, WTO, IMF & Global Bodies", "World Trade Organization (WTO)", "enquiries@wto.org", "ngo"),
+        ("C-02", "1. UN, WTO, IMF & Global Bodies", "International Monetary Fund (IMF)", "media@imf.org", "ngo"),
+        ("C-03", "1. UN, WTO, IMF & Global Bodies", "UN Resident Coordinator Nepal", "rcs-info-nepal@un.org", "ngo"),
+        ("C-04", "1. UN, WTO, IMF & Global Bodies", "UNICEF Nepal", "kathmandu@unicef.org", "ngo"),
+        ("C-05", "1. UN, WTO, IMF & Global Bodies", "WHO Nepal", "gocotanoa@who.int", "ngo"),
+        ("C-06", "1. UN, WTO, IMF & Global Bodies", "UNESCO Nepal", "j.dutoit@unesco.org", "ngo"),
+        ("C-07", "2. Commercial Banks & Finance", "Everest Bank Limited", "marketing@ebl.com.np", "bank"),
+        ("C-08", "2. Commercial Banks & Finance", "Nepal Bank Limited", "info@nepalbank.com.np", "bank"),
+        ("C-09", "2. Commercial Banks & Finance", "Nepal Investment Mega Bank (NIMB)", "helpdesk@nimb.com.np", "bank"),
+        ("C-10", "2. Commercial Banks & Finance", "Nepal SBI Bank Limited", "corporate@nsbl.com.np", "bank"),
+        ("C-11", "2. Commercial Banks & Finance", "Agricultural Development Bank (ADBL)", "info@adbl.gov.np", "bank"),
+        ("C-12", "3. Airlines & Aviation", "Nepal Airlines Sales Desk", "sales@nac.com.np", "bank"),
+        ("C-13", "3. Airlines & Aviation", "Nepal Airlines Corporate", "spokesperson@nac.com.np", "bank"),
+        ("C-14", "3. Airlines & Aviation", "Nepal Airlines Pokhara", "pkr@nac.com.np", "bank"),
+        ("C-15", "3. Airlines & Aviation", "Nepal Airlines Bhairahawa", "bwa@nac.com.np", "bank"),
+        ("C-16", "4. Universities & Education", "Pokhara University", "info@pu.edu.np", "edu"),
+        ("C-17", "4. Universities & Education", "Purbanchal University", "info@purbuniv.edu.np", "edu"),
+        ("C-18", "4. Universities & Education", "Tribhuvan University", "tuexam@tribhuvan-university.edu.np", "edu"),
+        ("C-19", "5. Global Sports & Media", "International Cricket Council (ICC)", "enquiries@icc-cricket.com", "media")
+    ]
+    for s_id, s_sec, s_org, s_em, s_tk in seeds:
+        if db.execute("SELECT COUNT(*) FROM wac_contacts WHERE cid=?", (s_id,)).fetchone().__getitem__(0) == 0:
+            db.execute("INSERT INTO wac_contacts VALUES (?, ?, ?, ?, ?, ?)", (s_id, s_sec, s_org, s_em, s_tk, 1732200000))
+    db.commit()
+    all_cnts = db.execute("SELECT sector, org_name, email, tpl_key FROM wac_contacts ORDER BY sector ASC, org_name ASC").fetchall()
+    grouped = {}
+    for row in all_cnts:
+        grouped.setdefault(row.__getitem__(0), []).append(row)
+    dir_opts = ""
+    for sec_lbl, clist in grouped.items():
+        opts = "".join([f'<option value="{c.__getitem__(2)}|{c.__getitem__(3)}|{c.__getitem__(1)}">{c.__getitem__(1)} ({c.__getitem__(2)})</option>' for c in clist])
+        dir_opts += f'<optgroup label="{sec_lbl}">{opts}</optgroup>' 
     db.execute("CREATE TABLE IF NOT EXISTS wac_mail (mail_id TEXT PRIMARY KEY, folder TEXT, recipient TEXT, sector TEXT, subject TEXT, body TEXT, ts INTEGER);")
     if db.execute("SELECT COUNT(*) FROM wac_mail").fetchone().__getitem__(0) == 0:
         db.execute("INSERT INTO wac_mail VALUES (?, ?, ?, ?, ?, ?, ?)", ("MSG-101", "inbox", "difft40y@gmail.com", "System Desk", "Welcome to Worldwide Ad Center Mail Hub", "Your unified Compose, Inbox, Outbox, Sent, Drafts, and Directory Outreach desk is active.", 1732200000))
@@ -1110,33 +1163,7 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
     </div>
     <h3>{tab.upper()}</h3>{items}</div>
     <div id="compose" class="box"><h3>Compose &amp; Compose to Directory</h3>
-    <select id="mdir" onchange="pickOrg(this)" style="border:1px solid #38bdf8;">
-        <option value="">-- Select Verified Organization From Targeted Directory (16 Contacts) --</option>
-        <optgroup label="1. Commercial Banks &amp; Finance">
-            <option value="marketing@ebl.com.np|bank|Everest Bank Limited">Everest Bank Limited (marketing@ebl.com.np)</option>
-            <option value="info@nepalbank.com.np|bank|Nepal Bank Limited">Nepal Bank Limited (info@nepalbank.com.np)</option>
-            <option value="helpdesk@nimb.com.np|bank|Nepal Investment Mega Bank (NIMB)">Nepal Investment Mega Bank (helpdesk@nimb.com.np)</option>
-            <option value="corporate@nsbl.com.np|bank|Nepal SBI Bank Limited">Nepal SBI Bank Limited (corporate@nsbl.com.np)</option>
-            <option value="info@adbl.gov.np|bank|Agricultural Development Bank (ADBL)">Agricultural Development Bank (info@adbl.gov.np)</option>
-        </optgroup>
-        <optgroup label="2. Airlines &amp; Aviation">
-            <option value="sales@nac.com.np|bank|Nepal Airlines Corporation (Sales)">Nepal Airlines Sales Desk (sales@nac.com.np)</option>
-            <option value="spokesperson@nac.com.np|bank|Nepal Airlines Corporate">Nepal Airlines Corporate (spokesperson@nac.com.np)</option>
-            <option value="pkr@nac.com.np|bank|Nepal Airlines Pokhara">Nepal Airlines Pokhara (pkr@nac.com.np)</option>
-            <option value="bwa@nac.com.np|bank|Nepal Airlines Bhairahawa">Nepal Airlines Bhairahawa (bwa@nac.com.np)</option>
-        </optgroup>
-        <optgroup label="3. Universities &amp; Education">
-            <option value="info@pu.edu.np|edu|Pokhara University">Pokhara University (info@pu.edu.np)</option>
-            <option value="info@purbuniv.edu.np|edu|Purbanchal University">Purbanchal University (info@purbuniv.edu.np)</option>
-            <option value="tuexam@tribhuvan-university.edu.np|edu|Tribhuvan University">Tribhuvan University (tuexam@tribhuvan-university.edu.np)</option>
-        </optgroup>
-        <optgroup label="4. UN Agencies &amp; International Bodies">
-            <option value="rcs-info-nepal@un.org|ngo|United Nations Resident Coordinator Nepal">UN Resident Coordinator Nepal (rcs-info-nepal@un.org)</option>
-            <option value="kathmandu@unicef.org|ngo|UNICEF Nepal">UNICEF Nepal (kathmandu@unicef.org)</option>
-            <option value="gocotanoa@who.int|ngo|WHO Nepal">WHO Nepal (gocotanoa@who.int)</option>
-            <option value="j.dutoit@unesco.org|ngo|UNESCO Nepal">UNESCO Nepal (j.dutoit@unesco.org)</option>
-        </optgroup>
-    </select>
+    <select id="mdir" onchange="pickOrg(this)" style="border:1px solid #38bdf8;"><option value="">-- Select Verified Organization From Worldwide Directory ({len(all_cnts)} Contacts) --</option>{dir_opts}</select>
     <select id="mtpl" onchange="loadTpl(this.value)" style="border:1px solid #22c55e;">
         <option value="">-- Load 1-Tap Outreach Template --</option>
         <option value="bank">Template 1: Banks, Airlines &amp; Commercial Brands</option>
@@ -1168,6 +1195,21 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
         <button class="btn" style="background:#475569;color:#fff;" onclick="sendM('draft')">SAVE DRAFT</button>
         <button class="btn" style="background:#f59e0b;color:#0f172a;" onclick="openGmail()">DISPATCH VIA GMAIL</button>
     </div><p id="mres" style="color:#22c55e;font-size:12px;"></p></div>
+    <div id="add-dir" class="box"><h3>+ Gradually Add Organization to Worldwide Directory</h3>
+    <select id="dsec">
+        <option>1. UN, WTO, IMF &amp; Global Bodies</option>
+        <option>2. Commercial Banks &amp; Finance</option>
+        <option>3. Airlines &amp; Aviation</option>
+        <option>4. Universities &amp; Education</option>
+        <option>5. Global Sports &amp; Media</option>
+        <option>6. Global Construction &amp; Tenders</option>
+    </select>
+    <input id="dorg" placeholder="Organization Name (e.g. Asian Development Bank)">
+    <input id="dem" placeholder="Official Email (e.g. contact@organization.org)">
+    <select id="dtpl"><option value="ngo">Template: UN / NGO / Public Governance</option><option value="bank">Template: Banks / Airlines / Brands</option><option value="edu">Template: Universities / Research Labs</option><option value="media">Template: Sports / Media / Influencers</option></select>
+    <input id="dpin" type="password" placeholder="Admin PIN (Default: 1234)">
+    <button class="btn" style="background:#38bdf8;color:#0f172a;width:100%;" onclick="addDirCnt()">+ SAVE TO WORLDWIDE DIRECTORY MENU</button>
+    <p id="dres" style="color:#22c55e;font-size:12px;"></p></div>
     <div id="prefs" class="box"><h3>Email &amp; Notification Preferences</h3>
     <p style="font-size:12px;margin:4px 0;">Primary Desk Email: <b>difft40y@gmail.com</b> &bull; Telegram Alerts: <b>@WorldwideAdCenterNotificationBot</b></p>
     <select id="pnotif"><option>Instant Telegram + Mail Hub Sync (Recommended)</option><option>Daily Summary Digest Only</option><option>Quiet Mode (Log in Inbox Only)</option></select>
@@ -1175,6 +1217,7 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
     <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="document.getElementById('pres').innerText='Email preferences & signature saved!';">SAVE EMAIL PREFERENCES</button>
     <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
     <script>
+    async function addDirCnt(){{const r=await fetch('/api/v1/mail/add-contact',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('dpin').value,sector:document.getElementById('dsec').value,org_name:document.getElementById('dorg').value,email:document.getElementById('dem').value,tpl_key:document.getElementById('dtpl').value}})}});const d=await r.json();document.getElementById('dres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}
     function pickOrg(sel){{
         if(!sel.value) return;
         const parts = sel.value.split('|');
