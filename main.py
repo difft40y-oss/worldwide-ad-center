@@ -1110,6 +1110,33 @@ async def mail_center(tab: str = "inbox", db: DBWrapper = Depends(get_db)):
     </div>
     <h3>{tab.upper()}</h3>{items}</div>
     <div id="compose" class="box"><h3>Compose &amp; Compose to Directory</h3>
+    <select id="mdir" onchange="pickOrg(this)" style="border:1px solid #38bdf8;">
+        <option value="">-- Select Verified Organization From Targeted Directory (16 Contacts) --</option>
+        <optgroup label="1. Commercial Banks &amp; Finance">
+            <option value="marketing@ebl.com.np|bank|Everest Bank Limited">Everest Bank Limited (marketing@ebl.com.np)</option>
+            <option value="info@nepalbank.com.np|bank|Nepal Bank Limited">Nepal Bank Limited (info@nepalbank.com.np)</option>
+            <option value="helpdesk@nimb.com.np|bank|Nepal Investment Mega Bank (NIMB)">Nepal Investment Mega Bank (helpdesk@nimb.com.np)</option>
+            <option value="corporate@nsbl.com.np|bank|Nepal SBI Bank Limited">Nepal SBI Bank Limited (corporate@nsbl.com.np)</option>
+            <option value="info@adbl.gov.np|bank|Agricultural Development Bank (ADBL)">Agricultural Development Bank (info@adbl.gov.np)</option>
+        </optgroup>
+        <optgroup label="2. Airlines &amp; Aviation">
+            <option value="sales@nac.com.np|bank|Nepal Airlines Corporation (Sales)">Nepal Airlines Sales Desk (sales@nac.com.np)</option>
+            <option value="spokesperson@nac.com.np|bank|Nepal Airlines Corporate">Nepal Airlines Corporate (spokesperson@nac.com.np)</option>
+            <option value="pkr@nac.com.np|bank|Nepal Airlines Pokhara">Nepal Airlines Pokhara (pkr@nac.com.np)</option>
+            <option value="bwa@nac.com.np|bank|Nepal Airlines Bhairahawa">Nepal Airlines Bhairahawa (bwa@nac.com.np)</option>
+        </optgroup>
+        <optgroup label="3. Universities &amp; Education">
+            <option value="info@pu.edu.np|edu|Pokhara University">Pokhara University (info@pu.edu.np)</option>
+            <option value="info@purbuniv.edu.np|edu|Purbanchal University">Purbanchal University (info@purbuniv.edu.np)</option>
+            <option value="tuexam@tribhuvan-university.edu.np|edu|Tribhuvan University">Tribhuvan University (tuexam@tribhuvan-university.edu.np)</option>
+        </optgroup>
+        <optgroup label="4. UN Agencies &amp; International Bodies">
+            <option value="rcs-info-nepal@un.org|ngo|United Nations Resident Coordinator Nepal">UN Resident Coordinator Nepal (rcs-info-nepal@un.org)</option>
+            <option value="kathmandu@unicef.org|ngo|UNICEF Nepal">UNICEF Nepal (kathmandu@unicef.org)</option>
+            <option value="gocotanoa@who.int|ngo|WHO Nepal">WHO Nepal (gocotanoa@who.int)</option>
+            <option value="j.dutoit@unesco.org|ngo|UNESCO Nepal">UNESCO Nepal (j.dutoit@unesco.org)</option>
+        </optgroup>
+    </select>
     <select id="mtpl" onchange="loadTpl(this.value)" style="border:1px solid #22c55e;">
         <option value="">-- Load 1-Tap Outreach Template --</option>
         <option value="bank">Template 1: Banks, Airlines &amp; Commercial Brands</option>
@@ -1148,6 +1175,14 @@ Hari Prasad Parajuli • Worldwide Ad Center (difft40y@gmail.com | +977-97178312
     <button class="btn" style="background:#38bdf8;color:#0f172a;" onclick="document.getElementById('pres').innerText='Email preferences & signature saved!';">SAVE EMAIL PREFERENCES</button>
     <p id="pres" style="color:#22c55e;font-size:12px;"></p></div>{FOOTER}
     <script>
+    function pickOrg(sel){{
+        if(!sel.value) return;
+        const parts = sel.value.split('|');
+        document.getElementById('mrec').value = parts[0];
+        document.getElementById('mtpl').value = parts[1];
+        loadTpl(parts[1]);
+        document.getElementById('msub').value = 'Partnership & Digital Outreach for ' + parts[2] + ' — Worldwide Ad Center';
+    }}
     function loadTpl(t){{
         const sig = '\n\nWarm regards,\nHari Prasad Parajuli • Founder, Worldwide Ad Center\nWebsite: https://worldwide-ad-center-1.onrender.com\nEmail: difft40y@gmail.com | Phone / WhatsApp: +977-9717831225';
         if(t==='bank'){{document.getElementById('msub').value='High-Conversion CPC Brand Outreach — Worldwide Ad Center';document.getElementById('mbdy').value='Dear Marketing & Brand Partnerships Team,\n\nPromote your seasonal offers and digital services across Nepal (all 7 provinces) and global web traffic at a flat 2.50 NPR per verified human click (all impressions free, multi-currency NPR/USD/INR/EUR).' + sig;}}
