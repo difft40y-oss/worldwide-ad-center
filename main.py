@@ -1395,8 +1395,50 @@ function copyBidCnt(){{
 }}
 </script></body></html>"""
 
+class DemoVideoReq(BaseModel):
+    pin: str
+    video_url: str
+
+@app.post("/api/v1/guide/set-video")
+async def set_demo_video(req: DemoVideoReq, db: DBWrapper = Depends(get_db)):
+    row = db.execute("SELECT admin_pin FROM settings WHERE id=1").fetchone()
+    valid_pin = row.__getitem__(0) if row else "1234"
+    if req.pin != valid_pin:
+        raise HTTPException(status_code=403, detail="Invalid Admin PIN")
+    db.execute("CREATE TABLE IF NOT EXISTS wac_meta (k TEXT PRIMARY KEY, v TEXT);")
+    url = req.video_url.strip()
+    if "watch?v=" in url:
+        vid = url.split("watch?v=").split("&")
+        url = f"https://youtube.com{vid}"
+    elif "youtu.be/" in url:
+        vid = url.split("youtu.be/").split("?")
+        url = f"https://youtube.com{vid}"
+    db.execute("DELETE FROM wac_meta WHERE k='demo_video'")
+    db.execute("INSERT INTO wac_meta VALUES ('demo_video', ?)", (url,))
+    db.commit()
+    return {"message": "Demo video updated on Beginner Guide & Rules!"}
+
 @app.get("/guide", response_class=HTMLResponse)
-async def beginner_guide():
+async def beginner_guide(db: DBWrapper = Depends(get_db)):
+    db.execute("CREATE TABLE IF NOT EXISTS wac_meta (k TEXT PRIMARY KEY, v TEXT);")
+    vrow = db.execute("SELECT v FROM wac_meta WHERE k='demo_video'").fetchone()
+    vurl = vrow.__getitem__(0) if vrow and vrow.__getitem__(0) else ""
+    player = f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid #38bdf8;margin:10px 0;"><iframe src="{vurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>' if vurl else '<div style="background:#0f172a;border:1px dashed #38bdf8;border-radius:10px;padding:16px;text-align:center;margin:10px 0;"><div style="font-size:24px;">&#127916;</div><div style="color:#fff;font-weight:bold;font-size:13px;margin:4px 0;">Full Platform Video Walkthrough Ready Slot</div><div style="color:#94a3b8;font-size:11px;">Record your 60-second Redmi 13 demo, upload to YouTube, and paste the link below with your Admin PIN to embed it live here.</div></div>'
+    demo_box = f"""<div class="box" style="border:1px solid #22c55e;"><span style="background:#22c55e;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;">INTERACTIVE DEMO TOUR</span><h2 style="margin-top:6px;">How Global Users Operate Worldwide Ad Center</h2>{player}
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
+        <div style="background:#0f172a;padding:11px;border-radius:8px;border-left:4px solid #38bdf8;"><b style="color:#38bdf8;font-size:12px;">STEP 1: Global Language &amp; Currency Setup</b><p style="font-size:12px;margin:4px 0 0 0;">Select any of 6 languages (English, 中文, 日本語, 한국어, हिन्दी, Español) and convert live CPC rates across NPR, USD, INR, and EUR.</p></div>
+        <div style="background:#0f172a;padding:11px;border-radius:8px;border-left:4px solid #22c55e;"><b style="color:#22c55e;font-size:12px;">STEP 2: Advertisers &amp; Agencies (/advertise &bull; /deposit)</b><p style="font-size:12px;margin:4px 0 0 0;">Create responsive ad banners in seconds, fund credits via eSewa QR or direct transfer, and pay only 2.50 NPR per verified human click.</p></div>
+        <div style="background:#0f172a;padding:11px;border-radius:8px;border-left:4px solid #f59e0b;"><b style="color:#f59e0b;font-size:12px;">STEP 3: Publishers &amp; Influencers (Ad Tag &bull; /payout-hub)</b><p style="font-size:12px;margin:4px 0 0 0;">Paste the 1-line JavaScript ad tag onto any website or share tracked social bio links to earn instant eSewa payouts.</p></div>
+        <div style="background:#0f172a;padding:11px;border-radius:8px;border-left:4px solid #c084fc;"><b style="color:#c084fc;font-size:12px;">STEP 4: Global Tenders &amp; Live Tracking (/tenders &bull; /status &bull; /analytics)</b><p style="font-size:12px;margin:4px 0 0 0;">Filter worldwide &amp; 7-province Nepal procurement bids, submit 1-tap inquiries via /mail, and audit real-time clicks &amp; tax invoices.</p></div>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid #334155;">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Admin Control: Paste YouTube Demo Video Link to Embed Live:</div>
+        <input id="vurl" placeholder="https://youtube.com..." style="width:100%;padding:10px;margin:4px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:12px;">
+        <input id="vpin" type="password" placeholder="Admin PIN (Default: 1234)" style="width:100%;padding:10px;margin:4px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:12px;">
+        <button onclick="saveVid()" style="width:100%;padding:10px;background:#38bdf8;color:#0f172a;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:12px;margin-top:4px;">EMBED / UPDATE DEMO VIDEO</button>
+        <p id="vres" style="color:#22c55e;font-size:12px;margin:4px 0 0 0;"></p>
+    </div></div>
+    <script>async function saveVid(){{const r=await fetch('/api/v1/guide/set-video',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{pin:document.getElementById('vpin').value,video_url:document.getElementById('vurl').value}})}});const d=await r.json();document.getElementById('vres').innerText=d.message||d.detail;if(r.ok)setTimeout(()=>location.reload(),900);}}</script>""" 
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.6}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2,h3{{color:#fff;margin-top:0}}.step{{background:#0f172a;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #38bdf8;font-size:13px}}.btn{{display:block;width:100%;padding:13px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer}}</style></head>
     <body>{render_nav("Beginner Guide & Rules", "Home / Beginner Guide (English Subtitles)")}
     <div class="box"><h2>Step-by-Step Guide</h2><p style='font-size:12px;color:#38bdf8;margin-top:-6px;'>English Subtitles &amp; Clear Onboarding Instructions</p>
