@@ -77,7 +77,8 @@ def init_db():
     db.commit()
     db.close()
 
-init_db()
+import threading
+threading.Thread(target=init_db, daemon=True).start()
 
 def send_telegram_alert(message: str) -> str:
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
