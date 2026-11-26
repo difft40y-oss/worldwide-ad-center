@@ -166,7 +166,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
         if(!fullDict){{const r=await fetch('/api/v1/dict.json');fullDict=await r.json();}}
-        localStorage.removeItem('wac_tr2_' + l); const cacheKey = 'wac_tr3_' + l;
+        const cacheKey = 'wac_v4_' + l;
         const cached = JSON.parse(localStorage.getItem(cacheKey) || '{{}}');
         const m = Object.assign({{}}, fullDict.hasOwnProperty(l)?fullDict[l]:{{}}, cached);
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
@@ -176,35 +176,40 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
             if(!node._origRaw) node._origRaw = node.nodeValue;
             const raw = node._origRaw;
-            const t = raw.replace(/\\s+/g, ' ').trim();
+            const t = raw.replace(/\s+/g, ' ').trim();
             if(!t || t.length < 2 || /^[0-9.,%+$\s:/•-]+$/.test(t) || t.startsWith('http') || /^(NPR|USD|INR|EUR|WAC|UN|WTO|WHO|IMF|ADB|UNESCO|AI|FIFA)$/.test(t)) continue;
-            nodes.push({{node, raw, t}});
             const cleanT = t.replace(/^[^A-Za-z0-9]+/, '').trim();
+            nodes.push({{node, raw, t, cleanT}});
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
             else if(m.hasOwnProperty(t)){{node.nodeValue = raw.replace(t, m[t]);}}
             else if(cleanT && m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
-            else{{missing.add(t);}}
+            else{{missing.add(cleanT || t);}}
         }}
-        document.querySelectorAll('option').forEach(op=>{{if(!op.closest('#langSel')){{if(!op._origOp)op._origOp=op.innerText.trim();if(m.hasOwnProperty(op._origOp))op.innerText=m[op._origOp];else if(op._origOp)missing.add(op._origOp);}}}});document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
+        document.querySelectorAll('option').forEach(op=>{{
+            if(op.closest('#langSel')) return;
+            if(!op._origOp) op._origOp = op.innerText.trim();
+            if(m.hasOwnProperty(op._origOp)) op.innerText = m[op._origOp];
+            else if(op._origOp.length > 1) missing.add(op._origOp);
+        }});
+        document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
             if(!el._origPh) el._origPh = el.placeholder;
             if(m.hasOwnProperty(el._origPh)) el.placeholder = m[el._origPh];
-            else if(el._origPh) missing.add(el._origPh);
+            else if(el._origPh.length > 1) missing.add(el._origPh);
         }});
         const arr = Array.from(missing);
-        for(let i=0; i<arr.length; i+=25){{
-            const slice = arr.slice(i, i+25);
+        for(let i=0; i<arr.length; i+=20){{
             try{{
-                const res = await fetch('/api/v1/auto-tr', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target:l,texts:slice}})}});
+                const res = await fetch('/api/v1/auto-tr', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target:l,texts:arr.slice(i,i+20)}})}});
                 const d = await res.json();
                 if(d.translations){{
                     Object.assign(cached, d.translations);
                     localStorage.setItem(cacheKey, JSON.stringify(cached));
                     nodes.forEach(item=>{{
                         if(d.translations.hasOwnProperty(item.t)){{item.node.nodeValue = item.raw.replace(item.t, d.translations[item.t]);}}
+                        else if(item.cleanT && d.translations.hasOwnProperty(item.cleanT)){{item.node.nodeValue = item.raw.replace(item.cleanT, d.translations[item.cleanT]);}}
                     }});
-                    document.querySelectorAll('option').forEach(op=>{{if(!op.closest('#langSel')){{if(!op._origOp)op._origOp=op.innerText.trim();if(m.hasOwnProperty(op._origOp))op.innerText=m[op._origOp];else if(op._origOp)missing.add(op._origOp);}}}});document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
-                        if(d.translations.hasOwnProperty(el._origPh)) el.placeholder = d.translations[el._origPh];
-                    }});
+                    document.querySelectorAll('option').forEach(op=>{{if(!op.closest('#langSel') && d.translations.hasOwnProperty(op._origOp)) op.innerText = d.translations[op._origOp];}});
+                    document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{if(d.translations.hasOwnProperty(el._origPh)) el.placeholder = d.translations[el._origPh];}});
                 }}
             }}catch(err){{}}
         }}
