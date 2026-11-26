@@ -170,7 +170,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
         const cached = JSON.parse(localStorage.getItem(cacheKey) || '{{}}');
         const m = Object.assign({{}}, fullDict.hasOwnProperty(l)?fullDict[l]:{{}}, cached);
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-        let node, missing = new Set(), nodes = [];
+        let node, missing = new Set(), nodes = new Array();
         while((node = walker.nextNode())){{
             const p = node.parentElement;
             if(!p || p.tagName==='SCRIPT' || p.tagName==='STYLE' || p.closest('#langSel')) continue;
@@ -185,7 +185,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             else if(cleanT && m.hasOwnProperty(cleanT)){{node.nodeValue = raw.replace(cleanT, m[cleanT]);}}
             else{{missing.add(t);}}
         }}
-        document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
+        document.querySelectorAll('option').forEach(op=>{{if(!op.closest('#langSel')){{if(!op._origOp)op._origOp=op.innerText.trim();if(m.hasOwnProperty(op._origOp))op.innerText=m[op._origOp];else if(op._origOp)missing.add(op._origOp);}}}});document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
             if(!el._origPh) el._origPh = el.placeholder;
             if(m.hasOwnProperty(el._origPh)) el.placeholder = m[el._origPh];
             else if(el._origPh) missing.add(el._origPh);
@@ -202,7 +202,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                     nodes.forEach(item=>{{
                         if(d.translations.hasOwnProperty(item.t)){{item.node.nodeValue = item.raw.replace(item.t, d.translations[item.t]);}}
                     }});
-                    document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
+                    document.querySelectorAll('option').forEach(op=>{{if(!op.closest('#langSel')){{if(!op._origOp)op._origOp=op.innerText.trim();if(m.hasOwnProperty(op._origOp))op.innerText=m[op._origOp];else if(op._origOp)missing.add(op._origOp);}}}});document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{{
                         if(d.translations.hasOwnProperty(el._origPh)) el.placeholder = d.translations[el._origPh];
                     }});
                 }}
