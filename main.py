@@ -166,7 +166,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
         localStorage.setItem('wac_lang', l);
         if(l==='en'){{location.reload();return;}}
         if(!fullDict){{const r=await fetch('/api/v1/dict.json');fullDict=await r.json();}}
-        localStorage.removeItem('wac_tr_' + l); const cacheKey = 'wac_tr2_' + l;
+        localStorage.removeItem('wac_tr2_' + l); const cacheKey = 'wac_tr3_' + l;
         const cached = JSON.parse(localStorage.getItem(cacheKey) || '{{}}');
         const m = Object.assign({{}}, fullDict.hasOwnProperty(l)?fullDict[l]:{{}}, cached);
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
@@ -230,15 +230,20 @@ async def auto_translate_batch(req: AutoTrReq):
     dot, sl = chr(46), chr(47)
     ep = "https:" + sl + sl + "translate" + dot + "googleapis" + dot + "com" + sl + "translate_a" + sl + "single"
     out = {}
-    for raw in req.texts[:120]:
+    for raw in req.texts[:40]:
         t = str(raw).strip()
         if not t or "Back / Exit" in t:
             continue
         try:
             u = f"{ep}?client=gtx&sl=en&tl={urllib.parse.quote(req.target)}&dt=t&q={urllib.parse.quote(t[:450])}"
             r = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-            data = json.loads(urllib.request.urlopen(r, timeout=5).read().decode("utf-8"))
-            tr = "".join([s for s in data if s and s])
+            data = json.loads(urllib.request.urlopen(r, timeout=6).read().decode("utf-8"))
+            parts = []
+            if isinstance(data, list) and len(data) > 0 and isinstance(data.__getitem__(0), list):
+                for seg in data.__getitem__(0):
+                    if isinstance(seg, list) and len(seg) > 0 and seg.__getitem__(0):
+                        parts.append(str(seg.__getitem__(0)))
+            tr = "".join(parts).strip()
             if tr:
                 out[t] = tr
         except Exception:
