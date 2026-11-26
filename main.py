@@ -177,7 +177,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             if(!node._origRaw) node._origRaw = node.nodeValue;
             const raw = node._origRaw;
             const t = raw.replace(/\\s+/g, ' ').trim();
-            if(!t || /^[0-9.,%+$\s:/•-]+$/.test(t) || t.startsWith('http') || /^(NPR|USD|INR|EUR|WAC|UN|WTO|WHO|IMF|ADB|UNESCO|AI|FIFA)$/.test(t)) continue;
+            if(!t || t.length < 2 || /^[0-9.,%+$\s:/•-]+$/.test(t) || t.startsWith('http') || /^(NPR|USD|INR|EUR|WAC|UN|WTO|WHO|IMF|ADB|UNESCO|AI|FIFA)$/.test(t)) continue;
             nodes.push({{node, raw, t}});
             const cleanT = t.replace(/^[^A-Za-z0-9]+/, '').trim();
             if(t.includes('Back / Exit') && exitLbl.hasOwnProperty(l)){{node.nodeValue = raw.replace(t, exitLbl[l]);}}
@@ -190,9 +190,11 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
             if(m.hasOwnProperty(el._origPh)) el.placeholder = m[el._origPh];
             else if(el._origPh) missing.add(el._origPh);
         }});
-        if(missing.size > 0){{
+        const arr = Array.from(missing);
+        for(let i=0; i<arr.length; i+=25){{
+            const slice = arr.slice(i, i+25);
             try{{
-                const res = await fetch('/api/v1/auto-tr', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target:l,texts:Array.from(missing)}})}});
+                const res = await fetch('/api/v1/auto-tr', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target:l,texts:slice}})}});
                 const d = await res.json();
                 if(d.translations){{
                     Object.assign(cached, d.translations);
