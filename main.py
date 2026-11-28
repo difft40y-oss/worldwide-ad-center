@@ -2039,7 +2039,7 @@ async def tenders_portal(db: DBWrapper = Depends(get_db)):
     cards = ""
     for r in rows:
         tid, ttl, iss, cat, ddl, curl = r
-        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; ID: {tid}</p><a href="/tenders" onclick="openBidModal(this);return false;" data-cnt="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
+        cards += f'<div style="background:#0f172a;padding:13px;border-radius:8px;margin-top:10px;border-left:4px solid #38bdf8;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="background:#1e293b;color:#38bdf8;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{cat}</span><span style="color:#f59e0b;font-size:11px;">Deadline: {ddl}</span></div><h4 style="margin:8px 0 4px 0;color:#fff;">{ttl}</h4><p style="margin:0 0 8px 0;font-size:12px;color:#94a3b8;">Issued by: <b>{iss}</b> &bull; <span style="background:#334155;color:#f59e0b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;">DEMO SAMPLE</span> ID: {tid}</p><a href="/tenders" onclick="openBidModal(this);return false;" data-cnt="{curl}" target="_blank" style="display:inline-block;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:bold;text-decoration:none;">View Bid / Contact</a></div>'
     if not cards:
         cards = '<p style="color:#94a3b8;font-size:12px;">No active construction notices yet. Publish the first Invitation for Bid (IFB) or Contractor Notice below!</p>'
 
@@ -2047,7 +2047,7 @@ async def tenders_portal(db: DBWrapper = Depends(get_db)):
     <body>{render_nav("Construction & Bidder Notices", "Home / Tenders & Bids")}
     <div class="box"><span style="background:#38bdf8;color:#0f172a;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFRASTRUCTURE &amp; PROCUREMENT</span>
     <h2 style="margin:8px 0 6px 0;">Construction &amp; Bidder Notices</h2>
-    <p style="font-size:13px;margin:0;">Active Invitation for Bids (IFB), Sealed Quotations, Subcontractor Calls &amp; Material Supply Tenders:</p>
+    <p style="font-size:13px;margin:0;">Active Invitation for Bids (IFB), Sealed Quotations, Subcontractor Calls &amp; Material Supply Tenders (<span style="color:#f59e0b;font-weight:bold;">[DEMO SAMPLE]</span> listings shown below; organizations can publish live tenders at the bottom):</p>
     {cards}</div>
 
     <div class="box"><h3>Publish Construction / Bidder Notice</h3>
