@@ -2010,8 +2010,20 @@ async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_portal(db: DBWrapper = Depends(get_db)):
-    db.execute("UPDATE tenders SET contact_url='procurement@ungm.org | UN Global Marketplace' WHERE LEFT(tender_id, 6) = 'BID-98'")
-    db.execute("UPDATE tenders SET contact_url='info@bolpatra.gov.np | Nepal PPMO e-GP Portal' WHERE LEFT(tender_id, 6) = 'BID-97'")
+    for tid, cnt in [
+        ("BID-98001", "procurement@ungm.org | UN Global Marketplace Desk"),
+        ("BID-98002", "asean.logistics@adb.org | Asia-Pacific Trade Desk"),
+        ("BID-98003", "gcc.infrastructure@ungm.org | Gulf Engineering Alliance"),
+        ("BID-98004", "edtech.tenders@ted.europa.eu | Transatlantic Media Desk"),
+        ("BID-97216", "gandaki.roads@bolpatra.gov.np | Gandaki Province PPMO"),
+        ("BID-97217", "lumbini.infra@bolpatra.gov.np | Lumbini Province PPMO"),
+        ("BID-97218", "bagmati.urban@bolpatra.gov.np | Bagmati Province PPMO"),
+        ("BID-97219", "koshi.water@bolpatra.gov.np | Koshi Province PPMO"),
+        ("BID-97220", "madhesh.agri@bolpatra.gov.np | Madhesh Province PPMO"),
+        ("BID-97221", "karnali.roads@bolpatra.gov.np | Karnali Province PPMO"),
+        ("BID-97222", "sudurpashchim.edu@bolpatra.gov.np | Sudurpashchim PPMO")
+    ]:
+        db.execute("UPDATE tenders SET contact_url=? WHERE tender_id=?", (cnt, tid))
     for sd in [
         ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station", "Lumbini Province", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "info@bolpatra.gov.np | Nepal PPMO e-GP Portal"),
         ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply", "Bagmati Province", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "info@bolpatra.gov.np | Nepal PPMO e-GP Portal"),
