@@ -279,7 +279,25 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
     <style>html,body{{max-width:100%;overflow-x:hidden;}}a,button,input,select,textarea{{min-height:42px;font-size:14px;}}body{{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:20px;margin:0}}.card{{background:#1e293b;padding:18px;border-radius:12px;border:1px solid #334155;margin-bottom:15px}}.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}}.stat{{background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px solid #475569}}.val{{font-size:22px;font-weight:bold;color:#22c55e}}.btn{{display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px}}</style></head>
     <body>{render_nav("Main Control Hub", "Home / Dashboard")}<div class="card" style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
         <p style="color:#94a3b8;font-size:11px;margin:0;">Storage: <b>{db_mode}</b></p>
-        <div style="display:flex;align-items:center;gap:4px;">
+        <div class="box" style="border:1px solid #38bdf8;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="background:#22c55e;color:#0f172a;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;">LIVE SPONSORED AD SHOWCASE</span>
+        <a href="/advertise" style="color:#38bdf8;font-size:11px;font-weight:bold;text-decoration:none;">+ Place Your Ad Here &rarr;</a>
+      </div>
+      <div id="rotAdBox" style="background:#0f172a;padding:12px;border-radius:10px;border-left:4px solid #22c55e;min-height:68px;">
+        <div id="rotHl" style="color:#fff;font-size:14px;font-weight:bold;">Worldwide Ad Center Network</div>
+        <div id="rotSub" style="color:#cbd5e1;font-size:12px;margin:4px 0 8px 0;">Verified global &amp; regional user campaigns rotating live.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="rotMeta" style="font-size:10px;color:#94a3b8;">SPONSORED #AD-1</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" onclick="stepAd(-1)" style="background:#1e293b;border:1px solid #475569;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;">&lsaquo;</button>
+            <button type="button" onclick="stepAd(1)" style="background:#1e293b;border:1px solid #475569;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;">&rsaquo;</button>
+            <a id="rotBtn" href="/advertise" target="_blank" style="background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;">
             <span style="font-size:10px;color:#94a3b8;">Currency:</span>
             <button onclick="setCur('NPR',1)" style="background:#38bdf8;color:#0f172a;border:none;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">NPR</button>
             <button onclick="setCur('USD',0.0074)" style="background:#0f172a;color:#cbd5e1;border:1px solid #475569;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:bold;cursor:pointer;">USD</button>
