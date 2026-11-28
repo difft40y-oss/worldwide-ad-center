@@ -2010,6 +2010,9 @@ async def save_settings(req: SettingsReq, db: DBWrapper = Depends(get_db)):
 
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_portal(db: DBWrapper = Depends(get_db)):
+    db.execute("UPDATE tenders SET contact_url='procurement@ungm.org | UN Global Marketplace' WHERE tender_id LIKE 'BID-98%'")
+    db.execute("UPDATE tenders SET contact_url='info@bolpatra.gov.np | Nepal PPMO e-GP Portal' WHERE tender_id LIKE 'BID-97%'")
+    db.commit()
     for sd in [
         ("BID-97217", "Butwal-Bhairahawa Industrial Corridor Sub-Station", "Lumbini Province", "Lumbini Infrastructure Development Office", "Building & Structural Works", "2026-12-15, 02:00 PM", "info@bolpatra.gov.np | Nepal PPMO e-GP Portal"),
         ("BID-97218", "Kathmandu Valley Smart Streetlight & Solar Supply", "Bagmati Province", "Bagmati Urban Works Division", "Sealed Quotation / Supply", "2026-12-18, 12:00 PM", "info@bolpatra.gov.np | Nepal PPMO e-GP Portal"),
