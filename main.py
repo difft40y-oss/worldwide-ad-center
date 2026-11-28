@@ -296,8 +296,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
         document.getElementById('cpcNote').innerText = 'Standard Rate: ' + cpc + ' ' + sym + ' / Click';
     }}
     </script>
-    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div style="margin-top:12px;">
-      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
+    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div id="balVal" class="val" style="color:#38bdf8;">{bal} NPR</div></div></div><div style="margin-top:12px;">      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <a href="/advertise" style="background:#22c55e;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">5. ADVERTISE WITH US (SUBMIT AD)</a>
         <a href="/advertiser-portal" style="background:#38bdf8;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
