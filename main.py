@@ -296,25 +296,26 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
         document.getElementById('cpcNote').innerText = 'Standard Rate: ' + cpc + ' ' + sym + ' / Click';
     }}
     </script>
-    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div id="balVal" class="val" style="color:#38bdf8;">{round(clk * 2.5, 2)} NPR</div></div></div><div style="margin-top:12px;">      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
+    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div id="balVal" class="val" style="color:#38bdf8;">{round(clk * 2.5, 2)} NPR</div></div></div><div style="margin-top:12px;">
+      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <a href="/advertise" style="background:#22c55e;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">5. ADVERTISE WITH US (SUBMIT AD)</a>
-        <a href="/advertiser-portal" style="background:#38bdf8;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
+        <a href="/advertise" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#22c55e;color:#0f172a;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">1. ADVERTISE WITH US (SUBMIT AD)</a>
+        <a href="/advertiser-portal" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#38bdf8;color:#0f172a;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">2. MANAGE &amp; ROTATE CAMPAIGNS</a>
       </div>
       <div style="font-size:11px;font-weight:bold;color:#22c55e;margin:10px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 2: Publisher Earnings &amp; Global Payouts</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <a href="/tag-preview" style="background:#1e293b;border:1px solid #22c55e;color:#fff;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">3. GET WEBSITE AD TAG (&lt;script&gt;)</a>
-        <a href="/payout-hub" style="background:#1e293b;border:1px solid #38bdf8;color:#fff;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">2. GLOBAL &amp; ESEWA PAYOUTS</a>
+        <a href="/tag-preview" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#1e293b;border:1px solid #22c55e;color:#fff;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">3. GET WEBSITE AD TAG (&lt;script&gt;)</a>
+        <a href="/payout-hub" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#1e293b;border:1px solid #38bdf8;color:#fff;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">4. GLOBAL &amp; ESEWA PAYOUTS</a>
       </div>
       <div style="font-size:11px;font-weight:bold;color:#f59e0b;margin:10px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 3: Global Tenders &amp; App Simulator</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <a href="/tenders" style="background:#1e293b;border:1px solid #f59e0b;color:#fff;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">6. GLOBAL &amp; NEPAL TENDERS</a>
-        <a href="/simulate-app" style="background:#1e293b;border:1px solid #475569;color:#fff;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">1. MOBILE APP AD SIMULATOR</a>
+        <a href="/tenders" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#1e293b;border:1px solid #f59e0b;color:#fff;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">5. GLOBAL &amp; NEPAL TENDERS</a>
+        <a href="/simulate-app" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#1e293b;border:1px solid #475569;color:#fff;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">6. MOBILE APP AD SIMULATOR</a>
       </div>
       <div style="font-size:11px;font-weight:bold;color:#c084fc;margin:10px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 4: System Diagnostics &amp; Roadmap</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button onclick="tgHealth()" style="background:#0f172a;border:1px solid #38bdf8;color:#38bdf8;padding:12px 8px;border-radius:10px;font-weight:bold;font-size:12px;cursor:pointer;">7. SEND TELEGRAM HEALTH REPORT</button>
-        <a href="/roadmap" style="background:#0f172a;border:1px solid #c084fc;color:#c084fc;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">8. PROJECT TREE &amp; FEATURE ROADMAP</a>
+        <button onclick="tgHealth()" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#0f172a;border:1px solid #38bdf8;color:#38bdf8;padding:10px 8px;border-radius:10px;font-weight:bold;font-size:12px;cursor:pointer;">7. SEND TELEGRAM HEALTH REPORT</button>
+        <a href="/roadmap" style="display:flex;align-items:center;justify-content:center;min-height:46px;background:#0f172a;border:1px solid #c084fc;color:#c084fc;padding:10px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">8. PROJECT TREE &amp; FEATURE ROADMAP</a>
       </div>
     </div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1e293b;border:1px solid #38bdf8;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.7);">
