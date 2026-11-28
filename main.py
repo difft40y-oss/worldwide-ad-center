@@ -125,6 +125,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                 <a href="/privacy" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128274; Privacy Policy</a>
                 <a href="/terms" style="display:block;padding:10px 13px;color:#94a3b8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128220; Terms of Service</a> &bull; <a href="/sitemap.xml" style="color:#38bdf8;text-decoration:none;">Sitemap</a>
                 <a href="/analytics" style="display:block;padding:10px 13px;color:#22c55e;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128202; Live Network &amp; Campaign Analytics</a>
+                <a href="/advertiser-portal" style="display:block;padding:10px 13px;color:#22c55e;font-weight:bold;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128188; Regular Advertiser Portal</a>
                 <a href="/status" style="display:block;padding:10px 13px;color:#38bdf8;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#128269; Track Application / Deposit ID</a>
                 <a href="/settings" style="display:block;padding:10px 13px;color:#f59e0b;text-decoration:none;font-size:12px;border-bottom:1px solid #1e293b;">&#9881;&#65039; Settings</a>
                 <a href="/" onclick="document.getElementById('wacMenu').style.display='none';" style="display:block;padding:10px 13px;color:#ef4444;font-weight:bold;text-decoration:none;font-size:12px;">&larr; Back / Exit</a>
@@ -262,7 +263,7 @@ async def get_dict_json():
 @app.get("/sitemap.xml")
 async def seo_sitemap():
     base = "https://worldwide-ad-center-1.onrender.com"
-    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/admin-desk", "/mail", "/roadmap", "/media-kit", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
+    paths = ["", "/sectors", "/editorial", "/careers", "/tenders", "/agencies", "/advertise", "/directory", "/status", "/analytics", "/advertiser-portal", "/admin-desk", "/mail", "/roadmap", "/media-kit", "/guide", "/documents", "/deposit", "/social-partners", "/verify-badge", "/gallery", "/faq", "/about", "/privacy", "/terms"]
     urls = "".join([f"<url><loc>{base}{p}</loc><changefreq>daily</changefreq></url>" for p in paths])
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org">{urls}</urlset>'
     return Response(content=xml, media_type="application/xml")
@@ -421,12 +422,13 @@ async def advertise_portal(db: DBWrapper = Depends(get_db)):
     <button class="tpl" onclick="tp('Local Service Offer','Trusted quality &amp; fast booking.','Book Now')">Local Offer</button>
     <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;border:1px dashed #38bdf8;margin-top:10px;"><div id="pi"></div><h4 id="ph" style="margin:5px 0">Your Headline</h4><p id="ps" style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0">Offer description</p><span id="pb" style="background:#22c55e;color:#0f172a;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:bold" onclick="alert('Live Ad Preview: Visitors clicking this button will open your Target URL.')">Learn More</span></div></div>
     <div class="box"><h3 style="margin-top:0">Banner Editor &amp; Attachment</h3>
-    <input id="hl" oninput="sy()" placeholder="Headline"><input id="sub" oninput="sy()" placeholder="Description"><input id="btn" oninput="sy()" placeholder="Button Text"><input id="url" placeholder="Target URL (https://...)">
+    <button type="button" onclick="aiCopy()" style="width:100%;padding:10px;margin:4px 0 8px 0;background:#8b5cf6;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">&#10024; AI AUTO-GENERATE HIGH-CTR AD COPY</button><input id="hl" oninput="sy()" placeholder="Headline"><input id="sub" oninput="sy()" placeholder="Description"><input id="btn" oninput="sy()" placeholder="Button Text"><input id="url" placeholder="Target URL (https://...)">
     <input type="file" accept="image/*" onchange="ri(this)" style="font-size:12px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;"><select id="afmt"><option>Responsive Banner (Auto-Fit)</option><option>Leaderboard (728x90 Web)</option><option>Square Card (300x250)</option><option>Mobile Sticky (320x50)</option></select><select id="areg"><option>Target: Worldwide Global</option><option>Target: Asia-Pacific</option><option>Target: Europe &amp; UK</option><option>Target: North &amp; South America</option><option>Target: Middle East &amp; GCC</option><option>Target: Nepal (All 7 Provinces)</option></select></div><select id="acap" style="margin-bottom:8px;"><option>Daily Budget: Flexible (2.50 NPR / $0.019 USD per click)</option><option>Daily Cap: 100 Verified Clicks ($1.90 USD / 250 NPR)</option><option>Daily Cap: 500 Verified Clicks ($9.50 USD / 1,250 NPR)</option><option>Daily Cap: 2,000 Verified Clicks ($38.00 USD / 5,000 NPR)</option></select><button class="btn" style="background:#38bdf8" onclick="sv()">SAVE TO 7-DAY LIBRARY</button>
     <button class="btn" onclick="sb()">SUBMIT FOR APPROVAL</button><p id="res" style="color:#22c55e;font-size:12px"></p></div>
     <div class="box"><h3 style="margin-top:0">7-Day Temporary Library</h3>{lib}</div>{FOOTER}
     <script>let im="";function sy(){{document.getElementById('ph').innerText=document.getElementById('hl').value||'Your Headline';document.getElementById('ps').innerText=document.getElementById('sub').value||'Offer description';document.getElementById('pb').innerText=document.getElementById('btn').value||'Learn More'}}
+    function aiCopy(){{const presets=[["Global Brand Reach — Pay Only Per Verified Click","Cookie-free placement across 35 global sectors. Start at $0.019 USD / 2.50 NPR per human visit.","Launch Campaign"],["Admissions Open 2026/27 — International Scholarships","Apply online today. Fast global admissions & verified program details.","Apply Now"],["Direct B2B & Procurement Notices Worldwide","Connect with verified suppliers, NGOs, and contractors across Asia, Europe & Americas.","View Tenders"]];const p=presets[Math.floor(Math.random()*presets.length)];tp(p[0],p[1],p[2]);}}
     function tp(h,s,b){{document.getElementById('hl').value=h;document.getElementById('sub').value=s;document.getElementById('btn').value=b;sy()}}
     function ri(i){{const f=i.files.item(0);if(!f)return;if(f.size>520000){{alert('Max 500KB');return}}const r=new FileReader();r.onload=e=>{{im=e.target.result;document.getElementById('pi').innerHTML='<img src="'+im+'" style="width:100%;max-height:90px;object-fit:cover;border-radius:5px">'}};r.readAsDataURL(f)}}
     async function sv(){{const r=await fetch('/api/v1/save-banner-draft',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{headline:document.getElementById('hl').value||'Draft',subtext:document.getElementById('sub').value + ' [' + (document.getElementById('afmt')?.value||'') + ' | ' + (document.getElementById('areg')?.value||'') + ' | ' + (document.getElementById('acap')?.value||'') + ']',btn_text:document.getElementById('btn').value||'Learn More',target_url:document.getElementById('url').value,img_data:im}})}});const d=await r.json();document.getElementById('res').innerText=d.message;setTimeout(()=>location.reload(),900)}}
@@ -1378,6 +1380,36 @@ function copyBidCnt(){{
   document.getElementById('bmMsg').innerText = 'Contact copied to clipboard!';
 }}
 </script></body></html>"""
+
+@app.get("/advertiser-portal", response_class=HTMLResponse)
+async def advertiser_portal(cid: str = "", db: DBWrapper = Depends(get_db)):
+    clean_id = cid.strip().upper().replace("AD-", "")
+    card = ""
+    if clean_id.isdigit():
+        row = db.execute("SELECT id, headline, subtext, target_url, active FROM ad_campaigns WHERE CAST(id AS TEXT)=?", (clean_id,)).fetchone()
+        if row:
+            aid, hl, sub, url, act = row.__getitem__(0), row.__getitem__(1), row.__getitem__(2), row.__getitem__(3), row.__getitem__(4)
+            st = "ACTIVE & ROTATING" if act == 1 else "PAUSED / PENDING"
+            col = "#22c55e" if act == 1 else "#f59e0b"
+            card = f"""<div style="background:#0f172a;padding:14px;border-radius:10px;border-left:4px solid {col};margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:{col};font-weight:bold;"><span>CAMPAIGN #AD-{aid}</span><span>{st}</span></div>
+            <h3 style="color:#fff;margin:6px 0;">{hl}</h3>
+            <p style="font-size:12px;color:#cbd5e1;margin:0 0 8px 0;">{sub}</p>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Destination: {url} &bull; Rate: 2.50 NPR ($0.019 USD) / Click</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <a href="/deposit" style="background:#22c55e;color:#0f172a;text-align:center;padding:10px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:12px;">+ TOP UP CREDITS</a>
+              <a href="/documents" style="background:#38bdf8;color:#0f172a;text-align:center;padding:10px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:12px;">TAX INVOICE PDF</a>
+            </div></div>"""
+        else:
+            card = f'<p style="color:#f59e0b;font-size:12px;margin-top:10px;">No campaign found for <b>AD-{clean_id}</b>.</p>'
+    return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #38bdf8;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:12px;background:#38bdf8;color:#0f172a;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px}}</style></head>
+    <body>{render_nav("Regular Advertiser Portal", "Home / Advertiser Portal")}
+    <div class="box"><h2>Worldwide Advertiser Self-Service Portal</h2><p style="font-size:12px;">Manage active campaigns, verify click rates, top up multi-currency credits, and download signed tax invoices:</p>
+    <form method="get" action="/advertiser-portal"><input name="cid" value="{clean_id}" placeholder="Enter Campaign ID (e.g. AD-1 or 99736)"><button class="btn" type="submit">OPEN CAMPAIGN DASHBOARD</button></form>{card}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+      <a href="/advertise" style="background:#0f172a;border:1px solid #38bdf8;color:#38bdf8;text-align:center;padding:10px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:12px;">+ CREATE NEW AD</a>
+      <a href="/analytics" style="background:#0f172a;border:1px solid #22c55e;color:#22c55e;text-align:center;padding:10px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:12px;">LIVE NETWORK STATS</a>
+    </div></div>{FOOTER}</body></html>"""
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
