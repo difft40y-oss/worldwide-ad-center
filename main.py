@@ -296,7 +296,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
         document.getElementById('cpcNote').innerText = 'Standard Rate: ' + cpc + ' ' + sym + ' / Click';
     }}
     </script>
-    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div id="balVal" class="val" style="color:#38bdf8;">{esc} NPR</div></div></div><div style="margin-top:12px;">      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
+    <div class="card"><div class="grid"><div class="stat"><div>IMPRESSIONS</div><div class="val">{imp}</div></div><div class="stat"><div>LOCKED CLICKS</div><div class="val">{clk}</div></div><div class="stat"><div>CTR %</div><div class="val">{ctr}%</div></div><div class="stat"><div>AVAILABLE</div><div id="balVal" class="val" style="color:#38bdf8;">{round(clk * 2.5, 2)} NPR</div></div></div><div style="margin-top:12px;">      <div style="font-size:11px;font-weight:bold;color:#38bdf8;margin:8px 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Pillar 1: Advertise &amp; Campaign Growth</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <a href="/advertise" style="background:#22c55e;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">5. ADVERTISE WITH US (SUBMIT AD)</a>
         <a href="/advertiser-portal" style="background:#38bdf8;color:#0f172a;padding:12px 8px;border-radius:10px;text-align:center;font-weight:bold;text-decoration:none;font-size:12px;">4. MANAGE &amp; ROTATE AD CAMPAIGNS</a>
@@ -1446,7 +1446,7 @@ async def analytics_dashboard(db: DBWrapper = Depends(get_db)):
         <div class="stat"><div class="val">{imp}</div><div style="font-size:10px;color:#94a3b8;">VERIFIED IMPRESSIONS</div></div>
         <div class="stat"><div class="val">{clk}</div><div style="font-size:10px;color:#94a3b8;">GUARDED HUMAN CLICKS</div></div>
         <div class="stat"><div class="val">{ctr}%</div><div style="font-size:10px;color:#94a3b8;">NETWORK CTR</div></div>
-        <div class="stat"><div class="val">{esc} NPR</div><div style="font-size:10px;color:#94a3b8;">ESCROW SETTLED</div></div>
+        <div class="stat"><div class="val">{round(clk * 2.5, 2)} NPR</div><div style="font-size:10px;color:#94a3b8;">ESCROW SETTLED</div></div>
     </div></div>
     <div class="box"><h2>Active &amp; Queued Campaigns ({len(camps)}) &bull; Live Tenders ({t_cnt})</h2>{bars}
     <a href="/documents" style="display:block;background:#38bdf8;color:#0f172a;text-align:center;padding:12px;border-radius:8px;font-weight:bold;text-decoration:none;margin-top:10px;">DOWNLOAD SIGNED TAX / PERFORMANCE STATEMENT</a></div>{FOOTER}<div id="bidModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
@@ -2468,7 +2468,7 @@ async def health_report(db: DBWrapper = Depends(get_db)):
         clk_r = db.execute("SELECT COUNT(*), COALESCE(SUM(payout_credited_npr), 0) FROM clicks WHERE escrow_status='locked'").fetchone()
         clk = clk_r[0] if clk_r else 0
         bal = round(float(clk_r[1]), 2) if clk_r and clk_r[1] else 0.0
-        report = f"📊 WORLDWIDE AD CENTER REPORT\n• Verified Impressions: {imp}\n• Locked Human Clicks: {clk}\n• Available Escrow: {esc} NPR"
+        report = f"📊 WORLDWIDE AD CENTER REPORT\n• Verified Impressions: {imp}\n• Locked Human Clicks: {clk}\n• Available Escrow: {round(clk * 2.5, 2)} NPR"
         st = send_telegram_alert(report)
         return {"status": "ok", "telegram": st, "summary": report}
     except Exception as ex:
@@ -2520,7 +2520,7 @@ async def payout_hub_page(db: DBWrapper = Depends(get_db)):
     bal = round(float(clk_r[1]), 2) if clk_r and clk_r[1] else 0.0
     return f"""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Worldwide Ad Center | Global & Nepal Ad Network"><meta property="og:description" content="Direct CPC advertising, 35 global sectors, all-Nepal construction tenders, and instant eSewa payouts."><meta property="og:type" content="website"><meta property="og:url" content="https://worldwide-ad-center-1.onrender.com"><style>html,body{{max-width:100%;overflow-x:hidden;}}body{{font-family:sans-serif;background:#0f172a;color:#cbd5e1;padding:16px;line-height:1.5}}.box{{background:#1e293b;padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid #334155}}h2{{color:#fff;margin-top:0}}input{{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;box-sizing:border-box;font-size:14px}}.btn{{width:100%;padding:13px;background:#22c55e;color:#0f172a;border:none;border-radius:8px;font-weight:bold;margin-top:8px;cursor:pointer;font-size:14px}}</style></head>
     <body>{render_nav("eSewa Withdrawal & History", "Home / eSewa Payouts")}
-    <div class="box"><h2>Global &amp; eSewa Publisher Payouts</h2><p style="font-size:12px;color:#38bdf8;margin:0 0 8px 0;">International Publishers: Request USD/EUR Wire, Wise, or Payoneer settlement via <b>difft40y@gmail.com</b> &bull; Nepal/South Asia: Instant eSewa (<b>9717831225</b>).</p><p style="font-size:13px;">Verified eSewa & Telegram Merchant: <b>+977-9717831225</b><br>Available Locked Escrow Balance: <b style="color:#22c55e;">{esc} NPR</b></p>
+    <div class="box"><h2>Global &amp; eSewa Publisher Payouts</h2><p style="font-size:12px;color:#38bdf8;margin:0 0 8px 0;">International Publishers: Request USD/EUR Wire, Wise, or Payoneer settlement via <b>difft40y@gmail.com</b> &bull; Nepal/South Asia: Instant eSewa (<b>9717831225</b>).</p><p style="font-size:13px;">Verified eSewa & Telegram Merchant: <b>+977-9717831225</b><br>Available Locked Escrow Balance: <b style="color:#22c55e;">{round(clk * 2.5, 2)} NPR</b></p>
     <select id="pmethod"><option>eSewa Mobile Wallet (Instant NPR — 9717831225)</option><option>PayPal Global Payout (USD / EUR Email)</option><option>Wise International Transfer (USD / EUR / GBP)</option><option>Western Union Cash / Bank Transfer</option><option>International Visa / Mastercard / SWIFT Wire</option></select>
     <input id="pwal" value="9717831225" placeholder="Wallet ID, PayPal Email, or IBAN/Account">
     <input id="pamt" type="number" placeholder="Withdrawal Amount (NPR)">
