@@ -141,7 +141,10 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
         <div style="font-size:11px;color:#94a3b8;">Section: <b style="color:#fff;">{active_title}</b></div>
-        <select id="langSel" onchange="applyLang(this.value)" style="background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;border-radius:6px;padding:3px 6px;font-size:11px;font-weight:bold;min-height:28px;width:auto;">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+      <button type="button" onclick="if(history.length>1)history.back();else location.href='/';" style="background:#0f172a;border:1px solid #475569;color:#38bdf8;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;white-space:nowrap;">&#9664; Back</button>
+      <button type="button" onclick="history.forward();" style="background:#0f172a;border:1px solid #475569;color:#38bdf8;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;white-space:nowrap;">Forward &#9654;</button>
+      <select id="langSel" onchange="applyLang(this.value)" style="background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;border-radius:6px;padding:3px 6px;font-size:11px;font-weight:bold;min-height:28px;width:auto;">
             <option value="en">&#127760; English</option>
             <option value="zh">&#127464;&#127475; 中文 (Chinese)</option>
             <option value="ja">&#127471;&#127477; 日本語 (Japanese)</option>
@@ -153,7 +156,7 @@ def render_nav(active_title: str, breadcrumb: str = "Home"):
                     <option value="ru">&#127479;&#127482; Русский (Russian)</option>
                     <option value="de">&#127465;&#127466; Deutsch (German)</option>
                     <option value="pt">&#127477;&#127481; Português (Portuguese)</option>
-        </select>
+        </select></div>
     </div>
     <script>
     const exitLbl = {{
@@ -292,7 +295,7 @@ async def root_hub(db: DBWrapper = Depends(get_db)):
           <div style="display:flex;gap:6px;align-items:center;">
             <button type="button" onclick="stepAd(-1)" style="background:#1e293b;border:1px solid #475569;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;">&lsaquo;</button>
             <button type="button" onclick="stepAd(1)" style="background:#1e293b;border:1px solid #475569;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;">&rsaquo;</button>
-            <a id="rotBtn" href="/advertise" target="_blank" style="background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Learn More</a>
+            <a id="rotBtn" href="/advertise" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;background:#22c55e;color:#0f172a;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">Learn More</a>
           </div>
         </div>
       </div>
